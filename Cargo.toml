@@ -3,6 +3,9 @@ name = "font"
 version = "0.0.1"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 license = "MIT"
-repository = "https://github.com/hilbert-space/font"
-homepage = "https://github.com/hilbert-space/font"
-description = "Font."
+repository = "https://github.com/bodoni/font"
+homepage = "https://github.com/bodoni/font"
+description = "The package provides a font toolbox."
+
+[dependencies]
+opentype = "0.7"
