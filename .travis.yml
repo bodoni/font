@@ -1,0 +1,18 @@
+language: rust
+sudo: false
+rust:
+  - stable
+  - beta
+  - nightly
+
+after_success:
+  - if [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
+      curl https://bodoni.github.io/travis/update_documentation.sh | bash;
+    fi
+
+env:
+  global:
+    secure: p37O8wK6CPaDMmH02771ef15Ovm2SgkI0I6H8cDxjBh/Y+JlRMNVgVnYreWNkqF/hP0zSEvUGm7WRiDZOENKpORhmHs+frX+Z2mXtiwIiPXuZtvF/MRrmiyqgajYOVYpIQJTMgN0FxQ+VyUurxTa0v1cwF+G9WlE05ong2xGJt59JnaH3VP2rbKwYPjKQOQJWuZn7SLc7nGIDSf031M4Bbw1vhRGRXa05RM63Mv5yFycg4C4r3f8fKDRcCOjjLmt3Xqu5gU8ale1XVjz076u73asER7UERNKSm7yPLNbkt7tMu1mxxdtO6nUjnweyotTr6wCaVET+jJqdYFZv5G9ImfP/eblm8EF08FqA8AIKatJivyDnc6L12HE9oBc2OOqQftcSNx8u8BCTpp2QM+G0jotgHC7y+ZKH53tadD/5/w17An6SLwfo1PTGRcqLcAOdIvVEbVFl2jlkySjwHFpHSV5TPAgyXgshukXtzDRTPoi4/1LWcXUxFsE/FbuDw8/KEjq77Qg2pOwtUQ/QkjdTyJDQz+U3FM52A48/HL3KuZYbeGXYkMQafuNjPe3VmILdgTxXQr8h+wiLX5kziYf9ADBvliQXQYWH+o9yaxbaWuRe6NnSeScwQc+Nz8TiG7awMCIAKUfdXTQGmYIPJT+J/WcVXnA45nes9b0hAzimEs=
+
+notifications:
+  email: false
