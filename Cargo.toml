@@ -8,4 +8,4 @@ homepage = "https://github.com/bodoni/font"
 description = "The package provides a font toolbox."
 
 [dependencies]
-opentype = "0.7"
+opentype = "0.8"
