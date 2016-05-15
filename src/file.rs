@@ -14,10 +14,8 @@ impl File {
     /// Open a file.
     pub fn open<T: AsRef<Path>>(path: T) -> Result<File> {
         let path = path.as_ref();
-        let extension = match path.extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()) {
-            Some(extension) => extension,
-            _ => raise!("unable to detect the file format"),
-        };
+        let extension = some!(path.extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()),
+                              "unable to detect the file format");
         match &*extension {
             "otf" => Ok(File { fonts: try!(opentype::open(path)) }),
             _ => raise!("encountered an unknown file format"),
