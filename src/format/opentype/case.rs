@@ -143,9 +143,29 @@ impl ::case::Case for PostScript {
                 },
                 RCurveLine => {
                     expect!(count >= 2 && (count - 2) % 6 == 0);
+                    for i in 0..((count - 2) / 6) {
+                        let j = 6 * i;
+                        builder.bezier_to(
+                            (operands[j + 0].into(), operands[j + 1].into()),
+                            (operands[j + 2].into(), operands[j + 3].into()),
+                            (operands[j + 4].into(), operands[j + 5].into()),
+                        );
+                    }
+                    let j = count - 2;
+                    builder.line_to((operands[j + 0].into(), operands[j + 1].into()));
                 },
                 RLineCurve => {
                     expect!(count >= 6 && (count - 6) % 2 == 0);
+                    for i in 0..((count - 6) / 2) {
+                        let j = 2 * i;
+                        builder.line_to((operands[j + 0].into(), operands[j + 1].into()));
+                    }
+                    let j = count - 6;
+                    builder.bezier_to(
+                        (operands[j + 0].into(), operands[j + 1].into()),
+                        (operands[j + 2].into(), operands[j + 3].into()),
+                        (operands[j + 4].into(), operands[j + 5].into()),
+                    );
                 },
                 HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {},
                 _ => unreachable!(),

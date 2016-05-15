@@ -22,6 +22,9 @@
 /// An error.
 pub type Error = std::io::Error;
 
+/// A point.
+pub type Point = (f32, f32);
+
 /// A result.
 pub type Result<T> = std::io::Result<T>;
 

@@ -1,3 +1,5 @@
+use Point;
+
 /// A glyph.
 pub struct Glyph {
     pub program: Vec<Operation>,
@@ -5,41 +7,43 @@ pub struct Glyph {
 
 /// An operation.
 pub enum Operation {
+    /// Draw a Bézier curve.
+    BezierTo(Point, Point, Point),
     /// Draw a line.
-    LineTo(f32, f32),
+    LineTo(Point),
     /// Move the cursor.
-    MoveTo(f32, f32),
+    MoveTo(Point),
 }
 
 pub struct Builder {
-    x: f32,
-    y: f32,
+    cursor: Point,
     program: Vec<Operation>,
 }
 
-pub type Point = (f32, f32);
+pub type Offset = (f32, f32);
 
 impl Builder {
     #[inline]
     pub fn new() -> Builder {
-        Builder { x: 0.0, y: 0.0, program: vec![] }
+        Builder { cursor: (0.0, 0.0), program: vec![] }
     }
 
-    pub fn bezier_to(&mut self, a: Point, b: Point, c: Point) {
-        self.x += a.0 + b.0 + c.0;
-        self.y += a.1 + b.1 + c.1;
+    pub fn bezier_to(&mut self, a: Offset, b: Offset, c: Offset) {
+        let a = (self.cursor.0 + a.0, self.cursor.1 + a.1);
+        let b = (a.0 + b.0, a.1 + b.1);
+        let c = (b.0 + c.0, b.1 + c.1);
+        self.cursor = c;
+        self.program.push(Operation::BezierTo(a, b, c));
     }
 
-    pub fn line_to(&mut self, (x, y): Point) {
-        self.x += x;
-        self.y += y;
-        self.program.push(Operation::LineTo(self.x, self.y));
+    pub fn line_to(&mut self, a: Offset) {
+        self.cursor = (self.cursor.0 + a.0, self.cursor.1 + a.1);
+        self.program.push(Operation::LineTo(self.cursor));
     }
 
-    pub fn move_to(&mut self, (x, y): Point) {
-        self.x += x;
-        self.y += y;
-        self.program.push(Operation::MoveTo(self.x, self.y));
+    pub fn move_to(&mut self, a: Offset) {
+        self.cursor = (self.cursor.0 + a.0, self.cursor.1 + a.1);
+        self.program.push(Operation::MoveTo(self.cursor));
     }
 }
 
