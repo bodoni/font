@@ -4,7 +4,19 @@ The package provides a font toolbox.
 
 ## [Documentation][doc]
 
-## Contributing
+## Example
+
+```rust
+let path = "SourceSerifPro-Regular.otf";
+let file = File::open(path).unwrap();
+let font = &file.fonts[0];
+
+assert_eq!(font.units_per_em, 1000);
+assert_eq!(font.ascender, 918);
+assert_eq!(font.descender, -335);
+```
+
+## Contribution
 
 1. Fork the project.
 2. Implement your idea.
