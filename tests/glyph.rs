@@ -1,5 +1,7 @@
 #[test]
 fn draw() {
     let font = &::setup().fonts[0];
-    let _ = font.case.draw('a').unwrap().unwrap();
+    for code in b'a'..(b'z' + 1) {
+        font.case.draw(code as char).unwrap().unwrap();
+    }
 }
