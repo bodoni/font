@@ -1,21 +1,25 @@
 extern crate postscript;
+extern crate truetype;
 
 use self::postscript::compact::FontSet;
 use self::postscript::type2::Program;
+use self::truetype::CharMapping;
 use std::rc::Rc;
 
 use Result;
 use glyph::Glyph;
 
 pub struct PostScript {
-    fontset: Rc<FontSet>,
     id: usize,
+    fontset: Rc<FontSet>,
+    #[allow(dead_code)]
+    mapping: Rc<CharMapping>,
 }
 
 impl PostScript {
     #[inline]
-    pub fn new(fontset: Rc<FontSet>, id: usize) -> PostScript {
-        PostScript { fontset: fontset, id: id }
+    pub fn new(id: usize, fontset: Rc<FontSet>, mapping: Rc<CharMapping>) -> PostScript {
+        PostScript { id: id, fontset: fontset, mapping: mapping }
     }
 }
 
