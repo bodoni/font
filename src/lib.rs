@@ -23,7 +23,7 @@
 pub type Error = std::io::Error;
 
 /// A result.
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = std::io::Result<T>;
 
 macro_rules! raise(
     ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
