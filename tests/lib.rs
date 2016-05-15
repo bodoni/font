@@ -1,7 +1,8 @@
-extern crate font;
+extern crate font as library;
 
-use font::File;
+use library::File;
 
+mod font;
 mod glyph;
 
 fn setup() -> File {

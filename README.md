@@ -9,11 +9,15 @@ The package provides a font toolbox.
 ```rust
 let path = "SourceSerifPro-Regular.otf";
 let file = File::open(path).unwrap();
-let font = &file.fonts[0];
+let glyph = file.fonts[0].draw('&').unwrap().unwrap();
 
-assert_eq!(font.units_per_em, 1000);
-assert_eq!(font.ascender, 918);
-assert_eq!(font.descender, -335);
+for operation in glyph.iter() {
+    match operation {
+        &BezierTo(..) => println!("Bézier!"),
+        &LineTo(..) => println!("Line!"),
+        &MoveTo(..) => println!("Move!"),
+    }
+}
 ```
 
 ## Contribution

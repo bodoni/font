@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use Point;
 
 /// A glyph.
@@ -22,6 +24,15 @@ pub struct Builder {
 }
 
 pub type Offset = (f32, f32);
+
+impl Deref for Glyph {
+    type Target = [Operation];
+
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        &self.program
+    }
+}
 
 impl Builder {
     #[inline]

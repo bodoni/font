@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use case::Case;
 
 /// A font.
@@ -10,4 +12,13 @@ pub struct Font {
     pub descender: isize,
     /// The collection of glyphs.
     pub case: Box<Case>,
+}
+
+impl Deref for Font {
+    type Target = Box<Case>;
+
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        &self.case
+    }
 }
