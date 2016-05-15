@@ -8,6 +8,6 @@ pub struct Font {
     pub ascender: isize,
     /// The descender line relative to the base line.
     pub descender: isize,
-    /// The glyph case.
+    /// The collection of glyphs.
     pub case: Box<Case>,
 }

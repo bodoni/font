@@ -12,3 +12,7 @@ description = "The package provides a font toolbox."
 opentype = "0.9"
 postscript = "0.4"
 truetype = "0.6"
+
+[[test]]
+name = "font"
+path = "tests/lib.rs"
