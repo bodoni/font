@@ -19,8 +19,6 @@
 //! # }
 //! ```
 
-extern crate opentype;
-
 /// An error.
 pub type Error = std::io::Error;
 

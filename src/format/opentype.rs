@@ -1,4 +1,5 @@
-use opentype;
+extern crate opentype;
+
 use std::path::Path;
 
 use {Font, Result};
