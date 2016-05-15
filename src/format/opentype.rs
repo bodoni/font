@@ -4,7 +4,6 @@ use std::path::Path;
 
 use {Font, Result};
 
-#[inline]
 pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
     let file = try!(opentype::File::open(path));
     let mut fonts = vec![];
