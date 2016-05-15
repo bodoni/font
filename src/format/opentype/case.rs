@@ -41,42 +41,43 @@ impl ::case::Case for PostScript {
 
         let mut clear = false;
         while let Some((operator, operands)) = try!(program.next()) {
+            macro_rules! get(($index:expr) => (operands[$index].into()));
             let count = operands.len();
             match operator {
                 RMoveTo => {
                     expect!(count == 2 || !clear && count == 3);
-                    builder.move_to((operands[0].into(), operands[1].into()));
+                    builder.move_to((get!(0), get!(1)));
                 },
                 HMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.move_to((operands[0].into(), 0.0));
+                    builder.move_to((get!(0), 0.0));
                 },
                 VMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.move_to((0.0, operands[0].into()));
+                    builder.move_to((0.0, get!(0)));
                 },
                 RLineTo => {
                     expect!(count % 2 == 0);
                     for i in 0..(count / 2) {
                         let j = 2 * i;
-                        builder.line_to((operands[j + 0].into(), operands[j + 1].into()));
+                        builder.line_to((get!(j + 0), get!(j + 1)));
                     }
                 },
                 HLineTo => {
                     for i in 0..count {
                         if i % 2 == 0 {
-                            builder.line_to((operands[i].into(), 0.0));
+                            builder.line_to((get!(i), 0.0));
                         } else {
-                            builder.line_to((0.0, operands[i].into()));
+                            builder.line_to((0.0, get!(i)));
                         }
                     }
                 },
                 VLineTo => {
                     for i in 0..count {
                         if i % 2 == 0 {
-                            builder.line_to((0.0, operands[i].into()));
+                            builder.line_to((0.0, get!(i)));
                         } else {
-                            builder.line_to((operands[i].into(), 0.0));
+                            builder.line_to((get!(i), 0.0));
                         }
                     }
                 },
@@ -85,9 +86,9 @@ impl ::case::Case for PostScript {
                     for i in 0..(count / 6) {
                         let j = 6 * i;
                         builder.bezier_to(
-                            (operands[j + 0].into(), operands[j + 1].into()),
-                            (operands[j + 2].into(), operands[j + 3].into()),
-                            (operands[j + 4].into(), operands[j + 5].into()),
+                            (get!(j + 0), get!(j + 1)),
+                            (get!(j + 2), get!(j + 3)),
+                            (get!(j + 4), get!(j + 5)),
                         );
                     }
                 },
@@ -96,14 +97,14 @@ impl ::case::Case for PostScript {
                         (0, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
-                        (1, operands[0].into())
+                        (1, get!(0))
                     };
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         builder.bezier_to(
-                            (operands[j + 0].into(), extra),
-                            (operands[j + 1].into(), operands[j + 2].into()),
-                            (operands[j + 3].into(), 0.0),
+                            (get!(j + 0),       extra),
+                            (get!(j + 1), get!(j + 2)),
+                            (get!(j + 3),         0.0),
                         );
                         extra = 0.0;
                     }
@@ -129,14 +130,14 @@ impl ::case::Case for PostScript {
                         (0, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
-                        (1, operands[0].into())
+                        (1, get!(0))
                     };
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         builder.bezier_to(
-                            (extra, operands[j + 0].into()),
-                            (operands[j + 1].into(), operands[j + 2].into()),
-                            (0.0, operands[j + 3].into()),
+                            (extra,       get!(j + 0)),
+                            (get!(j + 1), get!(j + 2)),
+                            (0.0,         get!(j + 3)),
                         );
                         extra = 0.0;
                     }
@@ -146,25 +147,25 @@ impl ::case::Case for PostScript {
                     for i in 0..((count - 2) / 6) {
                         let j = 6 * i;
                         builder.bezier_to(
-                            (operands[j + 0].into(), operands[j + 1].into()),
-                            (operands[j + 2].into(), operands[j + 3].into()),
-                            (operands[j + 4].into(), operands[j + 5].into()),
+                            (get!(j + 0), get!(j + 1)),
+                            (get!(j + 2), get!(j + 3)),
+                            (get!(j + 4), get!(j + 5)),
                         );
                     }
                     let j = count - 2;
-                    builder.line_to((operands[j + 0].into(), operands[j + 1].into()));
+                    builder.line_to((get!(j + 0), get!(j + 1)));
                 },
                 RLineCurve => {
                     expect!(count >= 6 && (count - 6) % 2 == 0);
                     for i in 0..((count - 6) / 2) {
                         let j = 2 * i;
-                        builder.line_to((operands[j + 0].into(), operands[j + 1].into()));
+                        builder.line_to((get!(j + 0), get!(j + 1)));
                     }
                     let j = count - 6;
                     builder.bezier_to(
-                        (operands[j + 0].into(), operands[j + 1].into()),
-                        (operands[j + 2].into(), operands[j + 3].into()),
-                        (operands[j + 4].into(), operands[j + 5].into()),
+                        (get!(j + 0), get!(j + 1)),
+                        (get!(j + 2), get!(j + 3)),
+                        (get!(j + 4), get!(j + 5)),
                     );
                 },
                 HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {},
