@@ -36,9 +36,13 @@ macro_rules! some(
     });
 );
 
+mod case;
 mod file;
 mod font;
 mod format;
+mod glyph;
 
+pub use case::Case;
 pub use file::File;
 pub use font::Font;
+pub use glyph::Glyph;

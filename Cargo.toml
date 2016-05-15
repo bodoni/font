@@ -10,3 +10,4 @@ description = "The package provides a font toolbox."
 
 [dependencies]
 opentype = "0.9"
+postscript = "0.3"

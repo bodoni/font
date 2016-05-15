@@ -1,3 +1,5 @@
+use case::Case;
+
 /// A font.
 pub struct Font {
     /// The number of units per em.
@@ -6,4 +8,6 @@ pub struct Font {
     pub ascender: isize,
     /// The descender line relative to the base line.
     pub descender: isize,
+    /// The glyphs.
+    pub glyphs: Box<Case>,
 }
