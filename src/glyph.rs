@@ -2,6 +2,7 @@ use Point;
 
 /// A glyph.
 pub struct Glyph {
+    /// The program.
     pub program: Vec<Operation>,
 }
 
