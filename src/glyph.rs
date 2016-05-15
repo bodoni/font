@@ -10,8 +10,8 @@ pub struct Glyph {
 
 /// An operation.
 pub enum Operation {
-    /// Draw a Bézier curve.
-    BezierTo(Point, Point, Point),
+    /// Draw a cubic Bézier curve.
+    CurveTo(Point, Point, Point),
     /// Draw a line.
     LineTo(Point),
     /// Move the cursor.
@@ -40,12 +40,12 @@ impl Builder {
         Builder { cursor: (0.0, 0.0), program: vec![] }
     }
 
-    pub fn bezier_to(&mut self, a: Offset, b: Offset, c: Offset) {
+    pub fn curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
         let a = (self.cursor.0 + a.0, self.cursor.1 + a.1);
         let b = (a.0 + b.0, a.1 + b.1);
         let c = (b.0 + c.0, b.1 + c.1);
         self.cursor = c;
-        self.program.push(Operation::BezierTo(a, b, c));
+        self.program.push(Operation::CurveTo(a, b, c));
     }
 
     pub fn line_to(&mut self, a: Offset) {

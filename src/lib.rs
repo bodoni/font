@@ -16,7 +16,7 @@
 //!
 //! for operation in glyph.iter() {
 //!     match operation {
-//!         &BezierTo(..) => println!("Bézier!"),
+//!         &CurveTo(..) => println!("Curve!"),
 //!         &LineTo(..) => println!("Line!"),
 //!         &MoveTo(..) => println!("Move!"),
 //!     }
