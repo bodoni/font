@@ -23,6 +23,10 @@ impl ::case::Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         use super::postscript::type2::Operator::*;
 
+        macro_rules! expect(
+            ($condition:expr) => (assert!($condition));
+        );
+
         let mut program = {
             let id = match self.mapping.find(glyph) {
                 Some(id) => id,
@@ -40,49 +44,68 @@ impl ::case::Case for PostScript {
             let count = operands.len();
             match operator {
                 RMoveTo => {
-                    assert!(count == 2 || !clear && count == 3);
-                    builder.move_to(operands[0].into(), operands[1].into());
+                    expect!(count == 2 || !clear && count == 3);
+                    builder.move_to((operands[0].into(), operands[1].into()));
                 },
                 HMoveTo => {
-                    assert!(count == 1 || !clear && count == 2);
-                    builder.move_to(operands[0].into(), 0.0);
+                    expect!(count == 1 || !clear && count == 2);
+                    builder.move_to((operands[0].into(), 0.0));
                 },
                 VMoveTo => {
-                    assert!(count == 1 || !clear && count == 2);
-                    builder.move_to(0.0, operands[0].into());
+                    expect!(count == 1 || !clear && count == 2);
+                    builder.move_to((0.0, operands[0].into()));
                 },
                 RLineTo => {
-                    assert!(count % 2 == 0);
-                    for i in 0..(count >> 1) {
-                        builder.line_to(operands[2 * i + 0].into(),
-                                        operands[2 * i + 1].into());
+                    expect!(count % 2 == 0);
+                    for i in 0..(count / 2) {
+                        let j = 2 * i;
+                        builder.line_to((operands[j + 0].into(), operands[j + 1].into()));
                     }
                 },
                 HLineTo => {
                     for i in 0..count {
                         if i % 2 == 0 {
-                            builder.line_to(operands[i].into(), 0.0);
+                            builder.line_to((operands[i].into(), 0.0));
                         } else {
-                            builder.line_to(0.0, operands[i].into());
+                            builder.line_to((0.0, operands[i].into()));
                         }
                     }
                 },
                 VLineTo => {
                     for i in 0..count {
                         if i % 2 == 0 {
-                            builder.line_to(0.0, operands[i].into());
+                            builder.line_to((0.0, operands[i].into()));
                         } else {
-                            builder.line_to(operands[i].into(), 0.0);
+                            builder.line_to((operands[i].into(), 0.0));
                         }
                     }
                 },
                 RRCurveTo => {
-                    assert!(count % 6 == 0);
+                    expect!(count % 6 == 0);
+                    for i in 0..(count / 6) {
+                        let j = 6 * i;
+                        builder.bezier_to(
+                            (operands[j + 0].into(), operands[j + 1].into()),
+                            (operands[j + 2].into(), operands[j + 3].into()),
+                            (operands[j + 4].into(), operands[j + 5].into()),
+                        );
+                    }
                 },
                 HHCurveTo => {
-                    if count % 4 == 0 {
+                    let (offset, mut extra) = if count % 4 == 0 {
+                        (0, 0.0)
                     } else {
-                        assert!((count - 1) % 4 == 0);
+                        expect!((count - 1) % 4 == 0);
+                        (1, operands[0].into())
+                    };
+                    for i in 0..((count - offset) / 4) {
+                        let j = offset + 4 * i;
+                        builder.bezier_to(
+                            (operands[j + 0].into(), extra),
+                            (operands[j + 1].into(), operands[j + 2].into()),
+                            (operands[j + 3].into(), 0.0),
+                        );
+                        extra = 0.0;
                     }
                 },
                 HVCurveTo => {
@@ -90,7 +113,7 @@ impl ::case::Case for PostScript {
                     } else if (count - 1) % 8 == 0 {
                     } else if (count - 4) % 8 == 0 {
                     } else {
-                        assert!((count - 4 - 1) % 8 == 0);
+                        expect!((count - 4 - 1) % 8 == 0);
                     }
                 },
                 VHCurveTo => {
@@ -98,20 +121,31 @@ impl ::case::Case for PostScript {
                     } else if (count - 1) % 8 == 0 {
                     } else if (count - 4) % 8 == 0 {
                     } else {
-                        assert!((count - 4 - 1) % 8 == 0);
+                        expect!((count - 4 - 1) % 8 == 0);
                     }
                 },
                 VVCurveTo => {
-                    if count % 4 == 0 {
+                    let (offset, mut extra) = if count % 4 == 0 {
+                        (0, 0.0)
                     } else {
-                        assert!((count - 1) % 4 == 0);
+                        expect!((count - 1) % 4 == 0);
+                        (1, operands[0].into())
+                    };
+                    for i in 0..((count - offset) / 4) {
+                        let j = offset + 4 * i;
+                        builder.bezier_to(
+                            (extra, operands[j + 0].into()),
+                            (operands[j + 1].into(), operands[j + 2].into()),
+                            (0.0, operands[j + 3].into()),
+                        );
+                        extra = 0.0;
                     }
                 },
                 RCurveLine => {
-                    assert!(count >= 2 && (count - 2) % 6 == 0);
+                    expect!(count >= 2 && (count - 2) % 6 == 0);
                 },
                 RLineCurve => {
-                    assert!(count >= 6 && (count - 6) % 2 == 0);
+                    expect!(count >= 6 && (count - 6) % 2 == 0);
                 },
                 HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {},
                 _ => unreachable!(),
