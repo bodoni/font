@@ -74,10 +74,10 @@ impl ::case::Case for PostScript {
                 },
                 VLineTo => {
                     for i in 0..count {
-                        if i % 2 == 0 {
-                            builder.line_to((0.0, get!(i)));
-                        } else {
+                        if i % 2 == 1 {
                             builder.line_to((get!(i), 0.0));
+                        } else {
+                            builder.line_to((0.0, get!(i)));
                         }
                     }
                 },
@@ -93,7 +93,7 @@ impl ::case::Case for PostScript {
                     }
                 },
                 HHCurveTo => {
-                    let (offset, mut extra) = if count % 4 == 0 {
+                    let (offset, first) = if count % 4 == 0 {
                         (0, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
@@ -101,32 +101,66 @@ impl ::case::Case for PostScript {
                     };
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
+                        let first = if i == 0 { first } else { 0.0 };
                         builder.bezier_to(
-                            (get!(j + 0),       extra),
+                            (get!(j + 0),       first),
                             (get!(j + 1), get!(j + 2)),
                             (get!(j + 3),         0.0),
                         );
-                        extra = 0.0;
                     }
                 },
                 HVCurveTo => {
-                    if count % 8 == 0 {
-                    } else if (count - 1) % 8 == 0 {
-                    } else if (count - 4) % 8 == 0 {
+                    let (steps, last) = if count % 4 == 0 {
+                        (count / 4, 0.0)
                     } else {
-                        expect!((count - 4 - 1) % 8 == 0);
+                        expect!((count - 1) % 4 == 0);
+                        ((count - 1) / 4, get!(count - 1))
+                    };
+                    for i in 0..steps {
+                        let j = 4 * i;
+                        let last = if i + 1 == steps { last } else { 0.0 };
+                        if i % 2 == 0 {
+                            builder.bezier_to(
+                                (get!(j + 0),         0.0),
+                                (get!(j + 1), get!(j + 2)),
+                                (       last, get!(j + 3)),
+                            );
+                        } else {
+                            builder.bezier_to(
+                                (        0.0, get!(j + 0)),
+                                (get!(j + 1), get!(j + 2)),
+                                (get!(j + 3),        last),
+                            );
+                        }
                     }
                 },
                 VHCurveTo => {
-                    if count % 8 == 0 {
-                    } else if (count - 1) % 8 == 0 {
-                    } else if (count - 4) % 8 == 0 {
+                    let (steps, last) = if count % 4 == 0 {
+                        (count / 4, 0.0)
                     } else {
-                        expect!((count - 4 - 1) % 8 == 0);
+                        expect!((count - 1) % 4 == 0);
+                        ((count - 1) / 4, get!(count - 1))
+                    };
+                    for i in 0..steps {
+                        let j = 4 * i;
+                        let last = if i + 1 == steps { last } else { 0.0 };
+                        if i % 2 == 1 {
+                            builder.bezier_to(
+                                (get!(j + 0),         0.0),
+                                (get!(j + 1), get!(j + 2)),
+                                (       last, get!(j + 3)),
+                            );
+                        } else {
+                            builder.bezier_to(
+                                (        0.0, get!(j + 0)),
+                                (get!(j + 1), get!(j + 2)),
+                                (get!(j + 3),        last),
+                            );
+                        }
                     }
                 },
                 VVCurveTo => {
-                    let (offset, mut extra) = if count % 4 == 0 {
+                    let (offset, first) = if count % 4 == 0 {
                         (0, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
@@ -134,12 +168,12 @@ impl ::case::Case for PostScript {
                     };
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
+                        let first = if i == 0 { first } else { 0.0 };
                         builder.bezier_to(
-                            (extra,       get!(j + 0)),
+                            (      first, get!(j + 0)),
                             (get!(j + 1), get!(j + 2)),
-                            (0.0,         get!(j + 3)),
+                            (        0.0, get!(j + 3)),
                         );
-                        extra = 0.0;
                     }
                 },
                 RCurveLine => {
