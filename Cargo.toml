@@ -9,4 +9,4 @@ documentation = "https://bodoni.github.io/font"
 description = "The package provides a font toolbox."
 
 [dependencies]
-opentype = "0.8"
+opentype = "0.9"
