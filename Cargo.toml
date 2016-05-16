@@ -1,17 +1,17 @@
 [package]
 name = "font"
-version = "0.0.6"
+version = "0.0.7"
+license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
-license = "MIT"
-repository = "https://github.com/bodoni/font"
-homepage = "https://github.com/bodoni/font"
-documentation = "https://bodoni.github.io/font"
 description = "The package provides a font toolbox."
+documentation = "https://bodoni.github.io/font"
+homepage = "https://github.com/bodoni/font"
+repository = "https://github.com/bodoni/font"
 
 [dependencies]
-opentype = "0.9"
-postscript = "0.4"
-truetype = "0.6"
+opentype = "0.10"
+postscript = "0.5"
+truetype = "0.7"
 
 [[test]]
 name = "font"
