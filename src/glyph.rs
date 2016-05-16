@@ -38,7 +38,7 @@ impl Deref for Glyph {
 
 impl Builder {
     #[inline]
-    pub fn new() -> Builder {
+    pub fn new() -> Self {
         Builder { point: (0.0, 0.0), program: vec![] }
     }
 

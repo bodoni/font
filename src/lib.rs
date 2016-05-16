@@ -12,7 +12,7 @@
 //! let path = "SourceSerifPro-Regular.otf";
 //! # let path = "tests/fixtures/SourceSerifPro-Regular.otf";
 //! let file = File::open(path).unwrap();
-//! let glyph = file.fonts[0].draw('&').unwrap().unwrap();
+//! let glyph = file[0].draw('&').unwrap().unwrap();
 //!
 //! for operation in glyph.iter() {
 //!     match operation {

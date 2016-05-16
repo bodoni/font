@@ -14,7 +14,7 @@ pub struct PostScript {
 
 impl PostScript {
     #[inline]
-    pub fn new(id: usize, fontset: Rc<FontSet>, mapping: Rc<Mapping>) -> PostScript {
+    pub fn new(id: usize, fontset: Rc<FontSet>, mapping: Rc<Mapping>) -> Self {
         PostScript { id: id, fontset: fontset, mapping: mapping }
     }
 }

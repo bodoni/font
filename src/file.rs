@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use std::path::Path;
 
 use Result;
@@ -12,7 +13,7 @@ pub struct File {
 
 impl File {
     /// Open a file.
-    pub fn open<T: AsRef<Path>>(path: T) -> Result<File> {
+    pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
         let path = path.as_ref();
         let extension = some!(path.extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()),
                               "unable to detect the file format");
@@ -20,5 +21,14 @@ impl File {
             "otf" => Ok(File { fonts: try!(opentype::open(path)) }),
             _ => raise!("encountered an unknown file format"),
         }
+    }
+}
+
+impl Deref for File {
+    type Target = [Font];
+
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        &self.fonts
     }
 }
