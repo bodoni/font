@@ -7,8 +7,6 @@ The package provides a font toolbox.
 ## Example
 
 ```rust
-extern crate font;
-
 use font::File;
 use font::Operation::*;
 
