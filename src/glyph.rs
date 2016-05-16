@@ -10,16 +10,16 @@ pub struct Glyph {
 
 /// An operation.
 pub enum Operation {
-    /// Draw a cubic Bézier curve.
+    /// Append a cubic Bézier curve to the current point.
     CurveTo(Point, Point, Point),
-    /// Draw a line.
+    /// Append a line to the current point.
     LineTo(Point),
-    /// Move the cursor.
+    /// Move the current point.
     MoveTo(Point),
 }
 
 pub struct Builder {
-    cursor: Point,
+    point: Point,
     program: Vec<Operation>,
 }
 
@@ -37,25 +37,25 @@ impl Deref for Glyph {
 impl Builder {
     #[inline]
     pub fn new() -> Builder {
-        Builder { cursor: (0.0, 0.0), program: vec![] }
+        Builder { point: (0.0, 0.0), program: vec![] }
     }
 
     pub fn curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
-        let a = (self.cursor.0 + a.0, self.cursor.1 + a.1);
+        let a = (self.point.0 + a.0, self.point.1 + a.1);
         let b = (a.0 + b.0, a.1 + b.1);
         let c = (b.0 + c.0, b.1 + c.1);
-        self.cursor = c;
+        self.point = c;
         self.program.push(Operation::CurveTo(a, b, c));
     }
 
     pub fn line_to(&mut self, a: Offset) {
-        self.cursor = (self.cursor.0 + a.0, self.cursor.1 + a.1);
-        self.program.push(Operation::LineTo(self.cursor));
+        self.point = (self.point.0 + a.0, self.point.1 + a.1);
+        self.program.push(Operation::LineTo(self.point));
     }
 
     pub fn move_to(&mut self, a: Offset) {
-        self.cursor = (self.cursor.0 + a.0, self.cursor.1 + a.1);
-        self.program.push(Operation::MoveTo(self.cursor));
+        self.point = (self.point.0 + a.0, self.point.1 + a.1);
+        self.program.push(Operation::MoveTo(self.point));
     }
 }
 
