@@ -7,6 +7,11 @@ The package provides a font toolbox.
 ## Example
 
 ```rust
+extern crate font;
+
+use font::File;
+use font::Operation::*;
+
 let path = "SourceSerifPro-Regular.otf";
 let file = File::open(path).unwrap();
 let glyph = file.fonts[0].draw('&').unwrap().unwrap();
