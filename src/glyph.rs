@@ -3,12 +3,14 @@ use std::ops::Deref;
 use Point;
 
 /// A glyph.
+#[derive(Clone, Debug)]
 pub struct Glyph {
     /// The program.
     pub program: Vec<Operation>,
 }
 
 /// An operation.
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operation {
     /// Append a cubic Bézier curve to the current point.
     CurveTo(Point, Point, Point),
