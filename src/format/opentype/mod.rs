@@ -17,7 +17,7 @@ pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
         let char_mapping = some!(font.char_mapping.take(),
                                  "cannot find the char-to-glyph mapping");
         let font_header = some!(font.font_header.as_ref(),
-                           "cannot find the font header");
+                                "cannot find the font header");
         let horizontal_header = some!(font.horizontal_header.as_ref(),
                                       "cannot find the horizontal header");
         let mapping = Rc::new(try!(mapping::Mapping::new(char_mapping)));
