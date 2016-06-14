@@ -18,7 +18,7 @@ impl File {
         let extension = some!(path.extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()),
                               "unable to detect the file format");
         match &*extension {
-            "otf" => Ok(File { fonts: try!(opentype::open(path)) }),
+            "otc" | "otf" | "ttc" | "ttf" => Ok(File { fonts: try!(opentype::open(path)) }),
             _ => raise!("encountered an unknown file format"),
         }
     }
