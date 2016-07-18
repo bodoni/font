@@ -21,15 +21,15 @@ pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
         let horizontal_header = some!(font.horizontal_header.as_ref(),
                                       "cannot find the horizontal header");
         let mapping = Rc::new(try!(mapping::Mapping::new(char_mapping)));
-        match font.postscript_fontset.take() {
-            Some(fontset) => {
-                let fontset = Rc::new(fontset);
-                for id in 0..fontset.char_strings.len() {
+        match font.compact_font_set.take() {
+            Some(font_set) => {
+                let font_set = Rc::new(font_set);
+                for id in 0..font_set.char_strings.len() {
                     fonts.push(Font {
                         units_per_em: font_header.units_per_em as usize,
                         ascender: horizontal_header.ascender as isize,
                         descender: horizontal_header.descender as isize,
-                        case: Box::new(case::PostScript::new(id, fontset.clone(),
+                        case: Box::new(case::PostScript::new(id, font_set.clone(),
                                                              mapping.clone())),
                     });
                 }

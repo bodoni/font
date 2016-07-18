@@ -8,20 +8,20 @@ use super::mapping::Mapping;
 
 pub struct PostScript {
     id: usize,
-    fontset: Rc<FontSet>,
+    font_set: Rc<FontSet>,
     mapping: Rc<Mapping>,
 }
 
 impl PostScript {
     #[inline]
-    pub fn new(id: usize, fontset: Rc<FontSet>, mapping: Rc<Mapping>) -> Self {
-        PostScript { id: id, fontset: fontset, mapping: mapping }
+    pub fn new(id: usize, font_set: Rc<FontSet>, mapping: Rc<Mapping>) -> Self {
+        PostScript { id: id, font_set: font_set, mapping: mapping }
     }
 }
 
 impl ::case::Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
-        use super::postscript::type2::Operator::*;
+        use super::postscript::type2::operation::Operator::*;
 
         macro_rules! expect(
             ($condition:expr) => (assert!($condition));
@@ -32,9 +32,9 @@ impl ::case::Case for PostScript {
                 Some(id) => id,
                 _ => return Ok(None),
             };
-            Program::new(&self.fontset.char_strings[self.id][id],
-                         &self.fontset.global_subroutines,
-                         &self.fontset.local_subroutines[self.id])
+            Program::new(&self.font_set.char_strings[self.id][id],
+                         &self.font_set.global_subroutines,
+                         &self.font_set.local_subroutines[self.id])
         };
 
         let mut builder = Builder::new();
