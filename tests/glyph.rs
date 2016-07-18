@@ -2,7 +2,7 @@
 fn draw_letter() {
     use library::Operation::*;
 
-    let font = &::setup()[0];
+    let font = &::setup(None)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
 
     assert_eq!(&*glyph, &*vec![
@@ -21,7 +21,7 @@ fn draw_letter() {
 
 #[test]
 fn draw_lowercase_letters() {
-    let font = &::setup()[0];
+    let font = &::setup(None)[0];
     for code in b'a'..(b'z' + 1) {
         font.case.draw(code as char).unwrap().unwrap();
     }

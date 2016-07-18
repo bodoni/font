@@ -1,6 +1,6 @@
 #[test]
 fn open() {
-    let file = ::setup();
+    let file = ::setup(None);
     let font = &file[0];
 
     assert_eq!(font.units_per_em, 1000);
