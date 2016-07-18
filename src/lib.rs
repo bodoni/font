@@ -53,4 +53,4 @@ mod glyph;
 pub use case::Case;
 pub use file::File;
 pub use font::Font;
-pub use glyph::{Glyph, Operation};
+pub use glyph::{Curve, Glyph, Operation};
