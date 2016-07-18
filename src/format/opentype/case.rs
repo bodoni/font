@@ -41,7 +41,7 @@ impl ::case::Case for PostScript {
 
         let mut clear = false;
         while let Some((operator, operands)) = try!(program.next()) {
-            macro_rules! get(($index:expr) => (operands[$index].into()));
+            macro_rules! get(($index:expr) => (operands[$index]));
             let count = operands.len();
             match operator {
                 RMoveTo => {
