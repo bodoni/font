@@ -275,10 +275,9 @@ fn draw_truetype_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }:
             if is_control!(cursor) {
                 match &mut control {
                     &mut Some(ref mut control) => {
-                        let x = (control.0 + current.0) / 2.0;
-                        let y = (control.1 + current.1) / 2.0;
-                        builder.quadratic_to(*control, Some((x, y)));
-                        *control = current;
+                        let middle = (current.0 / 2.0, current.1 / 2.0);
+                        builder.quadratic_to(*control, Some(middle));
+                        *control = middle;
                     },
                     control @ &mut None => {
                         *control = Some(current);
