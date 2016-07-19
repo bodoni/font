@@ -13,11 +13,11 @@ pub struct Glyph {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operation {
     /// Append a Bézier curve to the current point.
-    CurveTo(Curve),
+    Curve(Curve),
     /// Append a line to the current point.
-    LineTo(Point),
+    Line(Point),
     /// Move the current point.
-    MoveTo(Point),
+    Move(Point),
 }
 
 /// A curve.
@@ -56,17 +56,17 @@ impl Builder {
         let b = (a.0 + b.0, a.1 + b.1);
         let c = (b.0 + c.0, b.1 + c.1);
         self.point = c;
-        self.program.push(Operation::CurveTo(Curve::Cubic(a, b, c)));
+        self.program.push(Operation::Curve(Curve::Cubic(a, b, c)));
     }
 
     pub fn line_to(&mut self, a: Offset) {
         self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.program.push(Operation::LineTo(self.point));
+        self.program.push(Operation::Line(self.point));
     }
 
     pub fn move_to(&mut self, a: Offset) {
         self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.program.push(Operation::MoveTo(self.point));
+        self.program.push(Operation::Move(self.point));
     }
 }
 

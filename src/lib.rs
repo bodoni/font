@@ -16,9 +16,9 @@
 //!
 //! for operation in glyph.iter() {
 //!     match operation {
-//!         &CurveTo(..) => println!("Curve!"),
-//!         &LineTo(..) => println!("Line!"),
-//!         &MoveTo(..) => println!("Move!"),
+//!         &Curve(..) => println!("Curve!"),
+//!         &Line(..) => println!("Line!"),
+//!         &Move(..) => println!("Move!"),
 //!     }
 //! }
 //! # }
