@@ -1,7 +1,7 @@
 use postscript::compact::FontSet;
 use postscript::type2::Program;
 use std::rc::Rc;
-use truetype::GlyphData;
+use truetype::glyph_data::{GlyphData, Simple};
 
 use Result;
 use case::Case;
@@ -26,12 +26,12 @@ impl PostScript {
     }
 }
 
+macro_rules! expect(($condition:expr) => (if !$condition { reject!(); }));
+macro_rules! reject(() => (raise!("found a malformed glyph")));
+
 impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         use postscript::type2::operation::Operator::*;
-
-        macro_rules! expect(($condition:expr) => (if !$condition { reject!(); }));
-        macro_rules! reject(() => (raise!("found a malformed glyph")));
 
         let mut program = match self.mapping.find(glyph) {
             Some(id) => match self.font_set.char_strings[self.id].get(id) {
@@ -235,9 +235,7 @@ impl TrueType {
 
 impl Case for TrueType {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
-        use truetype::glyph_data::{Description, Simple};
-
-        macro_rules! reject(() => (panic!("found a malformed glyph")));
+        use truetype::glyph_data::Description::*;
 
         let glyph = match self.mapping.find(glyph) {
             Some(id) => match self.glyph_data.get(id) {
@@ -247,56 +245,57 @@ impl Case for TrueType {
             },
             _ => return Ok(None),
         };
-
-        let mut builder = Builder::new();
-
         match &glyph.description {
-            &Description::Simple(Simple { ref end_points, ref flags, ref x, ref y, .. }) => {
-                macro_rules! is_control(($i:expr) => (flags[$i] & 0b1 == 0));
-                macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
-                let point_count = flags.len();
-                if point_count == 0 || point_count != x.len() || point_count != y.len() {
-                    reject!();
-                }
-                let mut cursor = 0;
-                for &end in end_points {
-                    let end = end as usize;
-                    if end >= point_count || is_control!(cursor) {
-                        reject!();
-                    }
-                    let first = read!(cursor);
-                    builder.move_to(first);
-                    let mut control: Option<(f32, f32)> = None;
-                    for cursor in (cursor + 1)..(end + 1) {
-                        let current = read!(cursor);
-                        if is_control!(cursor) {
-                            match &mut control {
-                                &mut Some(ref mut control) => {
-                                    let x = (control.0 + current.0) / 2.0;
-                                    let y = (control.1 + current.1) / 2.0;
-                                    builder.quadratic_to(*control, Some((x, y)));
-                                    *control = current;
-                                },
-                                control @ &mut None => {
-                                    *control = Some(current);
-                                },
-                            }
-                        } else {
-                            match control.take() {
-                                Some(control) => builder.quadratic_to(control, Some(current)),
-                                _ => builder.line_to(current),
-                            }
-                        }
-                    }
-                    if let Some(control) = control.take() {
-                        builder.quadratic_to(control, None);
-                    }
-                    cursor = end + 1;
-                }
-            },
-            &Description::Compound(..) => unimplemented!(),
+            &Simple(ref description) => draw_truetype_simple(description),
+            &Compound(..) => unimplemented!(),
         }
-
-        Ok(Some(builder.into()))
     }
+}
+
+fn draw_truetype_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
+                        -> Result<Option<Glyph>> {
+
+    macro_rules! is_control(($i:expr) => (flags[$i] & 0b1 == 0));
+    macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
+
+    let point_count = flags.len();
+    expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
+
+    let mut builder = Builder::new();
+
+    let mut cursor = 0;
+    for &end in end_points {
+        let end = end as usize;
+        expect!(end < point_count && !is_control!(cursor));
+        let first = read!(cursor);
+        builder.move_to(first);
+        let mut control: Option<(f32, f32)> = None;
+        for cursor in (cursor + 1)..(end + 1) {
+            let current = read!(cursor);
+            if is_control!(cursor) {
+                match &mut control {
+                    &mut Some(ref mut control) => {
+                        let x = (control.0 + current.0) / 2.0;
+                        let y = (control.1 + current.1) / 2.0;
+                        builder.quadratic_to(*control, Some((x, y)));
+                        *control = current;
+                    },
+                    control @ &mut None => {
+                        *control = Some(current);
+                    },
+                }
+            } else {
+                match control.take() {
+                    Some(control) => builder.quadratic_to(control, Some(current)),
+                    _ => builder.line_to(current),
+                }
+            }
+        }
+        if let Some(control) = control.take() {
+            builder.quadratic_to(control, None);
+        }
+        cursor = end + 1;
+    }
+
+    Ok(Some(builder.into()))
 }
