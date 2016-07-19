@@ -16,9 +16,9 @@ let glyph = file[0].draw('&').unwrap().unwrap();
 
 for operation in glyph.iter() {
     match operation {
-        &Curve(..) => println!("Curve!"),
-        &Line(..) => println!("Line!"),
         &Move(..) => println!("Move!"),
+        &Line(..) => println!("Line!"),
+        &Curve(..) => println!("Curve!"),
     }
 }
 ```

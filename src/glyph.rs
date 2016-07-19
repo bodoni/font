@@ -12,12 +12,12 @@ pub struct Glyph {
 /// An operation.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operation {
-    /// Append a Bézier curve to the current point.
-    Curve(Curve),
-    /// Append a line to the current point.
-    Line(Point),
     /// Move the current point.
     Move(Point),
+    /// Append a line to the current point.
+    Line(Point),
+    /// Append a Bézier curve to the current point.
+    Curve(Curve),
 }
 
 /// A curve.
