@@ -85,7 +85,7 @@ impl ::case::Case for PostScript {
                     expect!(count % 6 == 0);
                     for i in 0..(count / 6) {
                         let j = 6 * i;
-                        builder.curve_to(
+                        builder.cubic_to(
                             (get!(j + 0), get!(j + 1)),
                             (get!(j + 2), get!(j + 3)),
                             (get!(j + 4), get!(j + 5)),
@@ -102,7 +102,7 @@ impl ::case::Case for PostScript {
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
-                        builder.curve_to(
+                        builder.cubic_to(
                             (get!(j + 0),       first),
                             (get!(j + 1), get!(j + 2)),
                             (get!(j + 3),         0.0),
@@ -120,13 +120,13 @@ impl ::case::Case for PostScript {
                         let j = 4 * i;
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 0 {
-                            builder.curve_to(
+                            builder.cubic_to(
                                 (get!(j + 0),         0.0),
                                 (get!(j + 1), get!(j + 2)),
                                 (       last, get!(j + 3)),
                             );
                         } else {
-                            builder.curve_to(
+                            builder.cubic_to(
                                 (        0.0, get!(j + 0)),
                                 (get!(j + 1), get!(j + 2)),
                                 (get!(j + 3),        last),
@@ -145,13 +145,13 @@ impl ::case::Case for PostScript {
                         let j = 4 * i;
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 1 {
-                            builder.curve_to(
+                            builder.cubic_to(
                                 (get!(j + 0),         0.0),
                                 (get!(j + 1), get!(j + 2)),
                                 (       last, get!(j + 3)),
                             );
                         } else {
-                            builder.curve_to(
+                            builder.cubic_to(
                                 (        0.0, get!(j + 0)),
                                 (get!(j + 1), get!(j + 2)),
                                 (get!(j + 3),        last),
@@ -169,7 +169,7 @@ impl ::case::Case for PostScript {
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
-                        builder.curve_to(
+                        builder.cubic_to(
                             (      first, get!(j + 0)),
                             (get!(j + 1), get!(j + 2)),
                             (        0.0, get!(j + 3)),
@@ -180,7 +180,7 @@ impl ::case::Case for PostScript {
                     expect!(count >= 2 && (count - 2) % 6 == 0);
                     for i in 0..((count - 2) / 6) {
                         let j = 6 * i;
-                        builder.curve_to(
+                        builder.cubic_to(
                             (get!(j + 0), get!(j + 1)),
                             (get!(j + 2), get!(j + 3)),
                             (get!(j + 4), get!(j + 5)),
@@ -196,7 +196,7 @@ impl ::case::Case for PostScript {
                         builder.line_to((get!(j + 0), get!(j + 1)));
                     }
                     let j = count - 6;
-                    builder.curve_to(
+                    builder.cubic_to(
                         (get!(j + 0), get!(j + 1)),
                         (get!(j + 2), get!(j + 3)),
                         (get!(j + 4), get!(j + 5)),

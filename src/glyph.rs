@@ -51,12 +51,9 @@ impl Builder {
         Builder { point: (0.0, 0.0), program: vec![] }
     }
 
-    pub fn curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
-        let a = (self.point.0 + a.0, self.point.1 + a.1);
-        let b = (a.0 + b.0, a.1 + b.1);
-        let c = (b.0 + c.0, b.1 + c.1);
-        self.point = c;
-        self.program.push(Operation::Curve(Curve::Cubic(a, b, c)));
+    pub fn move_to(&mut self, a: Offset) {
+        self.point = (self.point.0 + a.0, self.point.1 + a.1);
+        self.program.push(Operation::Move(self.point));
     }
 
     pub fn line_to(&mut self, a: Offset) {
@@ -64,9 +61,12 @@ impl Builder {
         self.program.push(Operation::Line(self.point));
     }
 
-    pub fn move_to(&mut self, a: Offset) {
-        self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.program.push(Operation::Move(self.point));
+    pub fn cubic_to(&mut self, a: Offset, b: Offset, c: Offset) {
+        let a = (self.point.0 + a.0, self.point.1 + a.1);
+        let b = (a.0 + b.0, a.1 + b.1);
+        let c = (b.0 + c.0, b.1 + c.1);
+        self.point = c;
+        self.program.push(Operation::Curve(Curve::Cubic(a, b, c)));
     }
 }
 
