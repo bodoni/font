@@ -5,8 +5,7 @@
 //! ```
 //! extern crate font;
 //!
-//! use font::File;
-//! use font::Operation::*;
+//! use font::{File, Operation};
 //!
 //! # fn main() {
 //! let path = "SourceSerifPro-Regular.otf";
@@ -16,9 +15,9 @@
 //!
 //! for operation in glyph.iter() {
 //!     match operation {
-//!         &Move(..) => println!("Move!"),
-//!         &Line(..) => println!("Line!"),
-//!         &Curve(..) => println!("Curve!"),
+//!         &Operation::Move(..) => println!("Move!"),
+//!         &Operation::Line(..) => println!("Line!"),
+//!         &Operation::Curve(..) => println!("Curve!"),
 //!     }
 //! }
 //! # }
