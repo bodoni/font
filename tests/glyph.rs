@@ -67,3 +67,11 @@ fn draw_ttf_letter() {
         Curve(Quadratic((  46.5,  134.5), (   0.0,  173.0))),
     ]);
 }
+
+#[test]
+fn draw_ttf_lowercase_letters() {
+    let font = &setup(Fixture::TTF)[0];
+    for code in b'a'..(b'z' + 1) {
+        font.case.draw(code as char).unwrap().unwrap();
+    }
+}
