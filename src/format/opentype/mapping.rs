@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use super::truetype::CharMapping;
+use truetype::CharMapping;
 
 use Result;
 

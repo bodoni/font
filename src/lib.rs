@@ -23,6 +23,10 @@
 //! # }
 //! ```
 
+extern crate opentype;
+extern crate postscript;
+extern crate truetype;
+
 /// An error.
 pub type Error = std::io::Error;
 

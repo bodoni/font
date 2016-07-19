@@ -1,12 +1,14 @@
+use {Fixture, setup};
+
 #[test]
-fn draw_letter() {
+fn draw_cff_letter() {
     use library::Curve::*;
     use library::Operation::*;
 
-    let font = &::setup(None)[0];
+    let font = &setup(Fixture::CFF)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
 
-    assert_eq!(&*glyph, &*vec![
+    assert_eq!(&*glyph, &[
         Move((274.0, 445.0)),
         Curve(Cubic((361.0, 445.0), (409.0, 371.0), (409.0, 236.0))),
         Curve(Cubic((409.0, 102.0), (361.0,  30.0), (274.0,  30.0))),
@@ -21,9 +23,14 @@ fn draw_letter() {
 }
 
 #[test]
-fn draw_lowercase_letters() {
-    let font = &::setup(None)[0];
+fn draw_cff_lowercase_letters() {
+    let font = &setup(Fixture::CFF)[0];
     for code in b'a'..(b'z' + 1) {
         font.case.draw(code as char).unwrap().unwrap();
     }
+}
+
+#[test]
+fn draw_ttf_letter() {
+    let _ = &setup(Fixture::TTF)[0];
 }

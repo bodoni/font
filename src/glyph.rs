@@ -3,10 +3,10 @@ use std::ops::Deref;
 use Point;
 
 /// A glyph.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Glyph {
-    /// The program.
-    pub program: Vec<Operation>,
+    /// The operations.
+    pub operations: Vec<Operation>,
 }
 
 /// An operation.
@@ -31,7 +31,7 @@ pub enum Curve {
 
 pub struct Builder {
     point: Point,
-    program: Vec<Operation>,
+    operations: Vec<Operation>,
 }
 
 pub type Offset = (f32, f32);
@@ -41,24 +41,24 @@ impl Deref for Glyph {
 
     #[inline(always)]
     fn deref(&self) -> &Self::Target {
-        &self.program
+        &self.operations
     }
 }
 
 impl Builder {
     #[inline]
     pub fn new() -> Self {
-        Builder { point: (0.0, 0.0), program: vec![] }
+        Builder { point: (0.0, 0.0), operations: vec![] }
     }
 
     pub fn move_to(&mut self, a: Offset) {
         self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.program.push(Operation::Move(self.point));
+        self.operations.push(Operation::Move(self.point));
     }
 
     pub fn line_to(&mut self, a: Offset) {
         self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.program.push(Operation::Line(self.point));
+        self.operations.push(Operation::Line(self.point));
     }
 
     pub fn cubic_to(&mut self, a: Offset, b: Offset, c: Offset) {
@@ -66,13 +66,13 @@ impl Builder {
         let b = (a.0 + b.0, a.1 + b.1);
         let c = (b.0 + c.0, b.1 + c.1);
         self.point = c;
-        self.program.push(Operation::Curve(Curve::Cubic(a, b, c)));
+        self.operations.push(Operation::Curve(Curve::Cubic(a, b, c)));
     }
 }
 
 impl From<Builder> for Glyph {
     #[inline]
     fn from(builder: Builder) -> Glyph {
-        Glyph { program: builder.program }
+        Glyph { operations: builder.operations }
     }
 }

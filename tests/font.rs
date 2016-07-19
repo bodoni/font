@@ -1,6 +1,8 @@
+use {Fixture, setup};
+
 #[test]
 fn open() {
-    let file = ::setup(None);
+    let file = setup(Fixture::CFF);
     let font = &file[0];
 
     assert_eq!(font.units_per_em, 1000);

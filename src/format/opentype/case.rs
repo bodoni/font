@@ -1,14 +1,21 @@
+use postscript::compact::FontSet;
+use postscript::type2::Program;
 use std::rc::Rc;
-use super::postscript::compact::FontSet;
-use super::postscript::type2::Program;
+use truetype::GlyphData;
 
 use Result;
+use case::Case;
 use glyph::{Builder, Glyph};
 use super::mapping::Mapping;
 
 pub struct PostScript {
     id: usize,
     font_set: Rc<FontSet>,
+    mapping: Rc<Mapping>,
+}
+
+pub struct TrueType {
+    glyph_data: Rc<GlyphData>,
     mapping: Rc<Mapping>,
 }
 
@@ -19,22 +26,23 @@ impl PostScript {
     }
 }
 
-impl ::case::Case for PostScript {
+impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
-        use super::postscript::type2::operation::Operator::*;
+        use postscript::type2::operation::Operator::*;
 
-        macro_rules! expect(
-            ($condition:expr) => (assert!($condition));
-        );
+        macro_rules! expect(($condition:expr) => (if !$condition { reject!(); }));
+        macro_rules! reject(() => (raise!("found a malformed glyph")));
 
-        let mut program = {
-            let id = match self.mapping.find(glyph) {
-                Some(id) => id,
-                _ => return Ok(None),
-            };
-            Program::new(&self.font_set.char_strings[self.id][id],
-                         &self.font_set.global_subroutines,
-                         &self.font_set.local_subroutines[self.id])
+        let mut program = match self.mapping.find(glyph) {
+            Some(id) => match self.font_set.char_strings[self.id].get(id) {
+                Some(char_string) => {
+                    Program::new(char_string,
+                                 &self.font_set.global_subroutines,
+                                 &self.font_set.local_subroutines[self.id])
+                },
+                _ => reject!(),
+            },
+            _ => return Ok(None),
         };
 
         let mut builder = Builder::new();
@@ -213,6 +221,39 @@ impl ::case::Case for PostScript {
                 },
                 _ => {},
             }
+        }
+
+        Ok(Some(builder.into()))
+    }
+}
+
+impl TrueType {
+    #[inline]
+    pub fn new(glyph_data: Rc<GlyphData>, mapping: Rc<Mapping>) -> Self {
+        TrueType { glyph_data: glyph_data, mapping: mapping }
+    }
+}
+
+impl Case for TrueType {
+    fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
+        use truetype::glyph_data::Description;
+
+        macro_rules! reject(() => (raise!("found a malformed glyph")));
+
+        let glyph = match self.mapping.find(glyph) {
+            Some(id) => match self.glyph_data.get(id) {
+                Some(&Some(ref glyph)) => glyph,
+                Some(&None) => return Ok(Some(Default::default())),
+                _ => reject!(),
+            },
+            _ => return Ok(None),
+        };
+
+        let builder = Builder::new();
+
+        match glyph.description {
+            Description::Simple(..) => {},
+            Description::Compound(..) => {},
         }
 
         Ok(Some(builder.into()))
