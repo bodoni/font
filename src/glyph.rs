@@ -1,22 +1,30 @@
+use std::mem;
 use std::ops::Deref;
 
-use Point;
+use Offset;
 
 /// A glyph.
 #[derive(Clone, Debug, Default)]
 pub struct Glyph {
-    /// The operations.
-    pub operations: Vec<Operation>,
+    /// The contours.
+    pub contours: Vec<Contour>,
 }
 
-/// An operation.
+/// A contour.
+#[derive(Clone, Debug, Default)]
+pub struct Contour {
+    /// The offset.
+    pub offset: Offset,
+    /// The segments.
+    pub segments: Vec<Segment>,
+}
+
+/// A segment.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Operation {
-    /// Move the current point.
-    Move(Point),
-    /// Append a line to the current point.
-    Line(Point),
-    /// Append a Bézier curve to the current point.
+pub enum Segment {
+    /// A line.
+    Line(Offset),
+    /// A Bézier curve.
     Curve(Curve),
 }
 
@@ -24,55 +32,89 @@ pub enum Operation {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Curve {
     /// A quadratic Bézier curve.
-    Quadratic(Point, Point),
+    Quadratic(Offset, Offset),
     /// A cubic Bézier curve.
-    Cubic(Point, Point, Point),
+    Cubic(Offset, Offset, Offset),
 }
 
+#[derive(Default)]
 pub struct Builder {
-    point: Point,
-    operations: Vec<Operation>,
+    offset: Offset,
+    contour: Contour,
+    contours: Vec<Contour>,
 }
-
-pub type Offset = (f32, f32);
 
 impl Deref for Glyph {
-    type Target = [Operation];
+    type Target = [Contour];
 
     #[inline(always)]
     fn deref(&self) -> &Self::Target {
-        &self.operations
+        &self.contours
+    }
+}
+
+impl Deref for Contour {
+    type Target = [Segment];
+
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        &self.segments
     }
 }
 
 impl Builder {
     #[inline]
     pub fn new() -> Self {
-        Builder { point: (0.0, 0.0), operations: vec![] }
+        Default::default()
     }
 
     pub fn move_to(&mut self, a: Offset) {
-        self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.operations.push(Operation::Move(self.point));
+        self.terminate();
+        self.offset(a);
+        self.contour.offset = self.offset;
     }
 
     pub fn line_to(&mut self, a: Offset) {
-        self.point = (self.point.0 + a.0, self.point.1 + a.1);
-        self.operations.push(Operation::Line(self.point));
+        self.offset(a);
+        self.contour.segments.push(Segment::Line(a));
+    }
+
+    pub fn quadratic_to(&mut self, a: Offset, b: Option<Offset>) {
+        self.offset(a);
+        let b = match b {
+            Some(b) => b,
+            _ => (self.contour.offset.0 - self.offset.0,
+                  self.contour.offset.1 - self.offset.1),
+        };
+        self.offset(b);
+        self.contour.segments.push(Segment::Curve(Curve::Quadratic(a, b)));
     }
 
     pub fn cubic_to(&mut self, a: Offset, b: Offset, c: Offset) {
-        let a = (self.point.0 + a.0, self.point.1 + a.1);
-        let b = (a.0 + b.0, a.1 + b.1);
-        let c = (b.0 + c.0, b.1 + c.1);
-        self.point = c;
-        self.operations.push(Operation::Curve(Curve::Cubic(a, b, c)));
+        self.offset(a);
+        self.offset(b);
+        self.offset(c);
+        self.contour.segments.push(Segment::Curve(Curve::Cubic(a, b, c)));
+    }
+
+    #[inline]
+    fn offset(&mut self, (x, y): Offset) {
+        self.offset.0 += x;
+        self.offset.1 += y;
+    }
+
+    #[inline]
+    fn terminate(&mut self) {
+        if !self.contour.is_empty() {
+            self.contours.push(mem::replace(&mut self.contour, Default::default()));
+        }
     }
 }
 
 impl From<Builder> for Glyph {
     #[inline]
-    fn from(builder: Builder) -> Glyph {
-        Glyph { operations: builder.operations }
+    fn from(mut builder: Builder) -> Glyph {
+        builder.terminate();
+        Glyph { contours: builder.contours }
     }
 }

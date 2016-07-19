@@ -7,17 +7,18 @@ The package provides a font toolbox.
 ## Example
 
 ```rust
-use font::{File, Operation};
+use font::{File, Segment};
 
 let path = "SourceSerifPro-Regular.otf";
 let file = File::open(path).unwrap();
 let glyph = file[0].draw('&').unwrap().unwrap();
 
-for operation in glyph.iter() {
-    match operation {
-        &Operation::Move(..) => println!("Move!"),
-        &Operation::Line(..) => println!("Line!"),
-        &Operation::Curve(..) => println!("Curve!"),
+for contour in glyph.iter() {
+    for segment in contour.iter() {
+        match segment {
+            &Segment::Line(..) => println!("Line!"),
+            &Segment::Curve(..) => println!("Curve!"),
+        }
     }
 }
 ```

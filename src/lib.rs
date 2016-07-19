@@ -5,7 +5,7 @@
 //! ```
 //! extern crate font;
 //!
-//! use font::{File, Operation};
+//! use font::{File, Segment};
 //!
 //! # fn main() {
 //! let path = "SourceSerifPro-Regular.otf";
@@ -13,11 +13,12 @@
 //! let file = File::open(path).unwrap();
 //! let glyph = file[0].draw('&').unwrap().unwrap();
 //!
-//! for operation in glyph.iter() {
-//!     match operation {
-//!         &Operation::Move(..) => println!("Move!"),
-//!         &Operation::Line(..) => println!("Line!"),
-//!         &Operation::Curve(..) => println!("Curve!"),
+//! for contour in glyph.iter() {
+//!     for segment in contour.iter() {
+//!         match segment {
+//!             &Segment::Line(..) => println!("Line!"),
+//!             &Segment::Curve(..) => println!("Curve!"),
+//!         }
 //!     }
 //! }
 //! # }
@@ -30,8 +31,8 @@ extern crate truetype;
 /// An error.
 pub type Error = std::io::Error;
 
-/// A point.
-pub type Point = (f32, f32);
+/// An offset.
+pub type Offset = (f32, f32);
 
 /// A result.
 pub type Result<T> = std::io::Result<T>;
@@ -56,4 +57,4 @@ mod glyph;
 pub use case::Case;
 pub use file::File;
 pub use font::Font;
-pub use glyph::{Curve, Glyph, Operation};
+pub use glyph::{Contour, Curve, Glyph, Segment};
