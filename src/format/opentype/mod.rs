@@ -4,8 +4,13 @@ use std::rc::Rc;
 
 use {Font, Result};
 
-mod case;
 mod mapping;
+mod postscript;
+mod truetype;
+
+use self::mapping::Mapping;
+use self::postscript::PostScript;
+use self::truetype::TrueType;
 
 pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
     let file = try!(opentype::File::open(path));
@@ -17,7 +22,7 @@ pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
                                 "cannot find the font header");
         let horizontal_header = some!(font.horizontal_header.as_ref(),
                                       "cannot find the horizontal header");
-        let mapping = Rc::new(try!(mapping::Mapping::new(char_mapping)));
+        let mapping = Rc::new(try!(Mapping::new(char_mapping)));
         if let Some(font_set) = font.compact_font_set.take() {
             let font_set = Rc::new(font_set);
             for id in 0..font_set.char_strings.len() {
@@ -25,7 +30,7 @@ pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
                     units_per_em: font_header.units_per_em as usize,
                     ascender: horizontal_header.ascender as isize,
                     descender: horizontal_header.descender as isize,
-                    case: Box::new(case::PostScript::new(id, font_set.clone(), mapping.clone())),
+                    case: Box::new(PostScript::new(id, font_set.clone(), mapping.clone())),
                 });
             }
             continue;
@@ -35,7 +40,7 @@ pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
                 units_per_em: font_header.units_per_em as usize,
                 ascender: horizontal_header.ascender as isize,
                 descender: horizontal_header.descender as isize,
-                case: Box::new(case::TrueType::new(Rc::new(glyph_data), mapping.clone())),
+                case: Box::new(TrueType::new(Rc::new(glyph_data), mapping.clone())),
             });
             continue;
         }
