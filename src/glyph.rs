@@ -72,7 +72,7 @@ impl Builder {
         self.contour.segments.push(Segment::Linear(a));
     }
 
-    pub fn quadratic_to(&mut self, a: Offset, b: Option<Offset>) {
+    pub fn quadratic_curve_to(&mut self, a: Offset, b: Option<Offset>) {
         self.offset(a);
         let b = match b {
             Some(b) => b,
@@ -83,7 +83,7 @@ impl Builder {
         self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
-    pub fn cubic_to(&mut self, a: Offset, b: Offset, c: Offset) {
+    pub fn cubic_curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
         self.offset(a);
         self.offset(b);
         self.offset(c);

@@ -92,7 +92,7 @@ impl Case for PostScript {
                     expect!(count % 6 == 0);
                     for i in 0..(count / 6) {
                         let j = 6 * i;
-                        builder.cubic_to(
+                        builder.cubic_curve_to(
                             (get!(j + 0), get!(j + 1)),
                             (get!(j + 2), get!(j + 3)),
                             (get!(j + 4), get!(j + 5)),
@@ -109,7 +109,7 @@ impl Case for PostScript {
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
-                        builder.cubic_to(
+                        builder.cubic_curve_to(
                             (get!(j + 0),       first),
                             (get!(j + 1), get!(j + 2)),
                             (get!(j + 3),         0.0),
@@ -127,13 +127,13 @@ impl Case for PostScript {
                         let j = 4 * i;
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 0 {
-                            builder.cubic_to(
+                            builder.cubic_curve_to(
                                 (get!(j + 0),         0.0),
                                 (get!(j + 1), get!(j + 2)),
                                 (       last, get!(j + 3)),
                             );
                         } else {
-                            builder.cubic_to(
+                            builder.cubic_curve_to(
                                 (        0.0, get!(j + 0)),
                                 (get!(j + 1), get!(j + 2)),
                                 (get!(j + 3),        last),
@@ -152,13 +152,13 @@ impl Case for PostScript {
                         let j = 4 * i;
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 1 {
-                            builder.cubic_to(
+                            builder.cubic_curve_to(
                                 (get!(j + 0),         0.0),
                                 (get!(j + 1), get!(j + 2)),
                                 (       last, get!(j + 3)),
                             );
                         } else {
-                            builder.cubic_to(
+                            builder.cubic_curve_to(
                                 (        0.0, get!(j + 0)),
                                 (get!(j + 1), get!(j + 2)),
                                 (get!(j + 3),        last),
@@ -176,7 +176,7 @@ impl Case for PostScript {
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
-                        builder.cubic_to(
+                        builder.cubic_curve_to(
                             (      first, get!(j + 0)),
                             (get!(j + 1), get!(j + 2)),
                             (        0.0, get!(j + 3)),
@@ -187,7 +187,7 @@ impl Case for PostScript {
                     expect!(count >= 2 && (count - 2) % 6 == 0);
                     for i in 0..((count - 2) / 6) {
                         let j = 6 * i;
-                        builder.cubic_to(
+                        builder.cubic_curve_to(
                             (get!(j + 0), get!(j + 1)),
                             (get!(j + 2), get!(j + 3)),
                             (get!(j + 4), get!(j + 5)),
@@ -203,7 +203,7 @@ impl Case for PostScript {
                         builder.line_to((get!(j + 0), get!(j + 1)));
                     }
                     let j = count - 6;
-                    builder.cubic_to(
+                    builder.cubic_curve_to(
                         (get!(j + 0), get!(j + 1)),
                         (get!(j + 2), get!(j + 3)),
                         (get!(j + 4), get!(j + 5)),
@@ -276,7 +276,7 @@ fn draw_truetype_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }:
                 match &mut control {
                     &mut Some(ref mut control) => {
                         let half = (current.0 / 2.0, current.1 / 2.0);
-                        builder.quadratic_to(*control, Some(half));
+                        builder.quadratic_curve_to(*control, Some(half));
                         *control = half;
                     },
                     control @ &mut None => {
@@ -285,13 +285,13 @@ fn draw_truetype_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }:
                 }
             } else {
                 match control.take() {
-                    Some(control) => builder.quadratic_to(control, Some(current)),
+                    Some(control) => builder.quadratic_curve_to(control, Some(current)),
                     _ => builder.line_to(current),
                 }
             }
         }
         if let Some(control) = control.take() {
-            builder.quadratic_to(control, None);
+            builder.quadratic_curve_to(control, None);
         }
         cursor = end + 1;
     }
