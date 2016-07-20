@@ -34,14 +34,14 @@ impl Case for TrueType {
             _ => return Ok(None),
         };
         match &glyph.description {
-            &Simple(ref description) => draw_truetype_simple(description),
+            &Simple(ref description) => draw_simple(description),
             &Compound(..) => unimplemented!(),
         }
     }
 }
 
-fn draw_truetype_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
-                        -> Result<Option<Glyph>> {
+fn draw_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
+               -> Result<Option<Glyph>> {
 
     macro_rules! is_control(($i:expr) => (flags[$i] & 0b1 == 0));
     macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
