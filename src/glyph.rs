@@ -23,14 +23,7 @@ pub struct Contour {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Segment {
     /// A line.
-    Line(Offset),
-    /// A Bézier curve.
-    Curve(Curve),
-}
-
-/// A curve.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Curve {
+    Linear(Offset),
     /// A quadratic Bézier curve.
     Quadratic(Offset, Offset),
     /// A cubic Bézier curve.
@@ -76,7 +69,7 @@ impl Builder {
 
     pub fn line_to(&mut self, a: Offset) {
         self.offset(a);
-        self.contour.segments.push(Segment::Line(a));
+        self.contour.segments.push(Segment::Linear(a));
     }
 
     pub fn quadratic_to(&mut self, a: Offset, b: Option<Offset>) {
@@ -87,14 +80,14 @@ impl Builder {
                   self.contour.offset.1 - self.offset.1),
         };
         self.offset(b);
-        self.contour.segments.push(Segment::Curve(Curve::Quadratic(a, b)));
+        self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
     pub fn cubic_to(&mut self, a: Offset, b: Offset, c: Offset) {
         self.offset(a);
         self.offset(b);
         self.offset(c);
-        self.contour.segments.push(Segment::Curve(Curve::Cubic(a, b, c)));
+        self.contour.segments.push(Segment::Cubic(a, b, c));
     }
 
     #[inline]

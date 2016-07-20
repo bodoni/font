@@ -16,8 +16,9 @@
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {
-//!             &Segment::Line(..) => println!("Line!"),
-//!             &Segment::Curve(..) => println!("Curve!"),
+//!             &Segment::Linear(..) => println!("Line!"),
+//!             &Segment::Quadratic(..) => println!("Curve!"),
+//!             &Segment::Cubic(..) => println!("Curve!"),
 //!         }
 //!     }
 //! }
@@ -57,4 +58,4 @@ mod glyph;
 pub use case::Case;
 pub use file::File;
 pub use font::Font;
-pub use glyph::{Contour, Curve, Glyph, Segment};
+pub use glyph::{Contour, Glyph, Segment};

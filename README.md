@@ -16,8 +16,9 @@ let glyph = file[0].draw('&').unwrap().unwrap();
 for contour in glyph.iter() {
     for segment in contour.iter() {
         match segment {
-            &Segment::Line(..) => println!("Line!"),
-            &Segment::Curve(..) => println!("Curve!"),
+            &Segment::Linear(..) => println!("Line!"),
+            &Segment::Quadratic(..) => println!("Curve!"),
+            &Segment::Cubic(..) => println!("Curve!"),
         }
     }
 }
