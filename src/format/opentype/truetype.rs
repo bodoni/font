@@ -90,7 +90,6 @@ fn draw_simple(builder: &mut Builder, simple: &Simple) -> Result<()> {
     Ok(())
 }
 
-#[allow(unused_variables)]
 fn draw_compound(case: &TrueType, builder: &mut Builder, compound: &Compound) -> Result<()> {
     let &Compound { ref components, .. } = compound;
     for component in components.iter() {
