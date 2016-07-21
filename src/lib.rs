@@ -32,9 +32,6 @@ extern crate truetype;
 /// An error.
 pub type Error = std::io::Error;
 
-/// An offset.
-pub type Offset = (f32, f32);
-
 /// A result.
 pub type Result<T> = std::io::Result<T>;
 
@@ -54,8 +51,10 @@ mod file;
 mod font;
 mod format;
 mod glyph;
+mod offset;
 
 pub use case::Case;
 pub use file::File;
 pub use font::Font;
 pub use glyph::{Contour, Glyph, Segment};
+pub use offset::Offset;

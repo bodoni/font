@@ -64,11 +64,11 @@ impl Deref for Contour {
 impl Builder {
     #[inline]
     pub fn new() -> Self {
-        Builder { offset: (0.0, 0.0), contour: Contour::new((0.0, 0.0)), contours: vec![] }
+        Builder { offset: Offset::zero(), contour: Contour::new(Offset::zero()), contours: vec![] }
     }
 
     pub fn move_to(&mut self, a: Offset) {
-        self.shift(a);
+        self.offset += a;
         let contour = mem::replace(&mut self.contour, Contour::new(a));
         if !contour.is_empty() {
             self.contours.push(contour);
@@ -76,32 +76,26 @@ impl Builder {
     }
 
     pub fn line_to(&mut self, a: Offset) {
-        self.shift(a);
+        self.offset += a;
         self.contour.segments.push(Segment::Linear(a));
     }
 
     pub fn quadratic_curve_to(&mut self, a: Offset, b: Offset) {
-        self.shift(a);
-        self.shift(b);
+        self.offset += a;
+        self.offset += b;
         self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
     pub fn cubic_curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
-        self.shift(a);
-        self.shift(b);
-        self.shift(c);
+        self.offset += a;
+        self.offset += b;
+        self.offset += c;
         self.contour.segments.push(Segment::Cubic(a, b, c));
     }
 
     #[inline]
     pub fn offset(&self) -> Offset {
         self.offset
-    }
-
-    #[inline]
-    fn shift(&mut self, (x, y): Offset) {
-        self.offset.0 += x;
-        self.offset.1 += y;
     }
 }
 

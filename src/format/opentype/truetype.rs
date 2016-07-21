@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use truetype::glyph_data::{Compound, GlyphData, Simple};
 
-use Result;
+use {Offset, Result};
 use case::Case;
 use glyph::{Builder, Glyph};
 use super::mapping::Mapping;
@@ -51,11 +51,11 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     let point_count = flags.len();
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
 
-    let mut offset = (0.0, 0.0);
+    let mut offset = Offset::zero();
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
     macro_rules! read(($i:expr) => ({
-        let point = (x[$i] as f32 + offset.0, y[$i] as f32 + offset.1);
-        offset = (0.0, 0.0);
+        let point = Offset::new(x[$i] as f32 + offset.0, y[$i] as f32 + offset.1);
+        offset = Offset::zero();
         point
     }));
 
@@ -65,7 +65,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         expect!(end < point_count && is_on_curve!(cursor));
         builder.move_to(read!(cursor));
         let start = builder.offset();
-        let mut control: Option<(f32, f32)> = None;
+        let mut control: Option<Offset> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
             if is_on_curve!(cursor) {
@@ -76,7 +76,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
             } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
-                        let half = (current.0 / 2.0, current.1 / 2.0);
+                        let half = current / 2.0;
                         builder.quadratic_curve_to(*control, half);
                         *control = half;
                     },
@@ -88,10 +88,9 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         }
         if let Some(control) = control.take() {
             let finish = builder.offset();
-            let x = start.0 - (finish.0 + control.0);
-            let y = start.1 - (finish.1 + control.1);
-            builder.quadratic_curve_to(control, (x, y));
-            offset = (-x, -y);
+            let current = start - (finish + control);
+            builder.quadratic_curve_to(control, current);
+            offset = -current;
         }
         cursor = end + 1;
     }

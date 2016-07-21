@@ -76,35 +76,30 @@ fn draw_ttf_lowercase_letters() {
 }
 
 fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
+    use library::Offset;
     use library::Segment::*;
 
     let mut points = vec![];
-    let (mut x, mut y) = (0.0, 0.0);
-    macro_rules! offset(
-        ($point:expr) => ({
-            x += $point.0;
-            y += $point.1;
-        });
-    );
+    let mut offset = Offset::zero();
     for contour in glyph.iter() {
-        offset!(contour.offset);
-        points.push((x, y));
+        offset += contour.offset;
+        points.push(offset.into());
         for segment in contour.iter() {
             match segment {
                 &Linear(a) => {
-                    offset!(a);
+                    offset += a;
                 },
                 &Quadratic(a, b) => {
-                    offset!(a);
-                    offset!(b);
+                    offset += a;
+                    offset += b;
                 },
                 &Cubic(a, b, c) => {
-                    offset!(a);
-                    offset!(b);
-                    offset!(c);
+                    offset += a;
+                    offset += b;
+                    offset += c;
                 },
             }
-            points.push((x, y));
+            points.push(offset.into());
         }
     }
     points
