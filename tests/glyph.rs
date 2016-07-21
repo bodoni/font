@@ -32,6 +32,13 @@ fn draw_cff_lowercase_letters() {
 }
 
 #[test]
+fn draw_ttf_compound_glyph() {
+    let font = &setup(Fixture::TTF)[0];
+    let glyph = font.case.draw('å').unwrap().unwrap();
+    assert_eq!(glyph.len(), 4);
+}
+
+#[test]
 fn draw_ttf_letter() {
     use library::Segment::*;
 
