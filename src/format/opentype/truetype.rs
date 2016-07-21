@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use truetype::glyph_data::{GlyphData, Simple};
+use truetype::glyph_data::{Compound, GlyphData, Simple};
 
 use Result;
 use case::Case;
@@ -35,7 +35,7 @@ impl Case for TrueType {
         };
         match &glyph.description {
             &Simple(ref description) => draw_simple(description),
-            &Compound(..) => unimplemented!(),
+            &Compound(ref description) => draw_compound(description),
         }
     }
 }
@@ -43,7 +43,7 @@ impl Case for TrueType {
 fn draw_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
                -> Result<Option<Glyph>> {
 
-    macro_rules! is_control(($i:expr) => (!flags[$i].is_on_curve()));
+    macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
     macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
 
     let point_count = flags.len();
@@ -54,13 +54,18 @@ fn draw_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
     let mut cursor = 0;
     for &end in end_points {
         let end = end as usize;
-        expect!(end < point_count && !is_control!(cursor));
+        expect!(end < point_count && is_on_curve!(cursor));
         let first = read!(cursor);
         builder.move_to(first);
         let mut control: Option<(f32, f32)> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
-            if is_control!(cursor) {
+            if is_on_curve!(cursor) {
+                match control.take() {
+                    Some(control) => builder.quadratic_curve_to(control, Some(current)),
+                    _ => builder.line_to(current),
+                }
+            } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
                         let half = (current.0 / 2.0, current.1 / 2.0);
@@ -71,11 +76,6 @@ fn draw_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
                         *control = Some(current);
                     },
                 }
-            } else {
-                match control.take() {
-                    Some(control) => builder.quadratic_curve_to(control, Some(current)),
-                    _ => builder.line_to(current),
-                }
             }
         }
         if let Some(control) = control.take() {
@@ -85,4 +85,9 @@ fn draw_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
     }
 
     Ok(Some(builder.into()))
+}
+
+#[allow(unused_variables)]
+fn draw_compound(&Compound { ref components, .. }: &Compound) -> Result<Option<Glyph>> {
+    unimplemented!()
 }
