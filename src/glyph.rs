@@ -4,14 +4,14 @@ use std::ops::Deref;
 use Offset;
 
 /// A glyph.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Glyph {
     /// The contours.
     pub contours: Vec<Contour>,
 }
 
 /// A contour.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Contour {
     /// The offset.
     pub offset: Offset,
@@ -30,7 +30,6 @@ pub enum Segment {
     Cubic(Offset, Offset, Offset),
 }
 
-#[derive(Default)]
 pub struct Builder {
     offset: Offset,
     contour: Contour,
@@ -46,6 +45,13 @@ impl Deref for Glyph {
     }
 }
 
+impl Contour {
+    #[inline]
+    fn new(offset: Offset) -> Self {
+        Contour { offset: offset, segments: vec![] }
+    }
+}
+
 impl Deref for Contour {
     type Target = [Segment];
 
@@ -58,56 +64,53 @@ impl Deref for Contour {
 impl Builder {
     #[inline]
     pub fn new() -> Self {
-        Default::default()
+        Builder { offset: (0.0, 0.0), contour: Contour::new((0.0, 0.0)), contours: vec![] }
     }
 
     pub fn move_to(&mut self, a: Offset) {
-        self.terminate();
-        self.offset(a);
-        self.contour.offset = self.offset;
+        self.shift(a);
+        let contour = mem::replace(&mut self.contour, Contour::new(a));
+        if !contour.is_empty() {
+            self.contours.push(contour);
+        }
     }
 
     pub fn line_to(&mut self, a: Offset) {
-        self.offset(a);
+        self.shift(a);
         self.contour.segments.push(Segment::Linear(a));
     }
 
-    pub fn quadratic_curve_to(&mut self, a: Offset, b: Option<Offset>) {
-        self.offset(a);
-        let b = match b {
-            Some(b) => b,
-            _ => (self.contour.offset.0 - self.offset.0,
-                  self.contour.offset.1 - self.offset.1),
-        };
-        self.offset(b);
+    pub fn quadratic_curve_to(&mut self, a: Offset, b: Offset) {
+        self.shift(a);
+        self.shift(b);
         self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
     pub fn cubic_curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
-        self.offset(a);
-        self.offset(b);
-        self.offset(c);
+        self.shift(a);
+        self.shift(b);
+        self.shift(c);
         self.contour.segments.push(Segment::Cubic(a, b, c));
     }
 
     #[inline]
-    fn offset(&mut self, (x, y): Offset) {
-        self.offset.0 += x;
-        self.offset.1 += y;
+    pub fn offset(&self) -> Offset {
+        self.offset
     }
 
     #[inline]
-    fn terminate(&mut self) {
-        if !self.contour.is_empty() {
-            self.contours.push(mem::replace(&mut self.contour, Default::default()));
-        }
+    fn shift(&mut self, (x, y): Offset) {
+        self.offset.0 += x;
+        self.offset.1 += y;
     }
 }
 
 impl From<Builder> for Glyph {
     #[inline]
-    fn from(mut builder: Builder) -> Glyph {
-        builder.terminate();
-        Glyph { contours: builder.contours }
+    fn from(Builder { contour, mut contours, .. }: Builder) -> Glyph {
+        if !contour.is_empty() {
+            contours.push(contour);
+        }
+        Glyph { contours: contours }
     }
 }

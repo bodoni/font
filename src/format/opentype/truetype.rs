@@ -48,31 +48,36 @@ impl Case for TrueType {
 fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     let &Simple { ref end_points, ref flags, ref x, ref y, .. } = description;
 
-    macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
-    macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
-
     let point_count = flags.len();
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
+
+    let mut offset = (0.0, 0.0);
+    macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
+    macro_rules! read(($i:expr) => ({
+        let point = (x[$i] as f32 + offset.0, y[$i] as f32 + offset.1);
+        offset = (0.0, 0.0);
+        point
+    }));
 
     let mut cursor = 0;
     for &end in end_points {
         let end = end as usize;
         expect!(end < point_count && is_on_curve!(cursor));
-        let first = read!(cursor);
-        builder.move_to(first);
+        builder.move_to(read!(cursor));
+        let start = builder.offset();
         let mut control: Option<(f32, f32)> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
             if is_on_curve!(cursor) {
                 match control.take() {
-                    Some(control) => builder.quadratic_curve_to(control, Some(current)),
+                    Some(control) => builder.quadratic_curve_to(control, current),
                     _ => builder.line_to(current),
                 }
             } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
                         let half = (current.0 / 2.0, current.1 / 2.0);
-                        builder.quadratic_curve_to(*control, Some(half));
+                        builder.quadratic_curve_to(*control, half);
                         *control = half;
                     },
                     control @ &mut None => {
@@ -82,7 +87,11 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
             }
         }
         if let Some(control) = control.take() {
-            builder.quadratic_curve_to(control, None);
+            let finish = builder.offset();
+            let x = start.0 - (finish.0 + control.0);
+            let y = start.1 - (finish.1 + control.1);
+            builder.quadratic_curve_to(control, (x, y));
+            offset = (-x, -y);
         }
         cursor = end + 1;
     }
