@@ -7,6 +7,7 @@ fn draw_cff_letter() {
     let font = &setup(Fixture::CFF)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
+
     assert_eq!(glyph[0].offset, (274.0, 445.0));
     assert_eq!(&*glyph[0], &[
         Cubic(( 87.0,    0.0), ( 48.0, -74.0), (  0.0, -135.0)),
@@ -14,6 +15,7 @@ fn draw_cff_letter() {
         Cubic((-86.0,    0.0), (-48.0,  72.0), (  0.0,  134.0)),
         Cubic((  0.0,  135.0), ( 48.0,  74.0), ( 86.0,    0.0)),
     ]);
+
     assert_eq!(glyph[1].offset, (274.0, 491.0));
     assert_eq!(&*glyph[1], &[
         Cubic((-115.0,    0.0), (-114.0, -89.0), (   0.0, -165.0)),
@@ -33,9 +35,34 @@ fn draw_cff_lowercase_letters() {
 
 #[test]
 fn draw_ttf_compound_glyph() {
+    use library::Segment::*;
+
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('å').unwrap().unwrap();
     assert_eq!(glyph.len(), 4);
+
+    assert_eq!(glyph[0].offset, (639.0, 1116.0));
+    assert_eq!(&*glyph[0], &[
+        Quadratic((  92.0,     0.0), (  72.0, -49.5)),
+        Quadratic((  72.0,   -49.5), (  40.0, -93.0)),
+        Linear   ((  11.0,     0.0)),
+        Linear   ((  67.0,   172.0)),
+        Linear   (( 127.0,     0.0)),
+        Linear   ((-233.0, -1096.0)),
+        Linear   ((-133.0,     0.0)),
+        Linear   ((  26.0,   209.0)),
+        Linear   ((  -8.0,     0.0)),
+        Quadratic((-179.0,  -229.0), (-198.0,   0.0)),
+        Quadratic((-139.0,     0.0), ( -79.0,  99.0)),
+        Quadratic(( -79.0,    99.0), (   0.0, 172.0)),
+        Quadratic((   0.0,   208.0), (  71.0, 178.0)),
+        Quadratic((  71.0,   178.0), ( 125.0, 101.0)),
+        Quadratic(( 125.0,   101.0), ( 149.0,   0.0)),
+    ]);
+
+    assert_eq!(glyph[1].offset, (598.0, 119.0));
+    assert_eq!(glyph[2].offset, (1587.0, 1575.0));
+    assert_eq!(glyph[3].offset, (1483.0, 1478.0));
 }
 
 #[test]
@@ -45,6 +72,7 @@ fn draw_ttf_letter() {
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
+
     assert_eq!(glyph[0].offset, (643.0, 1110.0));
     assert_eq!(&*glyph[0], &[
         Quadratic(( 190.0,    0.0), ( 110.0, -112.5)),
@@ -58,6 +86,7 @@ fn draw_ttf_letter() {
         Quadratic((  73.0,  167.5), ( 124.0,   89.5)),
         Quadratic(( 124.0,   89.5), ( 151.0,    0.0)),
     ]);
+
     assert_eq!(glyph[1].offset, (1030.0, 711.0));
     assert_eq!(&*glyph[1], &[
         Quadratic((   0.0,  115.0), ( -62.5,   71.5)),

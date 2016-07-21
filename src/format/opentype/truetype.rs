@@ -45,8 +45,8 @@ impl Case for TrueType {
     }
 }
 
-fn draw_simple(builder: &mut Builder, simple: &Simple) -> Result<()> {
-    let &Simple { ref end_points, ref flags, ref x, ref y, .. } = simple;
+fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
+    let &Simple { ref end_points, ref flags, ref x, ref y, .. } = description;
 
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
     macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
@@ -90,9 +90,8 @@ fn draw_simple(builder: &mut Builder, simple: &Simple) -> Result<()> {
     Ok(())
 }
 
-fn draw_compound(case: &TrueType, builder: &mut Builder, compound: &Compound) -> Result<()> {
-    let &Compound { ref components, .. } = compound;
-    for component in components.iter() {
+fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
+    for component in description.components.iter() {
         try!(case.draw_index(builder, component.index as usize));
     }
     Ok(())
