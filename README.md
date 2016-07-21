@@ -11,9 +11,9 @@ use font::{File, Segment};
 
 let path = "SourceSerifPro-Regular.otf";
 let file = File::open(path).unwrap();
-let glyph = file[0].draw('&').unwrap().unwrap();
+let font = &file[0];
 
-for contour in glyph.iter() {
+for contour in font.draw('&').unwrap().unwrap().iter() {
     for segment in contour.iter() {
         match segment {
             &Segment::Linear(..) => println!("Line!"),
