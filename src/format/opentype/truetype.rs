@@ -43,7 +43,7 @@ impl Case for TrueType {
 fn draw_simple(&Simple { ref end_points, ref flags, ref x, ref y, .. }: &Simple)
                -> Result<Option<Glyph>> {
 
-    macro_rules! is_control(($i:expr) => (flags[$i] & 0b1 == 0));
+    macro_rules! is_control(($i:expr) => (!flags[$i].is_on_curve()));
     macro_rules! read(($i:expr) => ((x[$i] as f32, y[$i] as f32)));
 
     let point_count = flags.len();
