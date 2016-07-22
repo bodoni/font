@@ -1,4 +1,3 @@
-use std::mem;
 use std::rc::Rc;
 use truetype::glyph_data::{Compound, GlyphData, Simple};
 
@@ -52,31 +51,28 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     let point_count = flags.len();
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
 
-    let mut offset = Offset::from(0.0);
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
-    macro_rules! read(($i:expr) => (
-        Offset::from((x[$i], y[$i])) + mem::replace(&mut offset, Offset::from(0.0))
-    ));
+    macro_rules! read(($i:expr) => (Offset::from((x[$i], y[$i]))));
 
     let mut cursor = 0;
     for &end in end_points {
         let end = end as usize;
         expect!(end < point_count && is_on_curve!(cursor));
         builder.move_to(read!(cursor));
-        let start = builder.offset();
+        let start = builder.position();
         let mut control: Option<Offset> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
             if is_on_curve!(cursor) {
                 match control.take() {
-                    Some(control) => builder.quadratic_curve_to(control, current),
-                    _ => builder.line_to(current),
+                    Some(control) => builder.quadratic_to(control, current),
+                    _ => builder.linear_to(current),
                 }
             } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
                         let half = current / 2.0;
-                        builder.quadratic_curve_to(*control, half);
+                        builder.quadratic_to(*control, half);
                         *control = half;
                     },
                     control @ &mut None => {
@@ -86,10 +82,10 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
             }
         }
         if let Some(control) = control.take() {
-            let finish = builder.offset();
+            let finish = builder.position();
             let current = start - (finish + control);
-            builder.quadratic_curve_to(control, current);
-            offset = -current;
+            builder.quadratic_to(control, current);
+            builder.offset_by(-current);
         }
         cursor = end + 1;
     }
@@ -98,7 +94,20 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
 }
 
 fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
+    use truetype::glyph_data::{Arguments, Options};
+
     for component in description.components.iter() {
+        builder.move_to_origin();
+        match &component.arguments {
+            &Arguments::Offsets(x, y) => builder.offset_by((x, y)),
+            &Arguments::Indices(..) => unimplemented!(),
+        }
+        match &component.options {
+            &Options::None => {},
+            &Options::Scalar(..) => unimplemented!(),
+            &Options::Vector(..) => unimplemented!(),
+            &Options::Matrix(..) => unimplemented!(),
+        }
         try!(case.draw_index(builder, component.index as usize));
     }
     Ok(())

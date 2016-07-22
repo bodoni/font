@@ -31,7 +31,8 @@ pub enum Segment {
 }
 
 pub struct Builder {
-    offset: Offset,
+    position: Offset,
+    offset: Option<Offset>,
     contour: Contour,
     contours: Vec<Contour>,
 }
@@ -64,51 +65,77 @@ impl Deref for Contour {
 impl Builder {
     #[inline]
     pub fn new() -> Self {
-        Builder { offset: Offset::from(0.0), contour: Contour::new(0.0), contours: vec![] }
+        Builder {
+            position: Offset::from(0.0),
+            offset: None,
+            contour: Contour::new(0.0),
+            contours: vec![],
+        }
     }
 
     pub fn move_to<T: Into<Offset>>(&mut self, a: T) {
-        let a = a.into();
-        self.offset += a;
-        let contour = mem::replace(&mut self.contour, Contour::new(a));
+        self.flush();
+        let a = self.offset(a);
+        self.position += a;
+        self.contour.offset = a;
+    }
+
+    pub fn move_to_origin(&mut self) {
+        self.flush();
+        self.offset = Some(-self.position);
+    }
+
+    pub fn linear_to<T: Into<Offset>>(&mut self, a: T) {
+        let a = self.offset(a);
+        self.position += a;
+        self.contour.segments.push(Segment::Linear(a));
+    }
+
+    pub fn quadratic_to<T: Into<Offset>>(&mut self, a: T, b: T) {
+        let (a, b) = (self.offset(a), b.into());
+        self.position += a;
+        self.position += b;
+        self.contour.segments.push(Segment::Quadratic(a, b));
+    }
+
+    pub fn cubic_to<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
+        let (a, b, c) = (self.offset(a), b.into(), c.into());
+        self.position += a;
+        self.position += b;
+        self.position += c;
+        self.contour.segments.push(Segment::Cubic(a, b, c));
+    }
+
+    pub fn offset_by<T: Into<Offset>>(&mut self, a: T) {
+        match &mut self.offset {
+            &mut Some(mut offset) => offset += a,
+            offset @ &mut None => *offset = Some(a.into()),
+        }
+    }
+
+    #[inline]
+    pub fn position(&self) -> Offset {
+        self.position
+    }
+
+    #[inline]
+    fn flush(&mut self) {
+        let contour = mem::replace(&mut self.contour, Contour::new(0.0));
         if !contour.is_empty() {
             self.contours.push(contour);
         }
     }
 
-    pub fn line_to<T: Into<Offset>>(&mut self, a: T) {
-        let a = a.into();
-        self.offset += a;
-        self.contour.segments.push(Segment::Linear(a));
-    }
-
-    pub fn quadratic_curve_to<T: Into<Offset>>(&mut self, a: T, b: T) {
-        let (a, b) = (a.into(), b.into());
-        self.offset += a;
-        self.offset += b;
-        self.contour.segments.push(Segment::Quadratic(a, b));
-    }
-
-    pub fn cubic_curve_to<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
-        let (a, b, c) = (a.into(), b.into(), c.into());
-        self.offset += a;
-        self.offset += b;
-        self.offset += c;
-        self.contour.segments.push(Segment::Cubic(a, b, c));
-    }
-
     #[inline]
-    pub fn offset(&self) -> Offset {
-        self.offset
+    fn offset<T: Into<Offset>>(&mut self, a: T) -> Offset {
+        if let Some(offset) = self.offset.take() { offset + a } else { a.into() }
     }
 }
 
 impl From<Builder> for Glyph {
     #[inline]
-    fn from(Builder { contour, mut contours, .. }: Builder) -> Glyph {
-        if !contour.is_empty() {
-            contours.push(contour);
-        }
-        Glyph { contours: contours }
+    fn from(mut builder: Builder) -> Glyph {
+        builder.flush();
+        Glyph { contours: builder.contours }
     }
 }
