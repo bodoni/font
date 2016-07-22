@@ -1,64 +1,92 @@
-use std::ops::{Add, AddAssign, Div, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// An offset.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Offset(pub f32, pub f32);
 
-impl Offset {
-    /// Create an offset.
-    #[inline]
-    pub fn new(x: f32, y: f32) -> Self {
-        Offset(x, y)
-    }
+macro_rules! implement(
+    (($x:ty, $y:ty)) => (
+        impl From<($x, $y)> for Offset {
+            #[inline]
+            fn from((x, y): ($x, $y)) -> Self {
+                Offset(x as f32, y as f32)
+            }
+        }
 
-    /// Create a zero offset.
-    #[inline]
-    pub fn zero() -> Self {
-        Offset(0.0, 0.0)
-    }
-}
+        impl From<Offset> for ($x, $y) {
+            #[inline]
+            fn from(offset: Offset) -> Self {
+                (offset.0 as $x, offset.1 as $y)
+            }
+        }
+    );
+    ($z:ty) => (
+        impl From<$z> for Offset {
+            #[inline]
+            fn from(z: $z) -> Self {
+                Offset(z as f32, z as f32)
+            }
+        }
 
-impl From<Offset> for (f32, f32) {
-    #[inline]
-    fn from(offset: Offset) -> Self {
-        (offset.0, offset.1)
-    }
-}
+        impl Div<$z> for Offset {
+            type Output = Offset;
 
-impl From<(f32, f32)> for Offset {
-    #[inline]
-    fn from((x, y): (f32, f32)) -> Self {
-        Offset(x, y)
-    }
-}
+            #[inline]
+            fn div(mut self, other: $z) -> Offset {
+                self /= other;
+                self
+            }
+        }
 
-impl Add for Offset {
+        impl DivAssign<$z> for Offset {
+            #[inline]
+            fn div_assign(&mut self, other: $z) {
+                self.0 /= other as f32;
+                self.1 /= other as f32;
+            }
+        }
+
+        impl Mul<$z> for Offset {
+            type Output = Offset;
+
+            #[inline]
+            fn mul(mut self, other: $z) -> Offset {
+                self *= other;
+                self
+            }
+        }
+
+        impl MulAssign<$z> for Offset {
+            #[inline]
+            fn mul_assign(&mut self, other: $z) {
+                self.0 *= other as f32;
+                self.1 *= other as f32;
+            }
+        }
+    );
+);
+
+implement!(f32);
+implement!(i16);
+implement!((f32, f32));
+implement!((i16, i16));
+
+impl<T> Add<T> for Offset where T: Into<Offset> {
     type Output = Offset;
 
     #[inline]
-    fn add(mut self, other: Offset) -> Offset {
-        self.0 += other.0;
-        self.1 += other.1;
+    fn add(mut self, other: T) -> Offset {
+        self += other;
         self
     }
 }
 
-impl AddAssign for Offset {
+impl<T> AddAssign<T> for Offset where T: Into<Offset> {
     #[inline]
-    fn add_assign(&mut self, other: Offset) {
-        self.0 += other.0;
-        self.1 += other.1;
-    }
-}
-
-impl Div<f32> for Offset {
-    type Output = Offset;
-
-    #[inline]
-    fn div(mut self, other: f32) -> Offset {
-        self.0 /= other;
-        self.1 /= other;
-        self
+    fn add_assign(&mut self, other: T) {
+        let Offset(x, y) = other.into();
+        self.0 += x;
+        self.1 += y;
     }
 }
 
@@ -73,11 +101,21 @@ impl Neg for Offset {
     }
 }
 
-impl Sub for Offset {
+impl<T> Sub<T> for Offset where T: Into<Offset> {
     type Output = Offset;
 
     #[inline]
-    fn sub(self, other: Offset) -> Offset {
-        self + (-other)
+    fn sub(mut self, other: T) -> Offset {
+        self -= other;
+        self
+    }
+}
+
+impl<T> SubAssign<T> for Offset where T: Into<Offset> {
+    #[inline]
+    fn sub_assign(&mut self, other: T) {
+        let Offset(x, y) = other.into();
+        self.0 -= x;
+        self.1 -= y;
     }
 }

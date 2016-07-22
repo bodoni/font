@@ -47,8 +47,8 @@ impl Deref for Glyph {
 
 impl Contour {
     #[inline]
-    fn new(offset: Offset) -> Self {
-        Contour { offset: offset, segments: vec![] }
+    fn new<T: Into<Offset>>(offset: T) -> Self {
+        Contour { offset: offset.into(), segments: vec![] }
     }
 }
 
@@ -64,10 +64,11 @@ impl Deref for Contour {
 impl Builder {
     #[inline]
     pub fn new() -> Self {
-        Builder { offset: Offset::zero(), contour: Contour::new(Offset::zero()), contours: vec![] }
+        Builder { offset: Offset::from(0.0), contour: Contour::new(0.0), contours: vec![] }
     }
 
-    pub fn move_to(&mut self, a: Offset) {
+    pub fn move_to<T: Into<Offset>>(&mut self, a: T) {
+        let a = a.into();
         self.offset += a;
         let contour = mem::replace(&mut self.contour, Contour::new(a));
         if !contour.is_empty() {
@@ -75,18 +76,21 @@ impl Builder {
         }
     }
 
-    pub fn line_to(&mut self, a: Offset) {
+    pub fn line_to<T: Into<Offset>>(&mut self, a: T) {
+        let a = a.into();
         self.offset += a;
         self.contour.segments.push(Segment::Linear(a));
     }
 
-    pub fn quadratic_curve_to(&mut self, a: Offset, b: Offset) {
+    pub fn quadratic_curve_to<T: Into<Offset>>(&mut self, a: T, b: T) {
+        let (a, b) = (a.into(), b.into());
         self.offset += a;
         self.offset += b;
         self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
-    pub fn cubic_curve_to(&mut self, a: Offset, b: Offset, c: Offset) {
+    pub fn cubic_curve_to<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
+        let (a, b, c) = (a.into(), b.into(), c.into());
         self.offset += a;
         self.offset += b;
         self.offset += c;

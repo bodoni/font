@@ -80,7 +80,7 @@ fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
     use library::Segment::*;
 
     let mut points = vec![];
-    let mut offset = Offset::zero();
+    let mut offset = Offset::from(0.0);
     for contour in glyph.iter() {
         offset += contour.offset;
         points.push(offset.into());

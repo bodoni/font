@@ -1,3 +1,4 @@
+use std::mem;
 use std::rc::Rc;
 use truetype::glyph_data::{Compound, GlyphData, Simple};
 
@@ -51,13 +52,11 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     let point_count = flags.len();
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
 
-    let mut offset = Offset::zero();
+    let mut offset = Offset::from(0.0);
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
-    macro_rules! read(($i:expr) => ({
-        let point = Offset::new(x[$i] as f32 + offset.0, y[$i] as f32 + offset.1);
-        offset = Offset::zero();
-        point
-    }));
+    macro_rules! read(($i:expr) => (
+        Offset::from((x[$i], y[$i])) + mem::replace(&mut offset, Offset::from(0.0))
+    ));
 
     let mut cursor = 0;
     for &end in end_points {
