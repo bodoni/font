@@ -131,7 +131,6 @@ impl Builder {
         if let Some(compensation) = self.compensation.take() { compensation + a } else { a.into() }
     }
 
-    #[inline]
     fn flush(&mut self) {
         if self.contour.is_empty() {
             return;
