@@ -31,10 +31,11 @@ pub enum Segment {
 }
 
 pub struct Builder {
+    start: Offset,
     position: Offset,
-    compensation: Option<Offset>,
     contour: Contour,
     contours: Vec<Contour>,
+    compensation: Option<Offset>,
 }
 
 impl Deref for Glyph {
@@ -66,10 +67,11 @@ impl Builder {
     #[inline]
     pub fn new() -> Self {
         Builder {
+            start: Offset::from(0.0),
             position: Offset::from(0.0),
-            compensation: None,
             contour: Contour::new(0.0),
             contours: vec![],
+            compensation: None,
         }
     }
 
@@ -77,6 +79,7 @@ impl Builder {
         self.flush();
         let a = self.compensate(a);
         self.position += a;
+        self.start = self.position;
         self.contour.offset = a;
     }
 
@@ -111,6 +114,11 @@ impl Builder {
             &mut Some(mut compensation) => compensation += a,
             compensation @ &mut None => *compensation = Some(a.into()),
         }
+    }
+
+    #[inline]
+    pub fn offset(&self) -> Offset {
+        self.start - self.position
     }
 
     #[inline]

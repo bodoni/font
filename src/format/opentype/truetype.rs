@@ -59,7 +59,6 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         let end = end as usize;
         expect!(end < point_count && is_on_curve!(cursor));
         builder.move_by(read!(cursor));
-        let start = builder.position();
         let mut control: Option<Offset> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
@@ -82,8 +81,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
             }
         }
         if let Some(control) = control.take() {
-            let finish = builder.position();
-            let current = start - (finish + control);
+            let current = builder.offset() - control;
             builder.quadratic_by(control, current);
             builder.compensate_by(-current);
         }
