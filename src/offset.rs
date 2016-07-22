@@ -4,6 +4,20 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Offset(pub f32, pub f32);
 
+impl Offset {
+    /// Check if the offset is zero.
+    #[inline]
+    pub fn is_zero(&self) -> bool {
+        self.0 == 0.0 && self.1 == 0.0
+    }
+
+    /// Create a zero offset.
+    #[inline]
+    pub fn zero() -> Self {
+        Offset(0.0, 0.0)
+    }
+}
+
 macro_rules! implement(
     (($x:ty, $y:ty)) => (
         impl From<($x, $y)> for Offset {

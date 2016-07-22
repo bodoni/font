@@ -67,8 +67,8 @@ impl Builder {
     #[inline]
     pub fn new() -> Self {
         Builder {
-            start: Offset::from(0.0),
-            position: Offset::from(0.0),
+            start: Offset::zero(),
+            position: Offset::zero(),
             contour: Contour::new(0.0),
             contours: vec![],
             compensation: None,
@@ -133,10 +133,14 @@ impl Builder {
 
     #[inline]
     fn flush(&mut self) {
-        let contour = mem::replace(&mut self.contour, Contour::new(0.0));
-        if !contour.is_empty() {
-            self.contours.push(contour);
+        if self.contour.is_empty() {
+            return;
         }
+        let offset = self.start - self.position;
+        if !offset.is_zero() {
+            self.linear_by(offset);
+        }
+        self.contours.push(mem::replace(&mut self.contour, Contour::new(0.0)));
     }
 }
 

@@ -112,6 +112,15 @@ fn draw_ttf_letter() {
         ( 832.5,  403.5),
         ( 879.0,  711.0),
     ]);
+    let glyph = font.case.draw('/').unwrap().unwrap();
+    assert_eq!(glyph.len(), 1);
+    assert_eq!(&trace(&glyph), &vec![
+        ( 893.0,  1462.0),
+        (  80.0,     0.0),
+        ( -94.0,     0.0),
+        ( 719.0,  1462.0),
+        ( 893.0,  1462.0),
+    ]);
 }
 
 #[test]
@@ -127,7 +136,7 @@ fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
     use library::Segment::*;
 
     let mut points = vec![];
-    let mut offset = Offset::from(0.0);
+    let mut offset = Offset::zero();
     for contour in glyph.iter() {
         offset += contour.offset;
         points.push(offset.into());
