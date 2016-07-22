@@ -58,21 +58,21 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     for &end in end_points {
         let end = end as usize;
         expect!(end < point_count && is_on_curve!(cursor));
-        builder.move_to(read!(cursor));
+        builder.move_by(read!(cursor));
         let start = builder.position();
         let mut control: Option<Offset> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
             if is_on_curve!(cursor) {
                 match control.take() {
-                    Some(control) => builder.quadratic_to(control, current),
-                    _ => builder.linear_to(current),
+                    Some(control) => builder.quadratic_by(control, current),
+                    _ => builder.linear_by(current),
                 }
             } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
                         let half = current / 2.0;
-                        builder.quadratic_to(*control, half);
+                        builder.quadratic_by(*control, half);
                         *control = half;
                     },
                     control @ &mut None => {
@@ -84,8 +84,8 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         if let Some(control) = control.take() {
             let finish = builder.position();
             let current = start - (finish + control);
-            builder.quadratic_to(control, current);
-            builder.offset_by(-current);
+            builder.quadratic_by(control, current);
+            builder.compensate_by(-current);
         }
         cursor = end + 1;
     }
@@ -99,7 +99,7 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
     for component in description.components.iter() {
         builder.move_to_origin();
         match &component.arguments {
-            &Arguments::Offsets(x, y) => builder.offset_by((x, y)),
+            &Arguments::Offsets(x, y) => builder.compensate_by((x, y)),
             &Arguments::Indices(..) => unimplemented!(),
         }
         match &component.options {

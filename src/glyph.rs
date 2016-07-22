@@ -32,7 +32,7 @@ pub enum Segment {
 
 pub struct Builder {
     position: Offset,
-    offset: Option<Offset>,
+    compensation: Option<Offset>,
     contour: Contour,
     contours: Vec<Contour>,
 }
@@ -67,49 +67,49 @@ impl Builder {
     pub fn new() -> Self {
         Builder {
             position: Offset::from(0.0),
-            offset: None,
+            compensation: None,
             contour: Contour::new(0.0),
             contours: vec![],
         }
     }
 
-    pub fn move_to<T: Into<Offset>>(&mut self, a: T) {
+    pub fn move_by<T: Into<Offset>>(&mut self, a: T) {
         self.flush();
-        let a = self.offset(a);
+        let a = self.compensate(a);
         self.position += a;
         self.contour.offset = a;
     }
 
     pub fn move_to_origin(&mut self) {
         self.flush();
-        self.offset = Some(-self.position);
+        self.compensation = Some(-self.position);
     }
 
-    pub fn linear_to<T: Into<Offset>>(&mut self, a: T) {
-        let a = self.offset(a);
+    pub fn linear_by<T: Into<Offset>>(&mut self, a: T) {
+        let a = self.compensate(a);
         self.position += a;
         self.contour.segments.push(Segment::Linear(a));
     }
 
-    pub fn quadratic_to<T: Into<Offset>>(&mut self, a: T, b: T) {
-        let (a, b) = (self.offset(a), b.into());
+    pub fn quadratic_by<T: Into<Offset>>(&mut self, a: T, b: T) {
+        let (a, b) = (self.compensate(a), b.into());
         self.position += a;
         self.position += b;
         self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
-    pub fn cubic_to<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
-        let (a, b, c) = (self.offset(a), b.into(), c.into());
+    pub fn cubic_by<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
+        let (a, b, c) = (self.compensate(a), b.into(), c.into());
         self.position += a;
         self.position += b;
         self.position += c;
         self.contour.segments.push(Segment::Cubic(a, b, c));
     }
 
-    pub fn offset_by<T: Into<Offset>>(&mut self, a: T) {
-        match &mut self.offset {
-            &mut Some(mut offset) => offset += a,
-            offset @ &mut None => *offset = Some(a.into()),
+    pub fn compensate_by<T: Into<Offset>>(&mut self, a: T) {
+        match &mut self.compensation {
+            &mut Some(mut compensation) => compensation += a,
+            compensation @ &mut None => *compensation = Some(a.into()),
         }
     }
 
@@ -119,16 +119,16 @@ impl Builder {
     }
 
     #[inline]
+    fn compensate<T: Into<Offset>>(&mut self, a: T) -> Offset {
+        if let Some(compensation) = self.compensation.take() { compensation + a } else { a.into() }
+    }
+
+    #[inline]
     fn flush(&mut self) {
         let contour = mem::replace(&mut self.contour, Contour::new(0.0));
         if !contour.is_empty() {
             self.contours.push(contour);
         }
-    }
-
-    #[inline]
-    fn offset<T: Into<Offset>>(&mut self, a: T) -> Offset {
-        if let Some(offset) = self.offset.take() { offset + a } else { a.into() }
     }
 }
 
