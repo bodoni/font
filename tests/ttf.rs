@@ -55,6 +55,13 @@ fn draw_a_ring() {
 }
 
 #[test]
+fn draw_copyright() {
+    let font = &setup(Fixture::TTF)[0];
+    let glyph = font.case.draw('©').unwrap().unwrap();
+    assert_eq!(glyph.bounding_box, (139.0, -20.0, 1642.0, 1483.0));
+}
+
+#[test]
 fn draw_from_a_to_z() {
     let font = &setup(Fixture::TTF)[0];
     for code in b'a'..(b'z' + 1) {
