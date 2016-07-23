@@ -1,36 +1,7 @@
-use library::Glyph;
-
-use {Fixture, setup};
+use {Fixture, setup, trace};
 
 #[test]
-fn draw_cff_letter() {
-    let font = &setup(Fixture::CFF)[0];
-    let glyph = font.case.draw('o').unwrap().unwrap();
-    assert_eq!(glyph.len(), 2);
-    assert_eq!(&trace(&glyph), &vec![
-        (274.0, 445.0),
-        (409.0, 236.0),
-        (274.0,  30.0),
-        (140.0, 236.0),
-        (274.0, 445.0),
-        (274.0, 491.0),
-        ( 45.0, 237.0),
-        (274.0, -15.0),
-        (504.0, 237.0),
-        (274.0, 491.0),
-    ]);
-}
-
-#[test]
-fn draw_cff_lowercase_letters() {
-    let font = &setup(Fixture::CFF)[0];
-    for code in b'a'..(b'z' + 1) {
-        font.case.draw(code as char).unwrap().unwrap();
-    }
-}
-
-#[test]
-fn draw_ttf_compound_glyph() {
+fn draw_a_ring() {
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('å').unwrap().unwrap();
     assert_eq!(glyph.len(), 4);
@@ -84,7 +55,15 @@ fn draw_ttf_compound_glyph() {
 }
 
 #[test]
-fn draw_ttf_letter() {
+fn draw_from_a_to_z() {
+    let font = &setup(Fixture::TTF)[0];
+    for code in b'a'..(b'z' + 1) {
+        font.case.draw(code as char).unwrap().unwrap();
+    }
+}
+
+#[test]
+fn draw_o() {
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
@@ -112,6 +91,11 @@ fn draw_ttf_letter() {
         ( 832.5,  403.5),
         ( 879.0,  711.0),
     ]);
+}
+
+#[test]
+fn draw_slash() {
+    let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('/').unwrap().unwrap();
     assert_eq!(glyph.len(), 1);
     assert_eq!(&trace(&glyph), &vec![
@@ -124,39 +108,10 @@ fn draw_ttf_letter() {
 }
 
 #[test]
-fn draw_ttf_lowercase_letters() {
-    let font = &setup(Fixture::TTF)[0];
-    for code in b'a'..(b'z' + 1) {
-        font.case.draw(code as char).unwrap().unwrap();
-    }
-}
-
-fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
-    use library::Offset;
-    use library::Segment::*;
-
-    let mut points = vec![];
-    let mut offset = Offset::zero();
-    for contour in glyph.iter() {
-        offset += contour.offset;
-        points.push(offset.into());
-        for segment in contour.iter() {
-            match segment {
-                &Linear(a) => {
-                    offset += a;
-                },
-                &Quadratic(a, b) => {
-                    offset += a;
-                    offset += b;
-                },
-                &Cubic(a, b, c) => {
-                    offset += a;
-                    offset += b;
-                    offset += c;
-                },
-            }
-            points.push(offset.into());
-        }
-    }
-    points
+fn open() {
+    let file = setup(Fixture::TTF);
+    let font = &file[0];
+    assert_eq!(font.units_per_em, 2048);
+    assert_eq!(font.ascender, 2189);
+    assert_eq!(font.descender, -600);
 }
