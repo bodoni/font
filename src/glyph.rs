@@ -6,6 +6,10 @@ use Offset;
 /// A glyph.
 #[derive(Clone, Debug)]
 pub struct Glyph {
+    /// The left-, bottom-, right-, topmost edges.
+    pub bounding_box: (f32, f32, f32, f32),
+    /// The left and right side bearings.
+    pub side_bearings: (f32, f32),
     /// The contours.
     pub contours: Vec<Contour>,
 }
@@ -33,9 +37,9 @@ pub enum Segment {
 pub struct Builder {
     start: Offset,
     position: Offset,
-    contour: Contour,
-    contours: Vec<Contour>,
     compensation: Option<Offset>,
+    contour: Contour,
+    glyph: Glyph,
 }
 
 impl Deref for Glyph {
@@ -69,10 +73,39 @@ impl Builder {
         Builder {
             start: Offset::zero(),
             position: Offset::zero(),
-            contour: Contour::new(0.0),
-            contours: vec![],
             compensation: None,
+            contour: Contour::new(0.0),
+            glyph: Glyph {
+                bounding_box: (0.0, 0.0, 0.0, 0.0),
+                side_bearings: (0.0, 0.0),
+                contours: vec![],
+            },
         }
+    }
+
+    pub fn bound_by(&mut self, bounding_box: (f32, f32, f32, f32)) {
+        self.glyph.bounding_box = bounding_box;
+    }
+
+    pub fn compensate_by<T: Into<Offset>>(&mut self, a: T) {
+        match &mut self.compensation {
+            &mut Some(mut compensation) => compensation += a,
+            compensation @ &mut None => *compensation = Some(a.into()),
+        }
+    }
+
+    pub fn cubic_by<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
+        let (a, b, c) = (self.compensate(a), b.into(), c.into());
+        self.position += a;
+        self.position += b;
+        self.position += c;
+        self.contour.segments.push(Segment::Cubic(a, b, c));
+    }
+
+    pub fn linear_by<T: Into<Offset>>(&mut self, a: T) {
+        let a = self.compensate(a);
+        self.position += a;
+        self.contour.segments.push(Segment::Linear(a));
     }
 
     pub fn move_by<T: Into<Offset>>(&mut self, a: T) {
@@ -88,34 +121,6 @@ impl Builder {
         self.compensation = Some(-self.position);
     }
 
-    pub fn linear_by<T: Into<Offset>>(&mut self, a: T) {
-        let a = self.compensate(a);
-        self.position += a;
-        self.contour.segments.push(Segment::Linear(a));
-    }
-
-    pub fn quadratic_by<T: Into<Offset>>(&mut self, a: T, b: T) {
-        let (a, b) = (self.compensate(a), b.into());
-        self.position += a;
-        self.position += b;
-        self.contour.segments.push(Segment::Quadratic(a, b));
-    }
-
-    pub fn cubic_by<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
-        let (a, b, c) = (self.compensate(a), b.into(), c.into());
-        self.position += a;
-        self.position += b;
-        self.position += c;
-        self.contour.segments.push(Segment::Cubic(a, b, c));
-    }
-
-    pub fn compensate_by<T: Into<Offset>>(&mut self, a: T) {
-        match &mut self.compensation {
-            &mut Some(mut compensation) => compensation += a,
-            compensation @ &mut None => *compensation = Some(a.into()),
-        }
-    }
-
     #[inline]
     pub fn offset(&self) -> Offset {
         self.start - self.position
@@ -124,6 +129,13 @@ impl Builder {
     #[inline]
     pub fn position(&self) -> Offset {
         self.position
+    }
+
+    pub fn quadratic_by<T: Into<Offset>>(&mut self, a: T, b: T) {
+        let (a, b) = (self.compensate(a), b.into());
+        self.position += a;
+        self.position += b;
+        self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
     #[inline]
@@ -139,7 +151,7 @@ impl Builder {
         if !offset.is_zero() {
             self.linear_by(offset);
         }
-        self.contours.push(mem::replace(&mut self.contour, Contour::new(0.0)));
+        self.glyph.contours.push(mem::replace(&mut self.contour, Contour::new(0.0)));
     }
 }
 
@@ -147,6 +159,6 @@ impl From<Builder> for Glyph {
     #[inline]
     fn from(mut builder: Builder) -> Glyph {
         builder.flush();
-        Glyph { contours: builder.contours }
+        builder.glyph
     }
 }

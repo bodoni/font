@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use truetype::glyph_data::{Compound, GlyphData, Simple};
+use truetype::glyph_data::{self, Compound, GlyphData, Simple};
 
 use {Offset, Result};
 use case::Case;
@@ -21,15 +21,11 @@ impl TrueType {
         TrueType { glyph_data: glyph_data, mapping: mapping }
     }
 
-    fn draw_index(&self, builder: &mut Builder, index: usize) -> Result<()> {
+    fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
         use truetype::glyph_data::Description::*;
-        match self.glyph_data.get(index) {
-            Some(&Some(ref glyph)) => match &glyph.description {
-                &Simple(ref description) => draw_simple(builder, description),
-                &Compound(ref description) => draw_compound(self, builder, description),
-            },
-            Some(&None) => return Ok(()),
-            _ => reject!(),
+        match &glyph.description {
+            &Simple(ref description) => draw_simple(builder, description),
+            &Compound(ref description) => draw_compound(self, builder, description),
         }
     }
 }
@@ -37,10 +33,18 @@ impl TrueType {
 impl Case for TrueType {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::new();
-        if let Some(index) = self.mapping.find(glyph) {
-            try!(self.draw_index(&mut builder, index));
-        } else {
-            return Ok(None);
+        let index = match self.mapping.find(glyph) {
+            Some(index) => index,
+            _ => return Ok(None),
+        };
+        let glyph = match self.glyph_data.get(index) {
+            Some(glyph) => glyph,
+            _ => reject!(),
+        };
+        if let &Some(ref glyph) = glyph {
+            builder.bound_by((glyph.min_x as f32, glyph.min_y as f32,
+                              glyph.max_x as f32, glyph.max_y as f32));
+            try!(self.draw_glyph(&mut builder, glyph));
         }
         Ok(Some(builder.into()))
     }
@@ -107,7 +111,16 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
             &Options::Vector(..) => unimplemented!(),
             &Options::Matrix(..) => unimplemented!(),
         }
-        try!(case.draw_index(builder, component.index as usize));
+        let glyph = match case.glyph_data.get(component.index as usize) {
+            Some(&Some(ref glyph)) => glyph,
+            Some(&None) => continue,
+            _ => reject!(),
+        };
+        if component.flags.should_use_metrics() {
+            builder.bound_by((glyph.min_x as f32, glyph.min_y as f32,
+                              glyph.max_x as f32, glyph.max_y as f32));
+        }
+        try!(case.draw_glyph(builder, glyph));
     }
     Ok(())
 }
