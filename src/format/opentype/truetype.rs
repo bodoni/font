@@ -5,6 +5,7 @@ use {Offset, Result};
 use case::Case;
 use glyph::{Builder, Glyph};
 use super::mapping::Mapping;
+use super::metrics::Metrics;
 
 pub struct TrueType {
     glyph_data: Rc<GlyphData>,
@@ -16,7 +17,7 @@ macro_rules! reject(() => (raise!("found a malformed glyph")));
 
 impl TrueType {
     #[inline]
-    pub fn new(glyph_data: Rc<GlyphData>, mapping: Rc<Mapping>) -> Self {
+    pub fn new(glyph_data: Rc<GlyphData>, _: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
         TrueType { glyph_data: glyph_data, mapping: mapping }
     }
 

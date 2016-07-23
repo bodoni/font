@@ -6,6 +6,7 @@ use Result;
 use case::Case;
 use glyph::{Builder, Glyph};
 use super::mapping::Mapping;
+use super::metrics::Metrics;
 
 pub struct PostScript {
     id: usize,
@@ -15,7 +16,7 @@ pub struct PostScript {
 
 impl PostScript {
     #[inline]
-    pub fn new(id: usize, font_set: Rc<FontSet>, mapping: Rc<Mapping>) -> Self {
+    pub fn new(id: usize, font_set: Rc<FontSet>, _: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
         PostScript { id: id, font_set: font_set, mapping: mapping }
     }
 }
