@@ -6,7 +6,7 @@ use Offset;
 /// A glyph.
 #[derive(Clone, Debug)]
 pub struct Glyph {
-    /// The left-, bottom-, right-, and topmost edges.
+    /// The left, bottom, right, and top edges.
     pub bounding_box: (f32, f32, f32, f32),
     /// The left and right side bearings.
     pub side_bearings: (f32, f32),
