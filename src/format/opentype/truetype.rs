@@ -21,11 +21,11 @@ impl TrueType {
         TrueType { glyph_data: glyph_data, mapping: mapping }
     }
 
-    fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
+    fn add_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
         use truetype::glyph_data::Description::*;
         match &glyph.description {
-            &Simple(ref description) => draw_simple(builder, description),
-            &Compound(ref description) => draw_compound(self, builder, description),
+            &Simple(ref description) => add_simple(builder, description),
+            &Compound(ref description) => add_compound(self, builder, description),
         }
     }
 }
@@ -42,15 +42,17 @@ impl Case for TrueType {
             _ => reject!(),
         };
         if let &Some(ref glyph) = glyph {
-            builder.bound_by((glyph.min_x as f32, glyph.min_y as f32,
-                              glyph.max_x as f32, glyph.max_y as f32));
-            try!(self.draw_glyph(&mut builder, glyph));
+            builder.set_max_x(glyph.max_x as f32);
+            builder.set_max_y(glyph.max_y as f32);
+            builder.set_min_x(glyph.min_x as f32);
+            builder.set_min_y(glyph.min_y as f32);
+            try!(self.add_glyph(&mut builder, glyph));
         }
         Ok(Some(builder.into()))
     }
 }
 
-fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
+fn add_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     let &Simple { ref end_points, ref flags, ref x, ref y, .. } = description;
 
     let point_count = flags.len();
@@ -69,14 +71,14 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
             let current = read!(cursor);
             if is_on_curve!(cursor) {
                 match control.take() {
-                    Some(control) => builder.quadratic_by(control, current),
-                    _ => builder.linear_by(current),
+                    Some(control) => builder.add_quadratic(control, current),
+                    _ => builder.add_linear(current),
                 }
             } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
                         let half = current / 2.0;
-                        builder.quadratic_by(*control, half);
+                        builder.add_quadratic(*control, half);
                         *control = half;
                     },
                     control @ &mut None => {
@@ -87,7 +89,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         }
         if let Some(control) = control.take() {
             let current = builder.offset() - control;
-            builder.quadratic_by(control, current);
+            builder.add_quadratic(control, current);
             builder.compensate_by(-current);
         }
         cursor = end + 1;
@@ -96,7 +98,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     Ok(())
 }
 
-fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
+fn add_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
@@ -117,10 +119,12 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
             _ => reject!(),
         };
         if component.flags.should_use_metrics() {
-            builder.bound_by((glyph.min_x as f32, glyph.min_y as f32,
-                              glyph.max_x as f32, glyph.max_y as f32));
+            builder.set_max_x(glyph.max_x as f32);
+            builder.set_max_y(glyph.max_y as f32);
+            builder.set_min_x(glyph.min_x as f32);
+            builder.set_min_y(glyph.min_y as f32);
         }
-        try!(case.draw_glyph(builder, glyph));
+        try!(case.add_glyph(builder, glyph));
     }
     Ok(())
 }

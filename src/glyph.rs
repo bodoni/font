@@ -83,18 +83,7 @@ impl Builder {
         }
     }
 
-    pub fn bound_by(&mut self, bounding_box: (f32, f32, f32, f32)) {
-        self.glyph.bounding_box = bounding_box;
-    }
-
-    pub fn compensate_by<T: Into<Offset>>(&mut self, a: T) {
-        match &mut self.compensation {
-            &mut Some(mut compensation) => compensation += a,
-            compensation @ &mut None => *compensation = Some(a.into()),
-        }
-    }
-
-    pub fn cubic_by<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
+    pub fn add_cubic<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
         let (a, b, c) = (self.compensate(a), b.into(), c.into());
         self.position += a;
         self.position += b;
@@ -102,10 +91,24 @@ impl Builder {
         self.contour.segments.push(Segment::Cubic(a, b, c));
     }
 
-    pub fn linear_by<T: Into<Offset>>(&mut self, a: T) {
+    pub fn add_linear<T: Into<Offset>>(&mut self, a: T) {
         let a = self.compensate(a);
         self.position += a;
         self.contour.segments.push(Segment::Linear(a));
+    }
+
+    pub fn add_quadratic<T: Into<Offset>>(&mut self, a: T, b: T) {
+        let (a, b) = (self.compensate(a), b.into());
+        self.position += a;
+        self.position += b;
+        self.contour.segments.push(Segment::Quadratic(a, b));
+    }
+
+    pub fn compensate_by<T: Into<Offset>>(&mut self, a: T) {
+        match &mut self.compensation {
+            &mut Some(mut compensation) => compensation += a,
+            compensation @ &mut None => *compensation = Some(a.into()),
+        }
     }
 
     pub fn move_by<T: Into<Offset>>(&mut self, a: T) {
@@ -131,11 +134,32 @@ impl Builder {
         self.position
     }
 
-    pub fn quadratic_by<T: Into<Offset>>(&mut self, a: T, b: T) {
-        let (a, b) = (self.compensate(a), b.into());
-        self.position += a;
-        self.position += b;
-        self.contour.segments.push(Segment::Quadratic(a, b));
+    pub fn set_left_side_bearing(&mut self, value: f32) {
+        self.glyph.side_bearings.0 = value;
+    }
+
+    pub fn set_right_side_bearing(&mut self, value: f32) {
+        self.glyph.side_bearings.1 = value;
+    }
+
+    #[inline]
+    pub fn set_min_x(&mut self, value: f32) {
+        self.glyph.bounding_box.0 = value;
+    }
+
+    #[inline]
+    pub fn set_min_y(&mut self, value: f32) {
+        self.glyph.bounding_box.1 = value;
+    }
+
+    #[inline]
+    pub fn set_max_x(&mut self, value: f32) {
+        self.glyph.bounding_box.2 = value;
+    }
+
+    #[inline]
+    pub fn set_max_y(&mut self, value: f32) {
+        self.glyph.bounding_box.3 = value;
     }
 
     #[inline]
@@ -149,7 +173,7 @@ impl Builder {
         }
         let offset = self.start - self.position;
         if !offset.is_zero() {
-            self.linear_by(offset);
+            self.add_linear(offset);
         }
         self.glyph.contours.push(mem::replace(&mut self.contour, Contour::new(0.0)));
     }
