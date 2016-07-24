@@ -34,7 +34,7 @@ impl Builder {
             return;
         }
         let offset = self.start - self.position;
-        if offset != Offset::zero() {
+        if offset != Offset::default() {
             self.add_linear(offset);
         }
         self.glyph.contours.push(mem::replace(&mut self.contour, Default::default()));

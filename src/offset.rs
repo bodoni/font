@@ -6,14 +6,6 @@ use Number;
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Offset(pub Number, pub Number);
 
-impl Offset {
-    /// Create a zero offset.
-    #[inline]
-    pub fn zero() -> Self {
-        Offset(0.0, 0.0)
-    }
-}
-
 impl From<Offset> for (Number, Number) {
     #[inline]
     fn from(offset: Offset) -> Self {
