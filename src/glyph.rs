@@ -3,7 +3,7 @@ use std::ops::Deref;
 use {Number, Offset};
 
 /// A glyph.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Glyph {
     /// The left, bottom, right, and top edges.
     pub bounding_box: (Number, Number, Number, Number),
@@ -31,6 +31,14 @@ pub enum Segment {
     Quadratic(Offset, Offset),
     /// A cubic Bézier curve.
     Cubic(Offset, Offset, Offset),
+}
+
+impl Default for Glyph {
+    #[inline]
+    fn default() -> Self {
+        use std::f32::NAN;
+        Glyph { bounding_box: (NAN, NAN, NAN, NAN), side_bearings: (NAN, NAN), contours: vec![] }
+    }
 }
 
 impl Deref for Glyph {

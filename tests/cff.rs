@@ -28,6 +28,14 @@ fn draw_o() {
 }
 
 #[test]
+fn draw_r() {
+    let font = &setup(Fixture::CFF)[0];
+    let glyph = font.case.draw('r').unwrap().unwrap();
+    assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
+    assert_eq!(glyph.side_bearings, (34.0, 11.0));
+}
+
+#[test]
 fn open() {
     let file = setup(Fixture::CFF);
     let font = &file[0];

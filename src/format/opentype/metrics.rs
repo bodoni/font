@@ -1,17 +1,23 @@
 use std::ops::Deref;
 use truetype::{HorizontalHeader, HorizontalMetrics};
 
-use Result;
+use {Number, Result};
 
 pub struct Metrics {
     header: HorizontalHeader,
-    #[allow(dead_code)]
     metrics: HorizontalMetrics,
 }
 
 impl Metrics {
+    #[inline]
     pub fn new(header: HorizontalHeader, metrics: HorizontalMetrics) -> Result<Self> {
         Ok(Metrics { header: header, metrics: metrics })
+    }
+
+    #[inline]
+    pub fn get(&self, index: usize) -> (Number, Number) {
+        let metrics = self.metrics.get(index);
+        (Number::from(metrics.0), Number::from(metrics.1))
     }
 }
 

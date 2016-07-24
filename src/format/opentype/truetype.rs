@@ -10,6 +10,7 @@ use super::metrics::Metrics;
 
 pub struct TrueType {
     glyph_data: Rc<GlyphData>,
+    metrics: Rc<Metrics>,
     mapping: Rc<Mapping>,
 }
 
@@ -18,8 +19,8 @@ macro_rules! reject(() => (raise!("found a malformed glyph")));
 
 impl TrueType {
     #[inline]
-    pub fn new(glyph_data: Rc<GlyphData>, _: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
-        TrueType { glyph_data: glyph_data, mapping: mapping }
+    pub fn new(glyph_data: Rc<GlyphData>, metrics: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
+        TrueType { glyph_data: glyph_data, metrics: metrics, mapping: mapping }
     }
 
     fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
@@ -42,12 +43,12 @@ impl Case for TrueType {
             Some(glyph) => glyph,
             _ => reject!(),
         };
+        let (advanced_width, left_side_bearing) = self.metrics.get(index);
+        builder.set_advance_width(advanced_width);
+        builder.set_left_side_bearing(left_side_bearing);
         if let &Some(ref glyph) = glyph {
-            builder.set_max_x(glyph.max_x);
-            builder.set_max_y(glyph.max_y);
-            builder.set_min_x(glyph.min_x);
-            builder.set_min_y(glyph.min_y);
             try!(self.draw_glyph(&mut builder, glyph));
+            builder.set_bounding_box(glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y);
         }
         Ok(Some(builder.into()))
     }
@@ -66,7 +67,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     for &end in end_points {
         let end = end as usize;
         expect!(end < point_count && is_on_curve!(cursor));
-        builder.move_by(read!(cursor));
+        builder.jump(read!(cursor));
         let mut control: Option<Offset> = None;
         for cursor in (cursor + 1)..(end + 1) {
             let current = read!(cursor);
@@ -91,7 +92,7 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         if let Some(control) = control.take() {
             let current = builder.offset() - control;
             builder.add_quadratic(control, current);
-            builder.compensate_by(-current);
+            builder.add_compensation(-current);
         }
         cursor = end + 1;
     }
@@ -103,9 +104,10 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
-        builder.move_to_origin();
+        let index = component.index as usize;
+        builder.restart();
         match &component.arguments {
-            &Arguments::Offsets(x, y) => builder.compensate_by((x, y)),
+            &Arguments::Offsets(x, y) => builder.add_compensation((x, y)),
             &Arguments::Indices(..) => unimplemented!(),
         }
         match &component.options {
@@ -114,16 +116,15 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
             &Options::Vector(..) => unimplemented!(),
             &Options::Matrix(..) => unimplemented!(),
         }
-        let glyph = match case.glyph_data.get(component.index as usize) {
+        let glyph = match case.glyph_data.get(index) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
             _ => reject!(),
         };
         if component.flags.should_use_metrics() {
-            builder.set_max_x(glyph.max_x);
-            builder.set_max_y(glyph.max_y);
-            builder.set_min_x(glyph.min_x);
-            builder.set_min_y(glyph.min_y);
+            let (advanced_width, left_side_bearing) = case.metrics.get(index);
+            builder.set_advance_width(advanced_width);
+            builder.set_left_side_bearing(left_side_bearing);
         }
         try!(case.draw_glyph(builder, glyph));
     }

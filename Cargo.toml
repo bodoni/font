@@ -11,7 +11,7 @@ repository = "https://github.com/bodoni/font"
 [dependencies]
 opentype = "0.13"
 postscript = "0.7"
-truetype = "0.10"
+truetype = "0.10.3"
 
 [[test]]
 name = "font"

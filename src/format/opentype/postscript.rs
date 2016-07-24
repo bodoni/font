@@ -12,13 +12,16 @@ use super::metrics::Metrics;
 pub struct PostScript {
     id: usize,
     font_set: Rc<FontSet>,
+    metrics: Rc<Metrics>,
     mapping: Rc<Mapping>,
 }
 
 impl PostScript {
     #[inline]
-    pub fn new(id: usize, font_set: Rc<FontSet>, _: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
-        PostScript { id: id, font_set: font_set, mapping: mapping }
+    pub fn new(id: usize, font_set: Rc<FontSet>, metrics: Rc<Metrics>, mapping: Rc<Mapping>)
+               -> Self {
+
+        PostScript { id: id, font_set: font_set, metrics: metrics, mapping: mapping }
     }
 }
 
@@ -29,18 +32,22 @@ impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         use postscript::type2::operation::Operator::*;
 
-        let mut program = match self.mapping.find(glyph) {
-            Some(id) => match self.font_set.char_strings[self.id].get(id) {
-                Some(char_string) => {
-                    Program::new(char_string, &self.font_set.global_subroutines,
-                                 &self.font_set.local_subroutines[self.id])
-                },
-                _ => reject!(),
-            },
+        let mut builder = Builder::new();
+
+        let index = match self.mapping.find(glyph) {
+            Some(index) => index,
             _ => return Ok(None),
         };
 
-        let mut builder = Builder::new();
+        let (advanced_width, left_side_bearing) = self.metrics.get(index);
+        builder.set_advance_width(advanced_width);
+        builder.set_left_side_bearing(left_side_bearing);
+
+        let mut program = match self.font_set.char_strings[self.id].get(index) {
+            Some(char_string) => Program::new(char_string, &self.font_set.global_subroutines,
+                                              &self.font_set.local_subroutines[self.id]),
+            _ => reject!(),
+        };
 
         let mut clear = false;
         while let Some((operator, operands)) = try!(program.next()) {
@@ -49,15 +56,15 @@ impl Case for PostScript {
             match operator {
                 RMoveTo => {
                     expect!(count == 2 || !clear && count == 3);
-                    builder.move_by((get!(0), get!(1)));
+                    builder.jump((get!(0), get!(1)));
                 },
                 HMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.move_by((get!(0), 0.0));
+                    builder.jump((get!(0), 0.0));
                 },
                 VMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.move_by((0.0, get!(0)));
+                    builder.jump((0.0, get!(0)));
                 },
                 RLineTo => {
                     expect!(count % 2 == 0);
