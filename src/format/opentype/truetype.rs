@@ -2,8 +2,9 @@ use std::rc::Rc;
 use truetype::glyph_data::{self, Compound, GlyphData, Simple};
 
 use {Offset, Result};
+use builder::Builder;
 use case::Case;
-use glyph::{Builder, Glyph};
+use glyph::Glyph;
 use super::mapping::Mapping;
 use super::metrics::Metrics;
 

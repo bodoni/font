@@ -3,8 +3,9 @@ use postscript::type2::Program;
 use std::rc::Rc;
 
 use Result;
+use builder::Builder;
 use case::Case;
-use glyph::{Builder, Glyph};
+use glyph::Glyph;
 use super::mapping::Mapping;
 use super::metrics::Metrics;
 
