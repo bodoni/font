@@ -16,8 +16,8 @@ impl Metrics {
 
     #[inline]
     pub fn get(&self, index: usize) -> (Number, Number) {
-        let metrics = self.metrics.get(index);
-        (Number::from(metrics.0), Number::from(metrics.1))
+        let (advance_width, left_side_bearing) = self.metrics.get(index);
+        (Number::from(advance_width), Number::from(left_side_bearing))
     }
 }
 
