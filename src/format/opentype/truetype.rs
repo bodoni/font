@@ -22,11 +22,11 @@ impl TrueType {
         TrueType { glyph_data: glyph_data, mapping: mapping }
     }
 
-    fn add_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
+    fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
         use truetype::glyph_data::Description::*;
         match &glyph.description {
-            &Simple(ref description) => add_simple(builder, description),
-            &Compound(ref description) => add_compound(self, builder, description),
+            &Simple(ref description) => draw_simple(builder, description),
+            &Compound(ref description) => draw_compound(self, builder, description),
         }
     }
 }
@@ -47,13 +47,13 @@ impl Case for TrueType {
             builder.set_max_y(glyph.max_y);
             builder.set_min_x(glyph.min_x);
             builder.set_min_y(glyph.min_y);
-            try!(self.add_glyph(&mut builder, glyph));
+            try!(self.draw_glyph(&mut builder, glyph));
         }
         Ok(Some(builder.into()))
     }
 }
 
-fn add_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
+fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     let &Simple { ref end_points, ref flags, ref x, ref y, .. } = description;
 
     let point_count = flags.len();
@@ -99,7 +99,7 @@ fn add_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
     Ok(())
 }
 
-fn add_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
+fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
@@ -125,7 +125,7 @@ fn add_compound(case: &TrueType, builder: &mut Builder, description: &Compound) 
             builder.set_min_x(glyph.min_x);
             builder.set_min_y(glyph.min_y);
         }
-        try!(case.add_glyph(builder, glyph));
+        try!(case.draw_glyph(builder, glyph));
     }
     Ok(())
 }
