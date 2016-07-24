@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.0.14"
+version = "0.0.13"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a font toolbox."
