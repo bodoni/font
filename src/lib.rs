@@ -32,11 +32,11 @@ extern crate truetype;
 /// An error.
 pub type Error = std::io::Error;
 
-/// A result.
-pub type Result<T> = std::io::Result<T>;
-
 /// A number.
 pub type Number = f32;
+
+/// A result.
+pub type Result<T> = std::io::Result<T>;
 
 macro_rules! raise(
     ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
