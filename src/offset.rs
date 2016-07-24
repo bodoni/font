@@ -1,20 +1,23 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+use Number;
+
 /// An offset.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Offset(pub f32, pub f32);
+pub struct Offset(pub Number, pub Number);
 
 impl Offset {
-    /// Check if the offset is zero.
-    #[inline]
-    pub fn is_zero(&self) -> bool {
-        self.0 == 0.0 && self.1 == 0.0
-    }
-
     /// Create a zero offset.
     #[inline]
     pub fn zero() -> Self {
         Offset(0.0, 0.0)
+    }
+}
+
+impl From<Offset> for (Number, Number) {
+    #[inline]
+    fn from(offset: Offset) -> Self {
+        (offset.0, offset.1)
     }
 }
 
@@ -23,14 +26,7 @@ macro_rules! implement(
         impl From<($x, $y)> for Offset {
             #[inline]
             fn from((x, y): ($x, $y)) -> Self {
-                Offset(x as f32, y as f32)
-            }
-        }
-
-        impl From<Offset> for ($x, $y) {
-            #[inline]
-            fn from(offset: Offset) -> Self {
-                (offset.0 as $x, offset.1 as $y)
+                Offset(Number::from(x), Number::from(y))
             }
         }
     );
@@ -38,7 +34,7 @@ macro_rules! implement(
         impl From<$z> for Offset {
             #[inline]
             fn from(z: $z) -> Self {
-                Offset(z as f32, z as f32)
+                Offset(Number::from(z), Number::from(z))
             }
         }
 
@@ -55,8 +51,8 @@ macro_rules! implement(
         impl DivAssign<$z> for Offset {
             #[inline]
             fn div_assign(&mut self, other: $z) {
-                self.0 /= other as f32;
-                self.1 /= other as f32;
+                self.0 /= Number::from(other);
+                self.1 /= Number::from(other);
             }
         }
 
@@ -73,8 +69,8 @@ macro_rules! implement(
         impl MulAssign<$z> for Offset {
             #[inline]
             fn mul_assign(&mut self, other: $z) {
-                self.0 *= other as f32;
-                self.1 *= other as f32;
+                self.0 *= Number::from(other);
+                self.1 *= Number::from(other);
             }
         }
     );

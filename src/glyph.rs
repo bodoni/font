@@ -1,15 +1,15 @@
 use std::mem;
 use std::ops::Deref;
 
-use Offset;
+use {Number, Offset};
 
 /// A glyph.
 #[derive(Clone, Debug)]
 pub struct Glyph {
     /// The left, bottom, right, and top edges.
-    pub bounding_box: (f32, f32, f32, f32),
+    pub bounding_box: (Number, Number, Number, Number),
     /// The left and right side bearings.
-    pub side_bearings: (f32, f32),
+    pub side_bearings: (Number, Number),
     /// The contours.
     pub contours: Vec<Contour>,
 }
@@ -104,19 +104,19 @@ impl Builder {
         self.contour.segments.push(Segment::Quadratic(a, b));
     }
 
-    pub fn compensate_by<T: Into<Offset>>(&mut self, a: T) {
+    pub fn compensate_by<T: Into<Offset>>(&mut self, value: T) {
         match &mut self.compensation {
-            &mut Some(mut compensation) => compensation += a,
-            compensation @ &mut None => *compensation = Some(a.into()),
+            &mut Some(mut compensation) => compensation += value,
+            compensation @ &mut None => *compensation = Some(value.into()),
         }
     }
 
-    pub fn move_by<T: Into<Offset>>(&mut self, a: T) {
+    pub fn move_by<T: Into<Offset>>(&mut self, value: T) {
         self.flush();
-        let a = self.compensate(a);
-        self.position += a;
+        let value = self.compensate(value);
+        self.position += value;
         self.start = self.position;
-        self.contour.offset = a;
+        self.contour.offset = value;
     }
 
     pub fn move_to_origin(&mut self) {
@@ -134,37 +134,41 @@ impl Builder {
         self.position
     }
 
-    pub fn set_left_side_bearing(&mut self, value: f32) {
-        self.glyph.side_bearings.0 = value;
+    pub fn set_left_side_bearing<T: Into<Number>>(&mut self, value: T) {
+        self.glyph.side_bearings.0 = value.into();
     }
 
-    pub fn set_right_side_bearing(&mut self, value: f32) {
-        self.glyph.side_bearings.1 = value;
-    }
-
-    #[inline]
-    pub fn set_min_x(&mut self, value: f32) {
-        self.glyph.bounding_box.0 = value;
+    pub fn set_right_side_bearing<T: Into<Number>>(&mut self, value: T) {
+        self.glyph.side_bearings.1 = value.into();
     }
 
     #[inline]
-    pub fn set_min_y(&mut self, value: f32) {
-        self.glyph.bounding_box.1 = value;
+    pub fn set_min_x<T: Into<Number>>(&mut self, value: T) {
+        self.glyph.bounding_box.0 = value.into();
     }
 
     #[inline]
-    pub fn set_max_x(&mut self, value: f32) {
-        self.glyph.bounding_box.2 = value;
+    pub fn set_min_y<T: Into<Number>>(&mut self, value: T) {
+        self.glyph.bounding_box.1 = value.into();
     }
 
     #[inline]
-    pub fn set_max_y(&mut self, value: f32) {
-        self.glyph.bounding_box.3 = value;
+    pub fn set_max_x<T: Into<Number>>(&mut self, value: T) {
+        self.glyph.bounding_box.2 = value.into();
     }
 
     #[inline]
-    fn compensate<T: Into<Offset>>(&mut self, a: T) -> Offset {
-        if let Some(compensation) = self.compensation.take() { compensation + a } else { a.into() }
+    pub fn set_max_y<T: Into<Number>>(&mut self, value: T) {
+        self.glyph.bounding_box.3 = value.into();
+    }
+
+    #[inline]
+    fn compensate<T: Into<Offset>>(&mut self, value: T) -> Offset {
+        if let Some(compensation) = self.compensation.take() {
+            compensation + value
+        } else {
+            value.into()
+        }
     }
 
     fn flush(&mut self) {
@@ -172,7 +176,7 @@ impl Builder {
             return;
         }
         let offset = self.start - self.position;
-        if !offset.is_zero() {
+        if offset != Offset::zero() {
             self.add_linear(offset);
         }
         self.glyph.contours.push(mem::replace(&mut self.contour, Contour::new(0.0)));

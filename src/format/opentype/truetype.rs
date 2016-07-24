@@ -42,10 +42,10 @@ impl Case for TrueType {
             _ => reject!(),
         };
         if let &Some(ref glyph) = glyph {
-            builder.set_max_x(glyph.max_x as f32);
-            builder.set_max_y(glyph.max_y as f32);
-            builder.set_min_x(glyph.min_x as f32);
-            builder.set_min_y(glyph.min_y as f32);
+            builder.set_max_x(glyph.max_x);
+            builder.set_max_y(glyph.max_y);
+            builder.set_min_x(glyph.min_x);
+            builder.set_min_y(glyph.min_y);
             try!(self.add_glyph(&mut builder, glyph));
         }
         Ok(Some(builder.into()))
@@ -119,10 +119,10 @@ fn add_compound(case: &TrueType, builder: &mut Builder, description: &Compound) 
             _ => reject!(),
         };
         if component.flags.should_use_metrics() {
-            builder.set_max_x(glyph.max_x as f32);
-            builder.set_max_y(glyph.max_y as f32);
-            builder.set_min_x(glyph.min_x as f32);
-            builder.set_min_y(glyph.min_y as f32);
+            builder.set_max_x(glyph.max_x);
+            builder.set_max_y(glyph.max_y);
+            builder.set_min_x(glyph.min_x);
+            builder.set_min_y(glyph.min_y);
         }
         try!(case.add_glyph(builder, glyph));
     }
