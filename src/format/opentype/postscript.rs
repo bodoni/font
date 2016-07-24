@@ -32,22 +32,19 @@ impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         use postscript::type2::operation::Operator::*;
 
-        let mut builder = Builder::new();
-
         let index = match self.mapping.find(glyph) {
             Some(index) => index,
             _ => return Ok(None),
         };
-
-        let (advanced_width, left_side_bearing) = self.metrics.get(index);
-        builder.set_advance_width(advanced_width);
-        builder.set_left_side_bearing(left_side_bearing);
 
         let mut program = match self.font_set.char_strings[self.id].get(index) {
             Some(char_string) => Program::new(char_string, &self.font_set.global_subroutines,
                                               &self.font_set.local_subroutines[self.id]),
             _ => reject!(),
         };
+
+        let mut builder = Builder::new();
+        builder.set_horizontal_metrics(self.metrics.get(index));
 
         let mut clear = false;
         while let Some((operator, operands)) = try!(program.next()) {

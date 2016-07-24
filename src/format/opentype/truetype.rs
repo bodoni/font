@@ -43,9 +43,7 @@ impl Case for TrueType {
             Some(glyph) => glyph,
             _ => reject!(),
         };
-        let (advanced_width, left_side_bearing) = self.metrics.get(index);
-        builder.set_advance_width(advanced_width);
-        builder.set_left_side_bearing(left_side_bearing);
+        builder.set_horizontal_metrics(self.metrics.get(index));
         if let &Some(ref glyph) = glyph {
             try!(self.draw_glyph(&mut builder, glyph));
             builder.set_bounding_box(glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y);
@@ -122,9 +120,7 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
             _ => reject!(),
         };
         if component.flags.should_use_metrics() {
-            let (advanced_width, left_side_bearing) = case.metrics.get(index);
-            builder.set_advance_width(advanced_width);
-            builder.set_left_side_bearing(left_side_bearing);
+            builder.set_horizontal_metrics(case.metrics.get(index));
         }
         try!(case.draw_glyph(builder, glyph));
     }

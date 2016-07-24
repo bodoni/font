@@ -99,18 +99,14 @@ impl Builder {
 
 impl Builder {
     #[inline]
-    pub fn set_advance_width<T: Into<Number>>(&mut self, value: T) {
-        self.advance_width = value.into();
-    }
-
-    #[inline]
     pub fn set_bounding_box<T: Into<Number>>(&mut self, min_x: T, min_y: T, max_x: T, max_y: T) {
         self.glyph.bounding_box = (min_x.into(), min_y.into(), max_x.into(), max_y.into());
     }
 
     #[inline]
-    pub fn set_left_side_bearing<T: Into<Number>>(&mut self, value: T) {
-        self.glyph.side_bearings.0 = value.into();
+    pub fn set_horizontal_metrics(&mut self, metrics: (Number, Number)) {
+        self.advance_width = metrics.0;
+        self.glyph.side_bearings.0 = metrics.1;
     }
 
     #[inline]
