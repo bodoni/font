@@ -1,3 +1,4 @@
+use std::io::{Read, Seek};
 use std::ops::Deref;
 use std::path::Path;
 
@@ -13,22 +14,15 @@ pub struct File {
 
 impl File {
     /// Open a file.
+    #[inline]
     pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
-        let extension = path.as_ref()
-                            .extension()
-                            .and_then(|e| e.to_str())
-                            .map(|e| e.to_lowercase());
-        let extension = some!(extension, "unable to detect the file format");
-        match &*extension {
-            "otc" | "otf" | "ttc" | "ttf" => File::open_opentype(path),
-            _ => raise!("encountered an unknown file format"),
-        }
+        File::read(&mut try!(::std::fs::File::open(path)))
     }
 
-    /// Open an OpenType file.
+    /// Read a file.
     #[inline]
-    pub fn open_opentype<T: AsRef<Path>>(path: T) -> Result<Self> {
-        Ok(File { fonts: try!(opentype::open(path)) })
+    pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Self> {
+        Ok(File { fonts: try!(opentype::read(tape)) })
     }
 }
 

@@ -1,5 +1,5 @@
 use opentype;
-use std::path::Path;
+use std::io::{Read, Seek};
 use std::rc::Rc;
 
 use {Font, Result};
@@ -14,8 +14,8 @@ use self::metrics::Metrics;
 use self::postscript::PostScript;
 use self::truetype::TrueType;
 
-pub fn open<T: AsRef<Path>>(path: T) -> Result<Vec<Font>> {
-    let file = try!(opentype::File::open(path));
+pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Vec<Font>> {
+    let file = try!(opentype::File::read(tape));
     let mut fonts = vec![];
     for mut font in file.fonts {
         let font_header = some!(font.font_header.as_ref(),
