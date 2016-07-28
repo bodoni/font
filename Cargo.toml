@@ -13,6 +13,9 @@ opentype = "0.13"
 postscript = "0.7"
 truetype = "0.10.3"
 
+[dev-dependencies]
+svg = "0.5"
+
 [[test]]
 name = "font"
 path = "tests/lib.rs"
