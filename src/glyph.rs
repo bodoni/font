@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use {Number, Offset};
 
 /// A glyph.
@@ -33,6 +31,26 @@ pub enum Segment {
     Cubic(Offset, Offset, Offset),
 }
 
+impl Glyph {
+    /// Return the width including the side bearings.
+    #[inline]
+    pub fn advance_width(&self) -> Number {
+        self.side_bearings.0 + self.width() + self.side_bearings.1
+    }
+
+    /// Return the height.
+    #[inline]
+    pub fn height(&self) -> Number {
+        self.bounding_box.3 - self.bounding_box.1
+    }
+
+    /// Return the width.
+    #[inline]
+    pub fn width(&self) -> Number {
+        self.bounding_box.2 - self.bounding_box.0
+    }
+}
+
 impl Default for Glyph {
     #[inline]
     fn default() -> Self {
@@ -41,20 +59,6 @@ impl Default for Glyph {
     }
 }
 
-impl Deref for Glyph {
-    type Target = [Contour];
+deref! { Glyph::contours => [Contour] }
 
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.contours
-    }
-}
-
-impl Deref for Contour {
-    type Target = [Segment];
-
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.segments
-    }
-}
+deref! { Contour::segments => [Segment] }

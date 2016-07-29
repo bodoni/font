@@ -1,5 +1,4 @@
 use std::io::{Read, Seek};
-use std::ops::Deref;
 use std::path::Path;
 
 use Result;
@@ -26,11 +25,4 @@ impl File {
     }
 }
 
-impl Deref for File {
-    type Target = [Font];
-
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.fonts
-    }
-}
+deref! { File::fonts => [Font] }
