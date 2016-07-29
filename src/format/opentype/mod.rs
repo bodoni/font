@@ -2,7 +2,7 @@ use opentype;
 use std::io::{Read, Seek};
 use std::rc::Rc;
 
-use {Font, Result};
+use {Font, Number, Result};
 
 mod mapping;
 mod metrics;
@@ -33,8 +33,8 @@ pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Vec<Font>> {
             for id in 0..font_set.char_strings.len() {
                 fonts.push(Font {
                     units_per_em: font_header.units_per_em as usize,
-                    ascender: metrics.ascender as isize,
-                    descender: metrics.descender as isize,
+                    ascender: Number::from(metrics.ascender),
+                    descender: Number::from(metrics.descender),
                     case: Box::new(PostScript::new(id, font_set.clone(), metrics.clone(),
                                                    mapping.clone())),
                 });
@@ -45,8 +45,8 @@ pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Vec<Font>> {
             let glyph_data = Rc::new(glyph_data);
             fonts.push(Font {
                 units_per_em: font_header.units_per_em as usize,
-                ascender: metrics.ascender as isize,
-                descender: metrics.descender as isize,
+                ascender: Number::from(metrics.ascender),
+                descender: Number::from(metrics.descender),
                 case: Box::new(TrueType::new(glyph_data.clone(), metrics.clone(),
                                              mapping.clone())),
             });
