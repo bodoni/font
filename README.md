@@ -24,6 +24,12 @@ for contour in font.draw('&').unwrap().unwrap().iter() {
 }
 ```
 
+<div align="center">
+  <a href="https://github.com/bodoni/font/blob/master/examples/glyph.svg">
+    <img src="https://cdn.rawgit.com/bodoni/font/master/examples/glyph.svg">
+  </a>
+</div>
+
 ## Contribution
 
 Your contribution is highly appreciated. Do not hesitate to open an issue or a
