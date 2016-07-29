@@ -1,15 +1,33 @@
 extern crate font;
 extern crate svg;
 
-use font::{File, Offset, Segment};
-use svg::Document;
-use svg::node::Node;
-use svg::node::element::{Group, Path};
-use svg::node::element::path::Data;
+use font::Glyph;
+use svg::node::element::Group;
+
+const OTF: &'static str = "tests/fixtures/SourceSerifPro-Regular.otf";
+const SVG: &'static str = "examples/glyph.svg";
 
 fn main() {
-    let File { fonts, .. } = File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap();
+    use font::File;
+    use svg::Document;
+    use svg::node::element::Style;
+
+    let File { fonts, .. } = File::open(OTF).unwrap();
     let glyph = fonts[0].draw('&').unwrap().unwrap();
+    let (width, height) = (glyph.advance_width(), glyph.height() + 2.0 * 50.0);
+    let transform = format!("translate(0, {}) scale(1, -1)", glyph.bounding_box.3 + 50.0);
+    let glyph = draw(&glyph).set("transform", transform);
+    let style = Style::new("path { fill: none; stroke: black; stroke-width: 3; }");
+    let document = Document::new().set("width", width).set("height", height).add(style).add(glyph);
+    svg::save(SVG, &document).unwrap();
+}
+
+fn draw(glyph: &Glyph) -> Group {
+    use font::{Offset, Segment};
+    use svg::node::Node;
+    use svg::node::element::Path;
+    use svg::node::element::path::Data;
+
     let mut group = Group::new();
     let mut a = Offset::default();
     for contour in glyph.iter() {
@@ -33,12 +51,7 @@ fn main() {
             }
         }
         data = data.close();
-        group.append(Path::new().set("fill", "none").set("stroke", "black").set("d", data));
+        group.append(Path::new().set("d", data));
     }
-    let ((left, bottom, right, top), (lsb, rsb)) = (glyph.bounding_box, glyph.side_bearings);
-    let width = (right + rsb) - (left - lsb);
-    let height = top - bottom + 2.0 * 50.0;
-    group = group.set("transform", format!("translate(0, {}) scale(1, -1)", top + 50.0));
-    let image = Document::new().set("width", width).set("height", height).add(group);
-    svg::save("examples/glyph.svg", &image).unwrap();
+    group
 }
