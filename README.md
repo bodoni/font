@@ -10,15 +10,15 @@ The package provides a font toolbox.
 use font::{File, Segment};
 
 let path = "SourceSerifPro-Regular.otf";
-let file = File::open(path).unwrap();
-let font = &file[0];
+let File { fonts, .. } = File::open(path).unwrap();
+let glyph = fonts[0].draw('&').unwrap().unwrap();
 
-for contour in font.draw('&').unwrap().unwrap().iter() {
+for contour in glyph.iter() {
     for segment in contour.iter() {
         match segment {
-            &Segment::Linear(..) => println!("Line!"),
-            &Segment::Quadratic(..) => println!("Curve!"),
-            &Segment::Cubic(..) => println!("Curve!"),
+            &Segment::Linear(..) => {},
+            &Segment::Quadratic(..) => {},
+            &Segment::Cubic(..) => {},
         }
     }
 }

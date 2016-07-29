@@ -8,12 +8,8 @@ use svg::node::element::{Group, Path};
 use svg::node::element::path::Data;
 
 fn main() {
-    let glyph = '&';
-    let font_path = "tests/fixtures/SourceSerifPro-Regular.otf";
-    let image_path = "examples/glyph.svg";
-    let file = File::open(font_path).unwrap();
-    let font = &file[0];
-    let glyph = font.draw(glyph).unwrap().unwrap();
+    let File { fonts, .. } = File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap();
+    let glyph = fonts[0].draw('&').unwrap().unwrap();
     let mut group = Group::new();
     let mut a = Offset::default();
     for contour in glyph.iter() {
@@ -44,5 +40,5 @@ fn main() {
     let height = top - bottom + 2.0 * 50.0;
     group = group.set("transform", format!("translate(0, {}) scale(1, -1)", top + 50.0));
     let image = Document::new().set("width", width).set("height", height).add(group);
-    svg::save(image_path, &image).unwrap();
+    svg::save("examples/glyph.svg", &image).unwrap();
 }
