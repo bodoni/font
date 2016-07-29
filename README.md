@@ -25,7 +25,7 @@ for contour in glyph.iter() {
 ```
 
 <div align="center">
-  <a href="https://github.com/bodoni/font/blob/master/examples/glyph.svg">
+  <a href="https://github.com/bodoni/font/blob/master/examples/glyph.rs">
     <img src="https://cdn.rawgit.com/bodoni/font/master/examples/glyph.svg">
   </a>
 </div>
