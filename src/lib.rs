@@ -16,9 +16,9 @@
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {
-//!             &Segment::Linear(..) => {},
-//!             &Segment::Quadratic(..) => {},
-//!             &Segment::Cubic(..) => {},
+//!             &Segment::Linear(..) => { /* … */ },
+//!             &Segment::Quadratic(..) => { /* … */ },
+//!             &Segment::Cubic(..) => { /* … */ },
 //!         }
 //!     }
 //! }

@@ -4,7 +4,7 @@ The package provides a font toolbox.
 
 ## [Documentation][doc]
 
-## Example
+## [Example](examples/glyph.rs)
 
 ```rust
 use font::{File, Segment};
@@ -16,9 +16,9 @@ let glyph = fonts[0].draw('&').unwrap().unwrap();
 for contour in glyph.iter() {
     for segment in contour.iter() {
         match segment {
-            &Segment::Linear(..) => {},
-            &Segment::Quadratic(..) => {},
-            &Segment::Cubic(..) => {},
+            &Segment::Linear(..) => { /* … */ },
+            &Segment::Quadratic(..) => { /* … */ },
+            &Segment::Cubic(..) => { /* … */ },
         }
     }
 }
