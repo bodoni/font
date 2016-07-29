@@ -35,17 +35,15 @@ fn draw(glyph: &Glyph) -> Group {
         let mut data = Data::new().move_to(vec![a.0, a.1]);
         for segment in contour.iter() {
             match segment {
-                &Segment::Linear(mut b) => {
-                    b += a;
-                    a = b;
-                    data = data.line_to(vec![b.0, b.1]);
+                &Segment::Linear(b) => {
+                    a += b;
+                    data = data.line_by(vec![b.0, b.1]);
                 },
-                &Segment::Cubic(mut b, mut c, mut d) => {
-                    b += a;
+                &Segment::Cubic(b, mut c, mut d) => {
                     c += b;
                     d += c;
-                    a = d;
-                    data = data.cubic_curve_to(vec![b.0, b.1, c.0, c.1, d.0, d.1]);
+                    a += d;
+                    data = data.cubic_curve_by(vec![b.0, b.1, c.0, c.1, d.0, d.1]);
                 },
                 _ => unreachable!(),
             }
