@@ -36,16 +36,13 @@ impl Case for PostScript {
             Some(index) => index,
             _ => return Ok(None),
         };
-
         let mut program = match self.font_set.char_strings[self.id].get(index) {
             Some(char_string) => Program::new(char_string, &self.font_set.global_subroutines,
                                               &self.font_set.local_subroutines[self.id]),
             _ => reject!(),
         };
-
         let mut builder = Builder::new();
         builder.set_horizontal_metrics(self.metrics.get(index));
-
         let mut clear = false;
         while let Some((operator, operands)) = try!(program.next()) {
             macro_rules! get(($index:expr) => (operands[$index]));
@@ -221,7 +218,6 @@ impl Case for PostScript {
                 _ => {},
             }
         }
-
         Ok(Some(builder.into()))
     }
 }

@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use truetype::glyph_data::{self, Compound, GlyphData, Simple};
+use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
 use {Offset, Result};
 use builder::Builder;
@@ -25,9 +25,10 @@ impl TrueType {
 
     fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
         use truetype::glyph_data::Description::*;
+
         match &glyph.description {
             &Simple(ref description) => draw_simple(builder, description),
-            &Compound(ref description) => draw_compound(self, builder, description),
+            &Composite(ref description) => draw_composite(self, builder, description),
         }
     }
 }
@@ -35,15 +36,15 @@ impl TrueType {
 impl Case for TrueType {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::new();
-        let index = match self.mapping.find(glyph) {
-            Some(index) => index,
+        let glyph_index = match self.mapping.find(glyph) {
+            Some(glyph_index) => glyph_index,
             _ => return Ok(None),
         };
-        let glyph = match self.glyph_data.get(index) {
+        let glyph = match self.glyph_data.get(glyph_index) {
             Some(glyph) => glyph,
             _ => reject!(),
         };
-        builder.set_horizontal_metrics(self.metrics.get(index));
+        builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         if let &Some(ref glyph) = glyph {
             try!(self.draw_glyph(&mut builder, glyph));
             builder.set_bounding_box(glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y);
@@ -52,15 +53,12 @@ impl Case for TrueType {
     }
 }
 
-fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
-    let &Simple { ref end_points, ref flags, ref x, ref y, .. } = description;
-
+fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result<()> {
+    let &SimpleDescription { ref end_points, ref flags, ref x, ref y, .. } = description;
     let point_count = flags.len();
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
-
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
     macro_rules! read(($i:expr) => (Offset::from((x[$i], y[$i]))));
-
     let mut cursor = 0;
     for &end in end_points {
         let end = end as usize;
@@ -94,15 +92,16 @@ fn draw_simple(builder: &mut Builder, description: &Simple) -> Result<()> {
         }
         cursor = end + 1;
     }
-
     Ok(())
 }
 
-fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound) -> Result<()> {
+fn draw_composite(case: &TrueType, builder: &mut Builder, description: &CompositeDescription)
+                  -> Result<()> {
+
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
-        let index = component.index as usize;
+        let glyph_index = component.glyph_index as usize;
         builder.restart();
         match &component.arguments {
             &Arguments::Offsets(x, y) => builder.add_compensation((x, y)),
@@ -114,13 +113,13 @@ fn draw_compound(case: &TrueType, builder: &mut Builder, description: &Compound)
             &Options::Vector(..) => unimplemented!(),
             &Options::Matrix(..) => unimplemented!(),
         }
-        let glyph = match case.glyph_data.get(index) {
+        let glyph = match case.glyph_data.get(glyph_index) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
             _ => reject!(),
         };
         if component.flags.should_use_metrics() {
-            builder.set_horizontal_metrics(case.metrics.get(index));
+            builder.set_horizontal_metrics(case.metrics.get(glyph_index));
         }
         try!(case.draw_glyph(builder, glyph));
     }
