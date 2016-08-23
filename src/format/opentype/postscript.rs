@@ -30,7 +30,7 @@ macro_rules! reject(() => (raise!("found a malformed glyph")));
 
 impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
-        use postscript::type2::operation::Operator::*;
+        use postscript::type2::Operator::*;
 
         let index = match self.mapping.find(glyph) {
             Some(index) => index,
