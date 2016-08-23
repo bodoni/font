@@ -12,7 +12,7 @@ use truetype::{
     MaximumProfile,
 };
 
-use {Case, Font, Number, Result};
+use {Case, Font, Result};
 
 mod mapping;
 mod metrics;
@@ -70,8 +70,8 @@ fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> R
 pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<Case>) -> Font {
     Font {
         units_per_em: font_header.units_per_em as usize,
-        ascender: Number::from(metrics.ascender),
-        descender: Number::from(metrics.descender),
+        ascender: metrics.ascender as isize,
+        descender: metrics.descender as isize,
         case: case,
     }
 }

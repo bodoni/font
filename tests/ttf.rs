@@ -120,6 +120,6 @@ fn open() {
     let file = setup(Fixture::TTF);
     let font = &file[0];
     assert_eq!(font.units_per_em, 2048);
-    assert_eq!(font.ascender, 2189.0);
-    assert_eq!(font.descender, -600.0);
+    assert_eq!(font.ascender, 2189);
+    assert_eq!(font.descender, -600);
 }
