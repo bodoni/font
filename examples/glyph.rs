@@ -8,12 +8,12 @@ const OTF: &'static str = "tests/fixtures/SourceSerifPro-Regular.otf";
 const SVG: &'static str = "examples/glyph.svg";
 
 fn main() {
-    use font::File;
+    use font::Font;
     use svg::Document;
     use svg::node::element::Style;
 
-    let File { fonts, .. } = File::open(OTF).unwrap();
-    let glyph = fonts[0].draw('&').unwrap().unwrap();
+    let font = Font::open(OTF).unwrap();
+    let glyph = font.draw('&').unwrap().unwrap();
     let (width, height) = (glyph.advance_width(), glyph.height() + 2.0 * 50.0);
     let transform = format!("translate(0, {}) scale(1, -1)", glyph.bounding_box.3 + 50.0);
     let glyph = draw(&glyph).set("transform", transform);
