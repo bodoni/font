@@ -5,13 +5,13 @@
 //! ```
 //! extern crate font;
 //!
-//! use font::{File, Segment};
+//! use font::{Font, Segment};
 //!
 //! # fn main() {
 //! let path = "SourceSerifPro-Regular.otf";
 //! # let path = "tests/fixtures/SourceSerifPro-Regular.otf";
-//! let file = File::open(path).unwrap();
-//! let glyph = file[0].draw('&').unwrap().unwrap();
+//! let font = Font::open(path).unwrap();
+//! let glyph = font.draw('&').unwrap().unwrap();
 //!
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {

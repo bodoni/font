@@ -7,11 +7,11 @@ The package provides a font toolbox.
 ## [Example](examples/glyph.rs)
 
 ```rust
-use font::{File, Segment};
+use font::{Font, Segment};
 
 let path = "SourceSerifPro-Regular.otf";
-let file = File::open(path).unwrap();
-let glyph = file[0].draw('&').unwrap().unwrap();
+let font = Font::open(path).unwrap();
+let glyph = font.draw('&').unwrap().unwrap();
 
 for contour in glyph.iter() {
     for segment in contour.iter() {

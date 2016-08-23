@@ -1,8 +1,7 @@
 use std::io::{Read, Seek};
 use std::path::Path;
 
-use Result;
-use font::Font;
+use {Font, Result};
 use format::opentype;
 
 /// A file.
