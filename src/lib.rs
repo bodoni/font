@@ -12,7 +12,6 @@
 //! # let path = "tests/fixtures/SourceSerifPro-Regular.otf";
 //! let font = Font::open(path).unwrap();
 //! let glyph = font.draw('&').unwrap().unwrap();
-//!
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {
