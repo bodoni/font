@@ -1,10 +1,10 @@
 [package]
 name = "font"
-version = "0.3.1"
+version = "0.3.2"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a font toolbox."
-documentation = "https://bodoni.github.io/font"
+documentation = "https://docs.rs/font"
 homepage = "https://github.com/bodoni/font"
 repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
