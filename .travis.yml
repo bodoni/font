@@ -6,6 +6,11 @@ rust:
   - beta
   - nightly
 
+script:
+  - cargo build -vv
+  - cargo test -vv
+  - cargo run -vv --example glyph
+
 after_success:
   - curl https://bodoni.github.io/travis/documentation.sh | bash
 
