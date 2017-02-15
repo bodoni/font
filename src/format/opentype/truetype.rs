@@ -46,7 +46,7 @@ impl Case for TrueType {
         };
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         if let &Some(ref glyph) = glyph {
-            try!(self.draw_glyph(&mut builder, glyph));
+            self.draw_glyph(&mut builder, glyph)?;
             builder.set_bounding_box(glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y);
         }
         Ok(Some(builder.into()))
@@ -121,7 +121,7 @@ fn draw_composite(case: &TrueType, builder: &mut Builder, description: &Composit
         if component.flags.should_use_metrics() {
             builder.set_horizontal_metrics(case.metrics.get(glyph_index));
         }
-        try!(case.draw_glyph(builder, glyph));
+        case.draw_glyph(builder, glyph)?;
     }
     Ok(())
 }

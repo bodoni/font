@@ -44,7 +44,7 @@ impl Case for PostScript {
         let mut builder = Builder::new();
         builder.set_horizontal_metrics(self.metrics.get(index));
         let mut clear = false;
-        while let Some((operator, operands)) = try!(program.next()) {
+        while let Some((operator, operands)) = program.next()? {
             macro_rules! get(($index:expr) => (operands[$index]));
             let count = operands.len();
             match operator {

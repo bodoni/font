@@ -26,8 +26,8 @@ use self::truetype::TrueType;
 
 pub fn read<T>(tape: &mut T) -> Result<Vec<Font>> where T: Read + Seek {
     let mut fonts = vec![];
-    for font in &try!(opentype::File::read(tape)).fonts {
-        try!(read_font(tape, &mut fonts, font));
+    for font in &opentype::File::read(tape)?.fonts {
+        read_font(tape, &mut fonts, font)?;
     }
     Ok(fonts)
 }
@@ -35,18 +35,18 @@ pub fn read<T>(tape: &mut T) -> Result<Vec<Font>> where T: Read + Seek {
 fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> Result<()>
     where T: Read + Seek
 {
-    let font_header = some!(try!(font.take::<_, FontHeader>(tape)), "cannot find the font header");
-    let horizontal_header = some!(try!(font.take::<_, HorizontalHeader>(tape)),
+    let font_header = some!(font.take::<_, FontHeader>(tape)?, "cannot find the font header");
+    let horizontal_header = some!(font.take::<_, HorizontalHeader>(tape)?,
                                   "cannot find the horizontal header");
-    let maximum_profile = some!(try!(font.take::<_, MaximumProfile>(tape)),
+    let maximum_profile = some!(font.take::<_, MaximumProfile>(tape)?,
                                 "cannot find the maximum profile");
-    let horizontal_metrics = some!(try!(font.take_given::<_, HorizontalMetrics>(
-        tape, (&horizontal_header, &maximum_profile))), "cannot find the horizontal metrics");
-    let char_mapping = some!(try!(font.take::<_, CharMapping>(tape)),
+    let horizontal_metrics = some!(font.take_given::<_, HorizontalMetrics>(
+        tape, (&horizontal_header, &maximum_profile))?, "cannot find the horizontal metrics");
+    let char_mapping = some!(font.take::<_, CharMapping>(tape)?,
                              "cannot find the char-to-glyph mapping");
-    let metrics = Rc::new(try!(Metrics::new(horizontal_header, horizontal_metrics)));
-    let mapping = Rc::new(try!(Mapping::new(char_mapping)));
-    if let Some(font_set) = try!(font.take::<_, FontSet>(tape)) {
+    let metrics = Rc::new(Metrics::new(horizontal_header, horizontal_metrics)?);
+    let mapping = Rc::new(Mapping::new(char_mapping)?);
+    if let Some(font_set) = font.take::<_, FontSet>(tape)? {
         let font_set = Rc::new(font_set);
         for id in 0..font_set.char_strings.len() {
             let case = PostScript::new(id, font_set.clone(), metrics.clone(), mapping.clone());
@@ -54,10 +54,10 @@ fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> R
         }
         return Ok(());
     }
-    if let Some(glyph_mapping) = try!(font.take_given::<_, GlyphMapping>(
-        tape, (&font_header, &maximum_profile))) {
+    if let Some(glyph_mapping) = font.take_given::<_, GlyphMapping>(
+        tape, (&font_header, &maximum_profile))? {
 
-        if let Some(glyph_data) = try!(font.take_given::<_, GlyphData>(tape, &glyph_mapping)) {
+        if let Some(glyph_data) = font.take_given::<_, GlyphData>(tape, &glyph_mapping)? {
             let case = TrueType::new(Rc::new(glyph_data), metrics.clone(), mapping.clone());
             fonts.push(new_font(&font_header, &metrics, Box::new(case)));
             return Ok(());
