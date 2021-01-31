@@ -1,12 +1,12 @@
 use std::rc::Rc;
 use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
-use crate::{Offset, Result};
+use super::mapping::Mapping;
+use super::metrics::Metrics;
 use crate::builder::Builder;
 use crate::case::Case;
 use crate::glyph::Glyph;
-use super::mapping::Mapping;
-use super::metrics::Metrics;
+use crate::{Offset, Result};
 
 pub struct TrueType {
     glyph_data: Rc<GlyphData>,
@@ -20,7 +20,11 @@ macro_rules! reject(() => (raise!("found a malformed glyph")));
 impl TrueType {
     #[inline]
     pub fn new(glyph_data: Rc<GlyphData>, metrics: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
-        TrueType { glyph_data: glyph_data, metrics: metrics, mapping: mapping }
+        TrueType {
+            glyph_data: glyph_data,
+            metrics: metrics,
+            mapping: mapping,
+        }
     }
 
     fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
@@ -54,7 +58,13 @@ impl Case for TrueType {
 }
 
 fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result<()> {
-    let &SimpleDescription { ref end_points, ref flags, ref x, ref y, .. } = description;
+    let &SimpleDescription {
+        ref end_points,
+        ref flags,
+        ref x,
+        ref y,
+        ..
+    } = description;
     let point_count = flags.len();
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
@@ -78,10 +88,10 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
                         let half = current / 2.0;
                         builder.add_quadratic(*control, half);
                         *control = half;
-                    },
+                    }
                     control @ &mut None => {
                         *control = Some(current);
-                    },
+                    }
                 }
             }
         }
@@ -95,9 +105,11 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
     Ok(())
 }
 
-fn draw_composite(case: &TrueType, builder: &mut Builder, description: &CompositeDescription)
-                  -> Result<()> {
-
+fn draw_composite(
+    case: &TrueType,
+    builder: &mut Builder,
+    description: &CompositeDescription,
+) -> Result<()> {
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
@@ -108,7 +120,7 @@ fn draw_composite(case: &TrueType, builder: &mut Builder, description: &Composit
             &Arguments::Indices(..) => unimplemented!(),
         }
         match &component.options {
-            &Options::None => {},
+            &Options::None => {}
             &Options::Scalar(..) => unimplemented!(),
             &Options::Vector(..) => unimplemented!(),
             &Options::Matrix(..) => unimplemented!(),

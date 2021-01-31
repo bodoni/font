@@ -2,13 +2,14 @@ extern crate font as library;
 
 mod common;
 
-use common::{Fixture, setup, trace};
+use common::{setup, trace, Fixture};
 
 #[test]
 fn draw_a_ring() {
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('å').unwrap().unwrap();
     assert_eq!(glyph.len(), 4);
+    #[rustfmt::skip]
     assert_eq!(&trace(&glyph), &vec![
         ( 639.0, 1116.0),
         ( 803.0, 1066.5),
@@ -79,6 +80,7 @@ fn draw_o() {
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
+    #[rustfmt::skip]
     assert_eq!(&trace(&glyph), &vec![
         ( 643.0, 1110.0),
         ( 943.0,  997.5),
@@ -110,6 +112,7 @@ fn draw_slash() {
     let font = &setup(Fixture::TTF)[0];
     let glyph = font.case.draw('/').unwrap().unwrap();
     assert_eq!(glyph.len(), 1);
+    #[rustfmt::skip]
     assert_eq!(&trace(&glyph), &vec![
         (893.0, 1462.0),
         ( 80.0,    0.0),

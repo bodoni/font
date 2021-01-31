@@ -1,7 +1,7 @@
 use std::mem;
 
-use crate::{Number, Offset};
 use crate::glyph::{Contour, Glyph, Segment};
+use crate::{Number, Offset};
 
 #[derive(Default)]
 pub struct Builder {
@@ -37,7 +37,9 @@ impl Builder {
         if offset != Offset::default() {
             self.add_linear(offset);
         }
-        self.glyph.contours.push(mem::replace(&mut self.contour, Default::default()));
+        self.glyph
+            .contours
+            .push(mem::replace(&mut self.contour, Default::default()));
     }
 }
 
@@ -122,7 +124,11 @@ impl Builder {
 impl From<Builder> for Glyph {
     fn from(mut builder: Builder) -> Glyph {
         builder.flush();
-        let Builder { mut glyph, advance_width, .. } = builder;
+        let Builder {
+            mut glyph,
+            advance_width,
+            ..
+        } = builder;
         let width = glyph.bounding_box.2 - glyph.bounding_box.0;
         glyph.side_bearings.1 = advance_width - (glyph.side_bearings.0 + width);
         glyph

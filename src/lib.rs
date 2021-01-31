@@ -48,8 +48,8 @@ mod format;
 mod glyph;
 mod offset;
 
+pub use self::font::Font;
 pub use case::Case;
 pub use file::File;
-pub use self::font::Font;
 pub use glyph::{Contour, Glyph, Segment};
 pub use offset::Offset;

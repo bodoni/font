@@ -1,5 +1,5 @@
-use crate::Result;
 use crate::glyph::Glyph;
+use crate::Result;
 
 /// A collection of glyphs.
 pub trait Case {

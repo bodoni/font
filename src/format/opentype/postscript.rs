@@ -2,12 +2,12 @@ use postscript::compact1::FontSet;
 use postscript::type2::Program;
 use std::rc::Rc;
 
-use crate::Result;
+use super::mapping::Mapping;
+use super::metrics::Metrics;
 use crate::builder::Builder;
 use crate::case::Case;
 use crate::glyph::Glyph;
-use super::mapping::Mapping;
-use super::metrics::Metrics;
+use crate::Result;
 
 pub struct PostScript {
     id: usize,
@@ -18,10 +18,18 @@ pub struct PostScript {
 
 impl PostScript {
     #[inline]
-    pub fn new(id: usize, font_set: Rc<FontSet>, metrics: Rc<Metrics>, mapping: Rc<Mapping>)
-               -> Self {
-
-        PostScript { id: id, font_set: font_set, metrics: metrics, mapping: mapping }
+    pub fn new(
+        id: usize,
+        font_set: Rc<FontSet>,
+        metrics: Rc<Metrics>,
+        mapping: Rc<Mapping>,
+    ) -> Self {
+        PostScript {
+            id: id,
+            font_set: font_set,
+            metrics: metrics,
+            mapping: mapping,
+        }
     }
 }
 
@@ -37,8 +45,11 @@ impl Case for PostScript {
             _ => return Ok(None),
         };
         let mut program = match self.font_set.char_strings[self.id].get(index) {
-            Some(char_string) => Program::new(char_string, &self.font_set.global_subroutines,
-                                              &self.font_set.local_subroutines[self.id]),
+            Some(char_string) => Program::new(
+                char_string,
+                &self.font_set.global_subroutines,
+                &self.font_set.local_subroutines[self.id],
+            ),
             _ => reject!(),
         };
         let mut builder = Builder::new();
@@ -51,22 +62,22 @@ impl Case for PostScript {
                 RMoveTo => {
                     expect!(count == 2 || !clear && count == 3);
                     builder.jump((get!(0), get!(1)));
-                },
+                }
                 HMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
                     builder.jump((get!(0), 0.0));
-                },
+                }
                 VMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
                     builder.jump((0.0, get!(0)));
-                },
+                }
                 RLineTo => {
                     expect!(count % 2 == 0);
                     for i in 0..(count / 2) {
                         let j = 2 * i;
                         builder.add_linear((get!(j + 0), get!(j + 1)));
                     }
-                },
+                }
                 HLineTo => {
                     for i in 0..count {
                         if i % 2 == 0 {
@@ -75,7 +86,7 @@ impl Case for PostScript {
                             builder.add_linear((0.0, get!(i)));
                         }
                     }
-                },
+                }
                 VLineTo => {
                     for i in 0..count {
                         if i % 2 == 1 {
@@ -84,7 +95,7 @@ impl Case for PostScript {
                             builder.add_linear((0.0, get!(i)));
                         }
                     }
-                },
+                }
                 RRCurveTo => {
                     expect!(count % 6 == 0);
                     for i in 0..(count / 6) {
@@ -95,7 +106,7 @@ impl Case for PostScript {
                             (get!(j + 4), get!(j + 5)),
                         );
                     }
-                },
+                }
                 HHCurveTo => {
                     let (offset, first) = if count % 4 == 0 {
                         (0, 0.0)
@@ -107,12 +118,12 @@ impl Case for PostScript {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
                         builder.add_cubic(
-                            (get!(j + 0),       first),
+                            (get!(j + 0), first),
                             (get!(j + 1), get!(j + 2)),
-                            (get!(j + 3),         0.0),
+                            (get!(j + 3), 0.0),
                         );
                     }
-                },
+                }
                 HVCurveTo => {
                     let (steps, last) = if count % 4 == 0 {
                         (count / 4, 0.0)
@@ -125,19 +136,19 @@ impl Case for PostScript {
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 0 {
                             builder.add_cubic(
-                                (get!(j + 0),         0.0),
+                                (get!(j + 0), 0.0),
                                 (get!(j + 1), get!(j + 2)),
-                                (       last, get!(j + 3)),
+                                (last, get!(j + 3)),
                             );
                         } else {
                             builder.add_cubic(
-                                (        0.0, get!(j + 0)),
+                                (0.0, get!(j + 0)),
                                 (get!(j + 1), get!(j + 2)),
-                                (get!(j + 3),        last),
+                                (get!(j + 3), last),
                             );
                         }
                     }
-                },
+                }
                 VHCurveTo => {
                     let (steps, last) = if count % 4 == 0 {
                         (count / 4, 0.0)
@@ -150,19 +161,19 @@ impl Case for PostScript {
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 1 {
                             builder.add_cubic(
-                                (get!(j + 0),         0.0),
+                                (get!(j + 0), 0.0),
                                 (get!(j + 1), get!(j + 2)),
-                                (       last, get!(j + 3)),
+                                (last, get!(j + 3)),
                             );
                         } else {
                             builder.add_cubic(
-                                (        0.0, get!(j + 0)),
+                                (0.0, get!(j + 0)),
                                 (get!(j + 1), get!(j + 2)),
-                                (get!(j + 3),        last),
+                                (get!(j + 3), last),
                             );
                         }
                     }
-                },
+                }
                 VVCurveTo => {
                     let (offset, first) = if count % 4 == 0 {
                         (0, 0.0)
@@ -174,12 +185,12 @@ impl Case for PostScript {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
                         builder.add_cubic(
-                            (      first, get!(j + 0)),
+                            (first, get!(j + 0)),
                             (get!(j + 1), get!(j + 2)),
-                            (        0.0, get!(j + 3)),
+                            (0.0, get!(j + 3)),
                         );
                     }
-                },
+                }
                 RCurveLine => {
                     expect!(count >= 2 && (count - 2) % 6 == 0);
                     for i in 0..((count - 2) / 6) {
@@ -192,7 +203,7 @@ impl Case for PostScript {
                     }
                     let j = count - 2;
                     builder.add_linear((get!(j + 0), get!(j + 1)));
-                },
+                }
                 RLineCurve => {
                     expect!(count >= 6 && (count - 6) % 2 == 0);
                     for i in 0..((count - 6) / 2) {
@@ -205,17 +216,16 @@ impl Case for PostScript {
                         (get!(j + 2), get!(j + 3)),
                         (get!(j + 4), get!(j + 5)),
                     );
-                },
-                HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {},
+                }
+                HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {}
                 _ => unreachable!(),
             }
             match operator {
-                HMoveTo | VMoveTo | RMoveTo |
-                HStem | HStemHM | VStem | VStemHM |
-                CntrMask | HintMask => {
+                HMoveTo | VMoveTo | RMoveTo | HStem | HStemHM | VStem | VStemHM | CntrMask
+                | HintMask => {
                     clear = true;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         Ok(Some(builder.into()))

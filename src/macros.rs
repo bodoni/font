@@ -1,5 +1,5 @@
 macro_rules! deref {
-    ($struct_name:ident::$field_name:ident => $target_name:ty) => (
+    ($struct_name:ident::$field_name:ident => $target_name:ty) => {
         impl ::std::ops::Deref for $struct_name {
             type Target = $target_name;
 
@@ -15,7 +15,7 @@ macro_rules! deref {
                 &mut self.$field_name
             }
         }
-    );
+    };
 }
 
 macro_rules! raise(

@@ -1,16 +1,11 @@
-use opentype;
 use ::postscript::compact1::FontSet;
-use std::io::{Read, Seek};
-use std::rc::Rc;
 use ::truetype::{
-    CharMapping,
-    FontHeader,
-    GlyphData,
-    GlyphMapping,
-    HorizontalHeader,
-    HorizontalMetrics,
+    CharMapping, FontHeader, GlyphData, GlyphMapping, HorizontalHeader, HorizontalMetrics,
     MaximumProfile,
 };
+use opentype;
+use std::io::{Read, Seek};
+use std::rc::Rc;
 
 use crate::{Case, Font, Result};
 
@@ -24,7 +19,10 @@ use self::metrics::Metrics;
 use self::postscript::PostScript;
 use self::truetype::TrueType;
 
-pub fn read<T>(tape: &mut T) -> Result<Vec<Font>> where T: Read + Seek {
+pub fn read<T>(tape: &mut T) -> Result<Vec<Font>>
+where
+    T: Read + Seek,
+{
     let mut fonts = vec![];
     for font in &opentype::File::read(tape)?.fonts {
         read_font(tape, &mut fonts, font)?;
@@ -33,17 +31,29 @@ pub fn read<T>(tape: &mut T) -> Result<Vec<Font>> where T: Read + Seek {
 }
 
 fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> Result<()>
-    where T: Read + Seek
+where
+    T: Read + Seek,
 {
-    let font_header = some!(font.take::<_, FontHeader>(tape)?, "cannot find the font header");
-    let horizontal_header = some!(font.take::<_, HorizontalHeader>(tape)?,
-                                  "cannot find the horizontal header");
-    let maximum_profile = some!(font.take::<_, MaximumProfile>(tape)?,
-                                "cannot find the maximum profile");
-    let horizontal_metrics = some!(font.take_given::<_, HorizontalMetrics>(
-        tape, (&horizontal_header, &maximum_profile))?, "cannot find the horizontal metrics");
-    let char_mapping = some!(font.take::<_, CharMapping>(tape)?,
-                             "cannot find the char-to-glyph mapping");
+    let font_header = some!(
+        font.take::<_, FontHeader>(tape)?,
+        "cannot find the font header"
+    );
+    let horizontal_header = some!(
+        font.take::<_, HorizontalHeader>(tape)?,
+        "cannot find the horizontal header"
+    );
+    let maximum_profile = some!(
+        font.take::<_, MaximumProfile>(tape)?,
+        "cannot find the maximum profile"
+    );
+    let horizontal_metrics = some!(
+        font.take_given::<_, HorizontalMetrics>(tape, (&horizontal_header, &maximum_profile))?,
+        "cannot find the horizontal metrics"
+    );
+    let char_mapping = some!(
+        font.take::<_, CharMapping>(tape)?,
+        "cannot find the char-to-glyph mapping"
+    );
     let metrics = Rc::new(Metrics::new(horizontal_header, horizontal_metrics)?);
     let mapping = Rc::new(Mapping::new(char_mapping)?);
     if let Some(font_set) = font.take::<_, FontSet>(tape)? {
@@ -54,9 +64,9 @@ fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> R
         }
         return Ok(());
     }
-    if let Some(glyph_mapping) = font.take_given::<_, GlyphMapping>(
-        tape, (&font_header, &maximum_profile))? {
-
+    if let Some(glyph_mapping) =
+        font.take_given::<_, GlyphMapping>(tape, (&font_header, &maximum_profile))?
+    {
         if let Some(glyph_data) = font.take_given::<_, GlyphData>(tape, &glyph_mapping)? {
             let case = TrueType::new(Rc::new(glyph_data), metrics.clone(), mapping.clone());
             fonts.push(new_font(&font_header, &metrics, Box::new(case)));

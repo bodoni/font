@@ -73,7 +73,10 @@ implement!(i16);
 implement!((f32, f32));
 implement!((i16, i16));
 
-impl<T> Add<T> for Offset where T: Into<Offset> {
+impl<T> Add<T> for Offset
+where
+    T: Into<Offset>,
+{
     type Output = Offset;
 
     #[inline]
@@ -83,7 +86,10 @@ impl<T> Add<T> for Offset where T: Into<Offset> {
     }
 }
 
-impl<T> AddAssign<T> for Offset where T: Into<Offset> {
+impl<T> AddAssign<T> for Offset
+where
+    T: Into<Offset>,
+{
     #[inline]
     fn add_assign(&mut self, other: T) {
         let Offset(x, y) = other.into();
@@ -103,7 +109,10 @@ impl Neg for Offset {
     }
 }
 
-impl<T> Sub<T> for Offset where T: Into<Offset> {
+impl<T> Sub<T> for Offset
+where
+    T: Into<Offset>,
+{
     type Output = Offset;
 
     #[inline]
@@ -113,7 +122,10 @@ impl<T> Sub<T> for Offset where T: Into<Offset> {
     }
 }
 
-impl<T> SubAssign<T> for Offset where T: Into<Offset> {
+impl<T> SubAssign<T> for Offset
+where
+    T: Into<Offset>,
+{
     #[inline]
     fn sub_assign(&mut self, other: T) {
         let Offset(x, y) = other.into();

@@ -55,7 +55,11 @@ impl Default for Glyph {
     #[inline]
     fn default() -> Self {
         use std::f32::NAN;
-        Glyph { bounding_box: (NAN, NAN, NAN, NAN), side_bearings: (NAN, NAN), contours: vec![] }
+        Glyph {
+            bounding_box: (NAN, NAN, NAN, NAN),
+            side_bearings: (NAN, NAN),
+            contours: vec![],
+        }
     }
 }
 

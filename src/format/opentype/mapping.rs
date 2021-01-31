@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use truetype::{CharMapping, GlyphID};
 use truetype::char_mapping::Encoding;
+use truetype::{CharMapping, GlyphID};
 
 use crate::Result;
 

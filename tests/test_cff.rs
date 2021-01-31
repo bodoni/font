@@ -2,7 +2,7 @@ extern crate font as library;
 
 mod common;
 
-use common::{Fixture, setup, trace};
+use common::{setup, trace, Fixture};
 
 #[test]
 fn draw_from_a_to_z() {
@@ -17,6 +17,7 @@ fn draw_o() {
     let font = &setup(Fixture::CFF)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
+    #[rustfmt::skip]
     assert_eq!(&trace(&glyph), &vec![
         (274.0, 445.0),
         (409.0, 236.0),

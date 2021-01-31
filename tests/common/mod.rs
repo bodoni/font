@@ -27,16 +27,16 @@ pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
             match segment {
                 &Linear(a) => {
                     offset += a;
-                },
+                }
                 &Quadratic(a, b) => {
                     offset += a;
                     offset += b;
-                },
+                }
                 &Cubic(a, b, c) => {
                     offset += a;
                     offset += b;
                     offset += c;
-                },
+                }
             }
             points.push(offset.into());
         }

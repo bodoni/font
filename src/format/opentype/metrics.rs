@@ -11,7 +11,10 @@ pub struct Metrics {
 impl Metrics {
     #[inline]
     pub fn new(header: HorizontalHeader, metrics: HorizontalMetrics) -> Result<Self> {
-        Ok(Metrics { header: header, metrics: metrics })
+        Ok(Metrics {
+            header: header,
+            metrics: metrics,
+        })
     }
 
     #[inline]
