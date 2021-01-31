@@ -1,8 +1,8 @@
 use std::io::{Read, Seek};
 use std::path::Path;
 
-use {Font, Result};
-use format::opentype;
+use crate::{Font, Result};
+use crate::format::opentype;
 
 /// A file.
 pub struct File {

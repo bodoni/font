@@ -1,10 +1,10 @@
 use std::rc::Rc;
 use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
-use {Offset, Result};
-use builder::Builder;
-use case::Case;
-use glyph::Glyph;
+use crate::{Offset, Result};
+use crate::builder::Builder;
+use crate::case::Case;
+use crate::glyph::Glyph;
 use super::mapping::Mapping;
 use super::metrics::Metrics;
 

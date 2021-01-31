@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use truetype::{HorizontalHeader, HorizontalMetrics};
 
-use {Number, Result};
+use crate::{Number, Result};
 
 pub struct Metrics {
     header: HorizontalHeader,

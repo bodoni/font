@@ -1,7 +1,7 @@
 use std::mem;
 
-use {Number, Offset};
-use glyph::{Contour, Glyph, Segment};
+use crate::{Number, Offset};
+use crate::glyph::{Contour, Glyph, Segment};
 
 #[derive(Default)]
 pub struct Builder {

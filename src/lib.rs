@@ -50,6 +50,6 @@ mod offset;
 
 pub use case::Case;
 pub use file::File;
-pub use font::Font;
+pub use self::font::Font;
 pub use glyph::{Contour, Glyph, Segment};
 pub use offset::Offset;

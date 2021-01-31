@@ -1,4 +1,4 @@
-use {Number, Offset};
+use crate::{Number, Offset};
 
 /// A glyph.
 #[derive(Clone, Debug)]

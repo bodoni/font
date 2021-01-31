@@ -1,6 +1,7 @@
 [package]
 name = "font"
-version = "0.3.2"
+version = "0.4.0"
+edition = "2018"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a font toolbox."
@@ -10,13 +11,9 @@ repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-opentype = "0.17"
-postscript = "0.11"
-truetype = "0.22"
+opentype = "0.19"
+postscript = "0.14"
+truetype = "0.30"
 
 [dev-dependencies]
-svg = "0.5"
-
-[[test]]
-name = "font"
-path = "tests/lib.rs"
+svg = "0.9"

@@ -1,4 +1,8 @@
-use {Fixture, setup, trace};
+extern crate font as library;
+
+mod common;
+
+use common::{Fixture, setup, trace};
 
 #[test]
 fn draw_from_a_to_z() {

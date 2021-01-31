@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use Number;
+use crate::Number;
 
 /// An offset.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

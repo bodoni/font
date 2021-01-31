@@ -2,7 +2,7 @@ use std::io::{Read, Seek};
 use std::ops::Deref;
 use std::path::Path;
 
-use {Case, File, Result};
+use crate::{Case, File, Result};
 
 /// A font.
 pub struct Font {
@@ -13,7 +13,7 @@ pub struct Font {
     /// The descender line relative to the base line.
     pub descender: isize,
     /// The collection of glyphs.
-    pub case: Box<Case>,
+    pub case: Box<dyn Case>,
 }
 
 impl Font {
@@ -35,7 +35,7 @@ impl Font {
 }
 
 impl Deref for Font {
-    type Target = Box<Case>;
+    type Target = Box<dyn Case>;
 
     #[inline(always)]
     fn deref(&self) -> &Self::Target {

@@ -1,8 +1,8 @@
-use Result;
-use glyph::Glyph;
+use crate::Result;
+use crate::glyph::Glyph;
 
 /// A collection of glyphs.
 pub trait Case {
     /// Draw a glyph.
-    fn draw(&self, char) -> Result<Option<Glyph>>;
+    fn draw(&self, glyph: char) -> Result<Option<Glyph>>;
 }

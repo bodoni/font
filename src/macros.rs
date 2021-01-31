@@ -19,7 +19,7 @@ macro_rules! deref {
 }
 
 macro_rules! raise(
-    ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
+    ($message:expr) => (return Err(crate::Error::new(::std::io::ErrorKind::Other, $message)));
 );
 
 macro_rules! some(

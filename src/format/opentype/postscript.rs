@@ -1,11 +1,11 @@
-use postscript::compact::FontSet;
+use postscript::compact1::FontSet;
 use postscript::type2::Program;
 use std::rc::Rc;
 
-use Result;
-use builder::Builder;
-use case::Case;
-use glyph::Glyph;
+use crate::Result;
+use crate::builder::Builder;
+use crate::case::Case;
+use crate::glyph::Glyph;
 use super::mapping::Mapping;
 use super::metrics::Metrics;
 

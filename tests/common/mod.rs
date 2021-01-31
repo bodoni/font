@@ -1,23 +1,20 @@
-extern crate font as library;
+#![allow(dead_code)]
 
 use library::{File, Glyph};
 
-mod cff;
-mod ttf;
-
-enum Fixture {
+pub enum Fixture {
     CFF,
     TTF,
 }
 
-fn setup(fixture: Fixture) -> File {
+pub fn setup(fixture: Fixture) -> File {
     match fixture {
         Fixture::CFF => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
         Fixture::TTF => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
     }
 }
 
-fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
+pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
     use library::Offset;
     use library::Segment::*;
 

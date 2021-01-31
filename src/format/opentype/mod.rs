@@ -1,8 +1,8 @@
 use opentype;
-use postscript::compact::FontSet;
+use ::postscript::compact1::FontSet;
 use std::io::{Read, Seek};
 use std::rc::Rc;
-use truetype::{
+use ::truetype::{
     CharMapping,
     FontHeader,
     GlyphData,
@@ -12,7 +12,7 @@ use truetype::{
     MaximumProfile,
 };
 
-use {Case, Font, Result};
+use crate::{Case, Font, Result};
 
 mod mapping;
 mod metrics;
@@ -67,7 +67,7 @@ fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> R
 }
 
 #[inline]
-pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<Case>) -> Font {
+pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<dyn Case>) -> Font {
     Font {
         units_per_em: font_header.units_per_em as usize,
         ascender: metrics.ascender as isize,
