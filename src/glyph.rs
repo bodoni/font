@@ -14,13 +14,14 @@ pub struct Glyph {
 /// A contour.
 #[derive(Clone, Debug, Default)]
 pub struct Contour {
-    /// The offset.
+    /// The offset of the previous point of the Glyph
     pub offset: Offset,
     /// The segments.
     pub segments: Vec<Segment>,
 }
 
 /// A segment.
+/// Each Offset is an Offset from the previous field.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Segment {
     /// A line.
@@ -29,6 +30,34 @@ pub enum Segment {
     Quadratic(Offset, Offset),
     /// A cubic Bézier curve.
     Cubic(Offset, Offset, Offset),
+}
+
+impl Segment {
+    /// Helper function to interpolate the current Segment
+    pub fn interpolate(&self, t: f32) -> Offset {
+        assert!(t >= 0.0 && t <= 1.0);
+
+        let ts = t * t; // t ** 2
+        let tss = ts * t; // t ** 3
+        let it = 1.0 - t; // 1.0 - t
+        let its = it * it; // (1.0 - t) ** 2
+        let itss = its * it; // (1.0 - t) ** 3
+
+        match self {
+            Segment::Linear(p1) => *p1 * t,
+            Segment::Quadratic(x, y) => {
+                let p1 = *x;
+                let p2 = p1 + *y;
+                p1 * t * it * 2 + p2 * ts
+            }
+            Segment::Cubic(x, y, z) => {
+                let p1 = *x;
+                let p2 = p1 + *y;
+                let p3 = p2 + *z;
+                p1 * t * itss * 3.0 + p2 * ts * it * 3 + p3 * tss
+            }
+        }
+    }
 }
 
 impl Glyph {
