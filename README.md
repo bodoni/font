@@ -33,8 +33,8 @@ Your contribution is highly appreciated. Do not hesitate to open an issue or a
 pull request. Note that any contribution submitted for inclusion in the project
 will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 
-[build-img]: https://travis-ci.org/bodoni/font.svg?branch=master
-[build-url]: https://travis-ci.org/bodoni/font
+[build-img]: https://github.com/bodoni/font/workflows/build/badge.svg
+[build-url]: https://github.com/bodoni/font/actions/workflows/build.yml
 [documentation-img]: https://docs.rs/font/badge.svg
 [documentation-url]: https://docs.rs/font
 [package-img]: https://img.shields.io/crates/v/font.svg
