@@ -2,7 +2,7 @@
 
 The package provides a font toolbox.
 
-## [Example](examples/glyph.rs)
+## [Example]
 
 ```rust
 use font::{Font, Segment};
@@ -22,8 +22,8 @@ for contour in glyph.iter() {
 ```
 
 <div align="center">
-  <a href="https://github.com/bodoni/font/blob/master/examples/glyph.rs">
-    <img src="https://cdn.rawgit.com/bodoni/font/master/examples/glyph.svg">
+  <a href="https://github.com/bodoni/workbench/blob/main/workbench/src/draw.rs">
+    <img src="https://cdn.rawgit.com/bodoni/font/main/assets/glyph.svg">
   </a>
 </div>
 
@@ -39,3 +39,5 @@ will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 [documentation-url]: https://docs.rs/font
 [package-img]: https://img.shields.io/crates/v/font.svg
 [package-url]: https://crates.io/crates/font
+
+[example]: https://github.com/bodoni/workbench/blob/main/workbench/src/draw.rs
