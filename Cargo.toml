@@ -13,7 +13,7 @@ exclude = ["tests/fixtures/*"]
 [dependencies]
 opentype = "0.19"
 postscript = "0.14"
-truetype = "0.30"
+truetype = "0.31"
 
 [dev-dependencies]
 svg = "0.9"
