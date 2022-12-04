@@ -27,9 +27,9 @@ impl Font {
     pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Self> {
         let File { mut fonts, .. } = File::read(tape)?;
         match fonts.len() {
-            0 => raise!("detected an empty file"),
+            0 => raise!("found an empty file"),
             1 => return Ok(fonts.remove(0)),
-            _ => raise!("detected a file with multiple fonts"),
+            _ => raise!("files with multiple fonts are not supported yet"),
         }
     }
 }
