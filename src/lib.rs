@@ -27,15 +27,8 @@
 extern crate opentype;
 extern crate postscript;
 extern crate truetype;
-
-/// An error.
-pub type Error = std::io::Error;
-
-/// A number.
-pub type Number = f32;
-
-/// A result.
-pub type Result<T> = std::io::Result<T>;
+#[macro_use]
+extern crate typeface;
 
 #[macro_use]
 mod macros;
@@ -48,8 +41,13 @@ mod format;
 mod glyph;
 mod offset;
 
+pub use typeface::{Error, Result};
+
 pub use self::font::Font;
 pub use case::Case;
 pub use file::File;
 pub use glyph::{Contour, Glyph, Segment};
 pub use offset::Offset;
+
+/// A number.
+pub type Number = f32;
