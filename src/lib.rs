@@ -27,7 +27,7 @@
 extern crate opentype;
 extern crate postscript;
 extern crate truetype;
-#[macro_use]
+#[macro_use(deref, raise)]
 extern crate typeface;
 
 #[macro_use]
