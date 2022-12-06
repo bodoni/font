@@ -69,15 +69,20 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
     expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
     macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
     macro_rules! read(($i:expr) => (Offset::from((x[$i], y[$i]))));
-    let mut cursor = 0;
+    let mut glyph_cursor = 0;
     for &end in end_points {
         let end = end as usize;
-        expect!(end < point_count && is_on_curve!(cursor));
-        builder.jump(read!(cursor));
+        expect!(end < point_count);
         let mut control: Option<Offset> = None;
-        for cursor in (cursor + 1)..(end + 1) {
-            let current = read!(cursor);
-            if is_on_curve!(cursor) {
+        builder.flush();
+        if is_on_curve!(glyph_cursor) {
+            builder.add_offset(read!(glyph_cursor));
+        } else {
+            control = Some(read!(glyph_cursor));
+        }
+        for contour_cursor in (glyph_cursor + 1)..=end {
+            let current = read!(contour_cursor);
+            if is_on_curve!(contour_cursor) {
                 match control.take() {
                     Some(control) => builder.add_quadratic(control, current),
                     _ => builder.add_linear(current),
@@ -95,12 +100,7 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
                 }
             }
         }
-        if let Some(control) = control.take() {
-            let current = builder.offset() - control;
-            builder.add_quadratic(control, current);
-            builder.add_compensation(-current);
-        }
-        cursor = end + 1;
+        glyph_cursor = end + 1;
     }
     Ok(())
 }
@@ -114,9 +114,9 @@ fn draw_composite(
 
     for component in description.components.iter() {
         let glyph_index = component.glyph_index as usize;
-        builder.restart();
+        builder.flush();
         match &component.arguments {
-            &Arguments::Offsets(x, y) => builder.add_compensation((x, y)),
+            &Arguments::Offsets(x, y) => builder.add_offset((x, y)),
             &Arguments::Indices(..) => unimplemented!(),
         }
         match &component.options {

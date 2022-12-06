@@ -3,6 +3,8 @@ use crate::{Number, Offset};
 /// A glyph.
 #[derive(Clone, Debug)]
 pub struct Glyph {
+    /// The advance width.
+    pub advance_width: Number,
     /// The left, bottom, right, and top edges.
     pub bounding_box: (Number, Number, Number, Number),
     /// The left and right side bearings.
@@ -32,12 +34,6 @@ pub enum Segment {
 }
 
 impl Glyph {
-    /// Return the width including the side bearings.
-    #[inline]
-    pub fn advance_width(&self) -> Number {
-        self.side_bearings.0 + self.width() + self.side_bearings.1
-    }
-
     /// Return the height.
     #[inline]
     pub fn height(&self) -> Number {
@@ -56,6 +52,7 @@ impl Default for Glyph {
     fn default() -> Self {
         use std::f32::NAN;
         Glyph {
+            advance_width: NAN,
             bounding_box: (NAN, NAN, NAN, NAN),
             side_bearings: (NAN, NAN),
             contours: vec![],
