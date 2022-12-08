@@ -14,9 +14,6 @@ pub struct TrueType {
     mapping: Rc<Mapping>,
 }
 
-macro_rules! expect(($condition:expr) => (if !$condition { reject!(); }));
-macro_rules! reject(() => (raise!("found a malformed glyph")));
-
 impl TrueType {
     #[inline]
     pub fn new(glyph_data: Rc<GlyphData>, metrics: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
@@ -46,7 +43,7 @@ impl Case for TrueType {
         };
         let glyph = match self.glyph_data.get(glyph_index) {
             Some(glyph) => glyph,
-            _ => reject!(),
+            _ => raise!("found no data for glyph {}", glyph),
         };
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         if let &Some(ref glyph) = glyph {
@@ -58,6 +55,14 @@ impl Case for TrueType {
 }
 
 fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result<()> {
+    macro_rules! expect(
+        ($condition:expr) => (
+            if !$condition {
+                raise!("found a malformed glyph");
+            }
+        )
+    );
+
     let &SimpleDescription {
         ref end_points,
         ref flags,
@@ -160,7 +165,7 @@ fn draw_composite(
         let glyph = match case.glyph_data.get(glyph_index) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
-            _ => reject!(),
+            _ => raise!("found no data for glyph index {}", glyph_index),
         };
         if component.flags.should_use_metrics() {
             builder.set_horizontal_metrics(case.metrics.get(glyph_index));

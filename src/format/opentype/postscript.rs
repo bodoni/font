@@ -33,13 +33,18 @@ impl PostScript {
     }
 }
 
-macro_rules! expect(($condition:expr) => (if !$condition { reject!(); }));
-macro_rules! reject(() => (raise!("found a malformed glyph")));
-
 impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
         use postscript::compact1::font_set::Record;
         use postscript::type2::Operator::*;
+
+        macro_rules! expect(
+            ($condition:expr) => (
+                if !$condition {
+                    raise!("found a malformed glyph");
+                }
+            )
+        );
 
         let index = match self.mapping.find(glyph) {
             Some(index) => index,
@@ -54,7 +59,7 @@ impl Case for PostScript {
                     _ => unimplemented!(),
                 },
             ),
-            _ => reject!(),
+            _ => raise!("found no char string for glyph {}", glyph),
         };
         let mut builder = Builder::new();
         builder.set_horizontal_metrics(self.metrics.get(index));
