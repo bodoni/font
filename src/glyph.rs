@@ -18,6 +18,8 @@ pub struct Glyph {
 pub struct Contour {
     /// The offset.
     pub offset: Offset,
+    /// The position.
+    pub position: Offset,
     /// The segments.
     pub segments: Vec<Segment>,
 }

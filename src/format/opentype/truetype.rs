@@ -71,7 +71,6 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
     expect!(point_count == y.len());
     let mut i = 0;
     let mut sum = Offset::default();
-    let mut last_position = Offset::default();
     for k in end_points.iter().map(|&k| k as usize) {
         expect!(i < k);
         expect!(k < point_count);
@@ -147,9 +146,8 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
             }
         };
         debug_assert_eq!(offset, Offset::default());
-        builder.add_offset(position - last_position);
+        builder.move_absolute(position);
         builder.flush();
-        last_position = position;
         sum += sum_delta;
         i = k + 1;
     }
@@ -165,10 +163,10 @@ fn draw_composite(
 
     for component in description.components.iter() {
         let glyph_index = component.glyph_index as usize;
-        match &component.arguments {
-            &Arguments::Offsets(x, y) => builder.add_offset((x, y)),
+        let offset = match &component.arguments {
+            &Arguments::Offsets(x, y) => Offset::from((x, y)),
             &Arguments::Indices(..) => unimplemented!(),
-        }
+        };
         match &component.options {
             &Options::None => {}
             &Options::Scalar(..) => unimplemented!(),
@@ -183,7 +181,7 @@ fn draw_composite(
         if component.flags.should_use_metrics() {
             builder.set_horizontal_metrics(case.metrics.get(glyph_index));
         }
-        case.draw_glyph(builder, glyph)?;
+        builder.nest(offset, |builder| case.draw_glyph(builder, glyph))?;
     }
     Ok(())
 }

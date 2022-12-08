@@ -6,7 +6,7 @@ use common::{setup, trace, Fixture};
 
 #[test]
 fn draw_a_ring() {
-    let font = &setup(Fixture::TTF)[0];
+    let font = &setup(Fixture::OpenSans)[0];
     let glyph = font.case.draw('å').unwrap().unwrap();
     assert_eq!(glyph.len(), 4);
     #[rustfmt::skip]
@@ -39,30 +39,30 @@ fn draw_a_ring() {
         ( 317.0,  175.5),
         ( 449.0,  119.0),
 
-        ( 989.0, 1456.0),
-        ( 929.0, 1299.0),
-        ( 770.0, 1241.0),
-        ( 610.0, 1298.5),
-        ( 551.0, 1454.0),
-        ( 613.0, 1606.5),
-        ( 770.0, 1665.0),
-        ( 930.0, 1608.0),
-        ( 989.0, 1456.0),
-        ( 885.0, 1454.0),
-        ( 853.0, 1538.0),
-        ( 770.0, 1569.0),
-        ( 688.0, 1538.0),
-        ( 655.0, 1454.0),
-        ( 684.5, 1369.5),
-        ( 770.0, 1339.0),
-        ( 853.0, 1369.5),
-        ( 885.0, 1454.0),
+        ( 951.0, 1456.0),
+        ( 891.0, 1299.0),
+        ( 732.0, 1241.0),
+        ( 572.0, 1298.5),
+        ( 513.0, 1454.0),
+        ( 575.0, 1606.5),
+        ( 732.0, 1665.0),
+        ( 892.0, 1608.0),
+        ( 951.0, 1456.0),
+        ( 847.0, 1454.0),
+        ( 815.0, 1538.0),
+        ( 732.0, 1569.0),
+        ( 650.0, 1538.0),
+        ( 617.0, 1454.0),
+        ( 646.5, 1369.5),
+        ( 732.0, 1339.0),
+        ( 815.0, 1369.5),
+        ( 847.0, 1454.0)
     ]);
 }
 
 #[test]
 fn draw_copyright() {
-    let font = &setup(Fixture::TTF)[0];
+    let font = &setup(Fixture::OpenSans)[0];
     let glyph = font.case.draw('©').unwrap().unwrap();
     assert_eq!(glyph.bounding_box, (139.0, -20.0, 1642.0, 1483.0));
     assert_eq!(glyph.side_bearings, (139.0, 62.0));
@@ -70,7 +70,7 @@ fn draw_copyright() {
 
 #[test]
 fn draw_from_a_to_z() {
-    let font = &setup(Fixture::TTF)[0];
+    let font = &setup(Fixture::OpenSans)[0];
     for code in b'a'..(b'z' + 1) {
         font.case.draw(code as char).unwrap().unwrap();
     }
@@ -78,7 +78,7 @@ fn draw_from_a_to_z() {
 
 #[test]
 fn draw_o() {
-    let font = &setup(Fixture::TTF)[0];
+    let font = &setup(Fixture::OpenSans)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
     #[rustfmt::skip]
@@ -111,7 +111,7 @@ fn draw_o() {
 
 #[test]
 fn draw_slash() {
-    let font = &setup(Fixture::TTF)[0];
+    let font = &setup(Fixture::OpenSans)[0];
     let glyph = font.case.draw('/').unwrap().unwrap();
     assert_eq!(glyph.len(), 1);
     #[rustfmt::skip]
@@ -126,7 +126,7 @@ fn draw_slash() {
 
 #[test]
 fn open() {
-    let file = setup(Fixture::TTF);
+    let file = setup(Fixture::OpenSans);
     let font = &file[0];
     assert_eq!(font.units_per_em, 2048);
     assert_eq!(font.ascender, 2189);

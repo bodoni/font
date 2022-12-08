@@ -6,15 +6,15 @@ use common::{setup, trace, Fixture};
 
 #[test]
 fn draw_from_a_to_z() {
-    let font = &setup(Fixture::CFF)[0];
-    for code in b'a'..(b'z' + 1) {
+    let font = &setup(Fixture::SourceSerif)[0];
+    for code in b'a'..=b'z' {
         font.case.draw(code as char).unwrap().unwrap();
     }
 }
 
 #[test]
 fn draw_o() {
-    let font = &setup(Fixture::CFF)[0];
+    let font = &setup(Fixture::SourceSerif)[0];
     let glyph = font.case.draw('o').unwrap().unwrap();
     assert_eq!(glyph.len(), 2);
     #[rustfmt::skip]
@@ -24,6 +24,7 @@ fn draw_o() {
         (274.0,  30.0),
         (140.0, 236.0),
         (274.0, 445.0),
+
         (274.0, 491.0),
         ( 45.0, 237.0),
         (274.0, -15.0),
@@ -34,7 +35,7 @@ fn draw_o() {
 
 #[test]
 fn draw_r() {
-    let font = &setup(Fixture::CFF)[0];
+    let font = &setup(Fixture::SourceSerif)[0];
     let glyph = font.case.draw('r').unwrap().unwrap();
     assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
     assert_eq!(glyph.side_bearings, (34.0, 11.0));
@@ -42,7 +43,7 @@ fn draw_r() {
 
 #[test]
 fn open() {
-    let file = setup(Fixture::CFF);
+    let file = setup(Fixture::SourceSerif);
     let font = &file[0];
     assert_eq!(font.units_per_em, 1000);
     assert_eq!(font.ascender, 918);

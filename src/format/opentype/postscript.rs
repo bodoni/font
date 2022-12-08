@@ -63,20 +63,21 @@ impl Case for PostScript {
             macro_rules! get(($index:expr) => (operands[$index]));
             let count = operands.len();
             match operator {
+                RMoveTo | HMoveTo | VMoveTo => builder.flush(),
+                _ => {}
+            }
+            match operator {
                 RMoveTo => {
                     expect!(count == 2 || !clear && count == 3);
-                    builder.flush();
-                    builder.add_offset((get!(0), get!(1)));
+                    builder.move_relative((get!(0), get!(1)));
                 }
                 HMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.flush();
-                    builder.add_offset((get!(0), 0.0));
+                    builder.move_relative((get!(0), 0.0));
                 }
                 VMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.flush();
-                    builder.add_offset((0.0, get!(0)));
+                    builder.move_relative((0.0, get!(0)));
                 }
                 RLineTo => {
                     expect!(count % 2 == 0);
@@ -235,6 +236,7 @@ impl Case for PostScript {
                 _ => {}
             }
         }
+        builder.flush();
         Ok(Some(builder.into()))
     }
 }

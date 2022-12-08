@@ -7,12 +7,31 @@ use crate::{Number, Offset};
 pub struct Builder {
     contour: Contour,
     glyph: Glyph,
+    offset: Offset,
 }
 
 impl Builder {
     #[inline]
     pub fn new() -> Self {
         Default::default()
+    }
+}
+
+impl Builder {
+    pub fn move_absolute<T: Into<Offset>>(&mut self, value: T) {
+        let last_position = match self.glyph.len() {
+            0 => Offset::default(),
+            count => self.glyph[count - 1].position,
+        };
+        let value = self.offset + value;
+        self.contour.offset = value - last_position;
+        self.contour.position = value;
+    }
+
+    pub fn move_relative<T: Into<Offset>>(&mut self, value: T) {
+        let value = value.into();
+        self.contour.offset += value;
+        self.contour.position += value;
     }
 }
 
@@ -25,13 +44,21 @@ impl Builder {
             .contours
             .push(mem::replace(&mut self.contour, Default::default()));
     }
+
+    pub fn nest<T, U, F>(&mut self, offset: T, build: F) -> U
+    where
+        T: Into<Offset>,
+        F: Fn(&mut Builder) -> U,
+    {
+        let offset = offset.into();
+        self.offset += offset;
+        let result = build(self);
+        self.offset -= offset;
+        result
+    }
 }
 
 impl Builder {
-    pub fn add_offset<T: Into<Offset>>(&mut self, value: T) {
-        self.contour.offset += value;
-    }
-
     pub fn add_linear<T: Into<Offset>>(&mut self, a: T) {
         let a = a.into();
         self.add_segment(Segment::Linear(a), a);
@@ -66,8 +93,7 @@ impl Builder {
 }
 
 impl From<Builder> for Glyph {
-    fn from(mut builder: Builder) -> Glyph {
-        builder.flush();
+    fn from(builder: Builder) -> Glyph {
         let Builder { mut glyph, .. } = builder;
         let width = glyph.bounding_box.2 - glyph.bounding_box.0;
         glyph.side_bearings.1 = glyph.advance_width - (glyph.side_bearings.0 + width);

@@ -3,14 +3,14 @@
 use library::{File, Glyph};
 
 pub enum Fixture {
-    CFF,
-    TTF,
+    OpenSans,
+    SourceSerif,
 }
 
 pub fn setup(fixture: Fixture) -> File {
     match fixture {
-        Fixture::CFF => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
-        Fixture::TTF => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
+        Fixture::OpenSans => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
+        Fixture::SourceSerif => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
     }
 }
 
