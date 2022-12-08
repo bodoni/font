@@ -38,6 +38,7 @@ macro_rules! reject(() => (raise!("found a malformed glyph")));
 
 impl Case for PostScript {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
+        use postscript::compact1::font_set::Record;
         use postscript::type2::Operator::*;
 
         let index = match self.mapping.find(glyph) {
@@ -47,8 +48,11 @@ impl Case for PostScript {
         let mut program = match self.font_set.char_strings[self.id].get(index) {
             Some(char_string) => Program::new(
                 char_string,
-                &self.font_set.global_subroutines,
-                &self.font_set.local_subroutines[self.id],
+                &self.font_set.subroutines,
+                match &self.font_set.records[self.id] {
+                    Record::CharacterNameKeyed(ref record) => &*record.subroutines,
+                    _ => unimplemented!(),
+                },
             ),
             _ => reject!(),
         };
