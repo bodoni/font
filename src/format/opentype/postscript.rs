@@ -62,10 +62,13 @@ impl Case for PostScript {
             _ => raise!("found no char string for glyph {}", glyph),
         };
         let mut builder = Builder::new();
-        builder.set_horizontal_metrics(self.metrics.get(index));
+        macro_rules! build(
+            ($function:ident($(($x:expr, $y:expr)),+ $(,)?)) => (
+                builder.$function($(($x, $y)),+);
+            )
+        );
         let mut clear = false;
         while let Some((operator, operands)) = program.next()? {
-            macro_rules! get(($index:expr) => (operands[$index]));
             let count = operands.len();
             match operator {
                 RMoveTo | HMoveTo | VMoveTo => builder.flush(),
@@ -74,38 +77,38 @@ impl Case for PostScript {
             match operator {
                 RMoveTo => {
                     expect!(count == 2 || !clear && count == 3);
-                    builder.move_relative((get!(0), get!(1)));
+                    build!(move_relative((operands[0], operands[1])));
                 }
                 HMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.move_relative((get!(0), 0.0));
+                    build!(move_relative((operands[0], 0.0)));
                 }
                 VMoveTo => {
                     expect!(count == 1 || !clear && count == 2);
-                    builder.move_relative((0.0, get!(0)));
+                    build!(move_relative((0.0, operands[0])));
                 }
                 RLineTo => {
                     expect!(count % 2 == 0);
                     for i in 0..(count / 2) {
                         let j = 2 * i;
-                        builder.add_linear((get!(j + 0), get!(j + 1)));
+                        build!(add_linear((operands[j], operands[j + 1])));
                     }
                 }
                 HLineTo => {
                     for i in 0..count {
                         if i % 2 == 0 {
-                            builder.add_linear((get!(i), 0.0));
+                            build!(add_linear((operands[i], 0.0)));
                         } else {
-                            builder.add_linear((0.0, get!(i)));
+                            build!(add_linear((0.0, operands[i])));
                         }
                     }
                 }
                 VLineTo => {
                     for i in 0..count {
                         if i % 2 == 1 {
-                            builder.add_linear((get!(i), 0.0));
+                            build!(add_linear((operands[i], 0.0)));
                         } else {
-                            builder.add_linear((0.0, get!(i)));
+                            build!(add_linear((0.0, operands[i])));
                         }
                     }
                 }
@@ -113,11 +116,11 @@ impl Case for PostScript {
                     expect!(count % 6 == 0);
                     for i in 0..(count / 6) {
                         let j = 6 * i;
-                        builder.add_cubic(
-                            (get!(j + 0), get!(j + 1)),
-                            (get!(j + 2), get!(j + 3)),
-                            (get!(j + 4), get!(j + 5)),
-                        );
+                        build!(add_cubic(
+                            (operands[j], operands[j + 1]),
+                            (operands[j + 2], operands[j + 3]),
+                            (operands[j + 4], operands[j + 5]),
+                        ));
                     }
                 }
                 HHCurveTo => {
@@ -125,16 +128,16 @@ impl Case for PostScript {
                         (0, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
-                        (1, get!(0))
+                        (1, operands[0])
                     };
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
-                        builder.add_cubic(
-                            (get!(j + 0), first),
-                            (get!(j + 1), get!(j + 2)),
-                            (get!(j + 3), 0.0),
-                        );
+                        build!(add_cubic(
+                            (operands[j], first),
+                            (operands[j + 1], operands[j + 2]),
+                            (operands[j + 3], 0.0),
+                        ));
                     }
                 }
                 HVCurveTo => {
@@ -142,23 +145,23 @@ impl Case for PostScript {
                         (count / 4, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
-                        ((count - 1) / 4, get!(count - 1))
+                        ((count - 1) / 4, operands[count - 1])
                     };
                     for i in 0..steps {
                         let j = 4 * i;
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 0 {
-                            builder.add_cubic(
-                                (get!(j + 0), 0.0),
-                                (get!(j + 1), get!(j + 2)),
-                                (last, get!(j + 3)),
-                            );
+                            build!(add_cubic(
+                                (operands[j], 0.0),
+                                (operands[j + 1], operands[j + 2]),
+                                (last, operands[j + 3]),
+                            ));
                         } else {
-                            builder.add_cubic(
-                                (0.0, get!(j + 0)),
-                                (get!(j + 1), get!(j + 2)),
-                                (get!(j + 3), last),
-                            );
+                            build!(add_cubic(
+                                (0.0, operands[j]),
+                                (operands[j + 1], operands[j + 2]),
+                                (operands[j + 3], last),
+                            ));
                         }
                     }
                 }
@@ -167,23 +170,23 @@ impl Case for PostScript {
                         (count / 4, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
-                        ((count - 1) / 4, get!(count - 1))
+                        ((count - 1) / 4, operands[count - 1])
                     };
                     for i in 0..steps {
                         let j = 4 * i;
                         let last = if i + 1 == steps { last } else { 0.0 };
                         if i % 2 == 1 {
-                            builder.add_cubic(
-                                (get!(j + 0), 0.0),
-                                (get!(j + 1), get!(j + 2)),
-                                (last, get!(j + 3)),
-                            );
+                            build!(add_cubic(
+                                (operands[j], 0.0),
+                                (operands[j + 1], operands[j + 2]),
+                                (last, operands[j + 3]),
+                            ));
                         } else {
-                            builder.add_cubic(
-                                (0.0, get!(j + 0)),
-                                (get!(j + 1), get!(j + 2)),
-                                (get!(j + 3), last),
-                            );
+                            build!(add_cubic(
+                                (0.0, operands[j]),
+                                (operands[j + 1], operands[j + 2]),
+                                (operands[j + 3], last),
+                            ));
                         }
                     }
                 }
@@ -192,43 +195,43 @@ impl Case for PostScript {
                         (0, 0.0)
                     } else {
                         expect!((count - 1) % 4 == 0);
-                        (1, get!(0))
+                        (1, operands[0])
                     };
                     for i in 0..((count - offset) / 4) {
                         let j = offset + 4 * i;
                         let first = if i == 0 { first } else { 0.0 };
-                        builder.add_cubic(
-                            (first, get!(j + 0)),
-                            (get!(j + 1), get!(j + 2)),
-                            (0.0, get!(j + 3)),
-                        );
+                        build!(add_cubic(
+                            (first, operands[j]),
+                            (operands[j + 1], operands[j + 2]),
+                            (0.0, operands[j + 3]),
+                        ));
                     }
                 }
                 RCurveLine => {
                     expect!(count >= 2 && (count - 2) % 6 == 0);
                     for i in 0..((count - 2) / 6) {
                         let j = 6 * i;
-                        builder.add_cubic(
-                            (get!(j + 0), get!(j + 1)),
-                            (get!(j + 2), get!(j + 3)),
-                            (get!(j + 4), get!(j + 5)),
-                        );
+                        build!(add_cubic(
+                            (operands[j], operands[j + 1]),
+                            (operands[j + 2], operands[j + 3]),
+                            (operands[j + 4], operands[j + 5]),
+                        ));
                     }
                     let j = count - 2;
-                    builder.add_linear((get!(j + 0), get!(j + 1)));
+                    build!(add_linear((operands[j], operands[j + 1])));
                 }
                 RLineCurve => {
                     expect!(count >= 6 && (count - 6) % 2 == 0);
                     for i in 0..((count - 6) / 2) {
                         let j = 2 * i;
-                        builder.add_linear((get!(j + 0), get!(j + 1)));
+                        build!(add_linear((operands[j], operands[j + 1])));
                     }
                     let j = count - 6;
-                    builder.add_cubic(
-                        (get!(j + 0), get!(j + 1)),
-                        (get!(j + 2), get!(j + 3)),
-                        (get!(j + 4), get!(j + 5)),
-                    );
+                    build!(add_cubic(
+                        (operands[j], operands[j + 1]),
+                        (operands[j + 2], operands[j + 3]),
+                        (operands[j + 4], operands[j + 5]),
+                    ));
                 }
                 HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {}
                 _ => unreachable!(),
@@ -242,6 +245,7 @@ impl Case for PostScript {
             }
         }
         builder.flush();
+        builder.set_horizontal_metrics(self.metrics.get(index));
         Ok(Some(builder.into()))
     }
 }

@@ -48,7 +48,7 @@ impl Case for TrueType {
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         if let &Some(ref glyph) = glyph {
             self.draw_glyph(&mut builder, glyph)?;
-            builder.set_bounding_box(glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y);
+            builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
         }
         Ok(Some(builder.into()))
     }
