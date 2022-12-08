@@ -5,12 +5,14 @@ use library::{File, Glyph};
 pub enum Fixture {
     OpenSans,
     SourceSerif,
+    VesperLibre,
 }
 
 pub fn setup(fixture: Fixture) -> File {
     match fixture {
         Fixture::OpenSans => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
         Fixture::SourceSerif => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
+        Fixture::VesperLibre => File::open("tests/fixtures/VesperLibre-Regular.ttf").unwrap(),
     }
 }
 
