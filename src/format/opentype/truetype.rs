@@ -66,33 +66,44 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
         ..
     } = description;
     let point_count = flags.len();
-    expect!(point_count > 0 && point_count == x.len() && point_count == y.len());
-    macro_rules! is_on_curve(($i:expr) => (flags[$i].is_on_curve()));
-    macro_rules! read(($i:expr) => (Offset::from((x[$i], y[$i]))));
-    let mut glyph_cursor = 0;
-    for &end in end_points {
-        let end = end as usize;
-        expect!(end < point_count);
-        let mut control: Option<Offset> = None;
-        builder.flush();
-        if is_on_curve!(glyph_cursor) {
-            builder.add_offset(read!(glyph_cursor));
+    expect!(point_count > 0);
+    expect!(point_count == x.len());
+    expect!(point_count == y.len());
+    let mut i = 0;
+    let mut sum = Offset::default();
+    let mut last_position = Offset::default();
+    for k in end_points.iter().map(|&k| k as usize) {
+        expect!(i < k);
+        expect!(k < point_count);
+        let start = (x[i], y[i]).into();
+        let mut control = if flags[i].is_on_curve() {
+            None
         } else {
-            control = Some(read!(glyph_cursor));
-        }
-        for contour_cursor in (glyph_cursor + 1)..=end {
-            let current = read!(contour_cursor);
-            if is_on_curve!(contour_cursor) {
+            Some(start)
+        };
+        let mut sum_delta = start;
+        let mut offset = Offset::default();
+        for j in (i + 1)..=k {
+            let current = (x[j], y[j]).into();
+            sum_delta += current;
+            if flags[j].is_on_curve() {
                 match control.take() {
-                    Some(control) => builder.add_quadratic(control, current),
-                    _ => builder.add_linear(current),
+                    Some(control) => {
+                        builder.add_quadratic(control, current);
+                        offset += control + current;
+                    }
+                    _ => {
+                        builder.add_linear(current);
+                        offset += current;
+                    }
                 }
             } else {
                 match &mut control {
                     &mut Some(ref mut control) => {
-                        let half = current / 2.0;
-                        builder.add_quadratic(*control, half);
-                        *control = half;
+                        let current = current / 2.0;
+                        builder.add_quadratic(*control, current);
+                        offset += *control + current;
+                        *control = current;
                     }
                     control @ &mut None => {
                         *control = Some(current);
@@ -100,7 +111,47 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
                 }
             }
         }
-        glyph_cursor = end + 1;
+        let position = match (flags[i].is_on_curve(), control) {
+            (false, None) => {
+                let current = -offset;
+                let control = -offset - start;
+                builder.add_quadratic(control, current);
+                offset += control + current;
+                Offset::default()
+            }
+            (false, Some(control)) => {
+                {
+                    let current = -offset / 2.0;
+                    builder.add_quadratic(control, current);
+                    offset += control + current;
+                }
+                {
+                    let current = -offset;
+                    let control = -offset - start;
+                    builder.add_quadratic(control, current);
+                    offset += control + current;
+                }
+                Offset::default()
+            }
+            (true, None) => {
+                let current = -offset;
+                builder.add_linear(current);
+                offset += current;
+                sum + start
+            }
+            (true, Some(control)) => {
+                let current = -offset - control;
+                builder.add_quadratic(control, current);
+                offset += control + current;
+                sum + start
+            }
+        };
+        debug_assert_eq!(offset, Offset::default());
+        builder.add_offset(position - last_position);
+        builder.flush();
+        last_position = position;
+        sum += sum_delta;
+        i = k + 1;
     }
     Ok(())
 }
@@ -114,7 +165,6 @@ fn draw_composite(
 
     for component in description.components.iter() {
         let glyph_index = component.glyph_index as usize;
-        builder.flush();
         match &component.arguments {
             &Arguments::Offsets(x, y) => builder.add_offset((x, y)),
             &Arguments::Indices(..) => unimplemented!(),
