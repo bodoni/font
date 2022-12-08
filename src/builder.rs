@@ -33,6 +33,15 @@ impl Builder {
         self.contour.offset += value;
         self.contour.position += value;
     }
+
+    pub fn move_control<T: Into<Offset>>(&mut self, a: T) {
+        let b = match self.contour.segments.get_mut(0) {
+            Some(&mut Segment::Quadratic(ref mut b, _)) => b,
+            Some(&mut Segment::Cubic(ref mut b, _, _)) => b,
+            _ => unreachable!(),
+        };
+        *b = a.into();
+    }
 }
 
 impl Builder {
@@ -60,22 +69,19 @@ impl Builder {
 
 impl Builder {
     pub fn add_linear<T: Into<Offset>>(&mut self, a: T) {
-        let a = a.into();
-        self.add_segment(Segment::Linear(a), a);
+        self.contour.segments.push(Segment::Linear(a.into()));
     }
 
     pub fn add_quadratic<T: Into<Offset>>(&mut self, a: T, b: T) {
-        let (a, b) = (a.into(), b.into());
-        self.add_segment(Segment::Quadratic(a, b), a + b);
+        self.contour
+            .segments
+            .push(Segment::Quadratic(a.into(), b.into()));
     }
 
     pub fn add_cubic<T: Into<Offset>>(&mut self, a: T, b: T, c: T) {
-        let (a, b, c) = (a.into(), b.into(), c.into());
-        self.add_segment(Segment::Cubic(a, b, c), a + b + c);
-    }
-
-    fn add_segment(&mut self, segment: Segment, _: Offset) {
-        self.contour.segments.push(segment);
+        self.contour
+            .segments
+            .push(Segment::Cubic(a.into(), b.into(), c.into()));
     }
 }
 
