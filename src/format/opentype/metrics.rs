@@ -38,7 +38,7 @@ impl Metrics {
     #[inline]
     pub fn get(&self, glyph_index: GlyphID) -> (Number, Number) {
         let (advance_width, left_side_bearing) = self.horizontal_metrics.get(glyph_index);
-        (Number::from(advance_width), Number::from(left_side_bearing))
+        (advance_width.into(), left_side_bearing.into())
     }
 }
 
