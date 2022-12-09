@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use library::{File, Glyph};
+use font::{File, Glyph};
 
 pub enum Fixture {
     OpenSans,
@@ -17,8 +17,8 @@ pub fn setup(fixture: Fixture) -> File {
 }
 
 pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
-    use library::Offset;
-    use library::Segment::*;
+    use font::Offset;
+    use font::Segment::*;
 
     let mut points = vec![];
     let mut offset = Offset::default();
