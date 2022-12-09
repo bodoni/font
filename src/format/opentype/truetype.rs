@@ -43,7 +43,7 @@ impl Case for TrueType {
         };
         let glyph = match self.glyph_data.get(glyph_index as usize) {
             Some(glyph) => glyph,
-            _ => raise!("found no data for glyph {}", glyph),
+            _ => raise!("failed to find data for glyph {}", glyph),
         };
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         if let &Some(ref glyph) = glyph {
@@ -165,7 +165,7 @@ fn draw_composite(
         let glyph = match case.glyph_data.get(glyph_index as usize) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
-            _ => raise!("found no data for glyph index {}", glyph_index),
+            _ => raise!("failed to find data for glyph index {}", glyph_index),
         };
         if component.flags.should_use_metrics() {
             builder.set_horizontal_metrics(case.metrics.get(glyph_index));

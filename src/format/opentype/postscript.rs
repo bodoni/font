@@ -59,7 +59,7 @@ impl Case for PostScript {
                     _ => unimplemented!(),
                 },
             ),
-            _ => raise!("found no char string for glyph {}", glyph),
+            _ => raise!("failed to find char string for glyph {}", glyph),
         };
         let mut builder = Builder::new();
         macro_rules! build(
