@@ -1,4 +1,3 @@
-use std::ops::Deref;
 use truetype::{HorizontalHeader, HorizontalMetrics};
 
 use crate::{Number, Result};
@@ -24,11 +23,4 @@ impl Metrics {
     }
 }
 
-impl Deref for Metrics {
-    type Target = HorizontalHeader;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        &self.header
-    }
-}
+deref! { Metrics::header => HorizontalHeader }
