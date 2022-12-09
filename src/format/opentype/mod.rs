@@ -81,7 +81,7 @@ where
             return Ok(());
         }
     }
-    raise!("failed to find glyph outlines");
+    raise!("found no glyph outlines");
 }
 
 #[inline]
