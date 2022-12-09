@@ -116,8 +116,13 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
                 offset += control;
                 builder.move_absolute(sum + sum_delta);
             }
-            (false, Some(_)) => {
-                unimplemented!();
+            (false, Some(control)) => {
+                let current = ((sum + start) - (sum + sum_delta)) / 2.0;
+                builder.add_quadratic(control, current);
+                offset += control + current;
+                builder.move_control(current);
+                offset += current;
+                builder.move_absolute(sum + sum_delta + current);
             }
             (true, None) => {
                 let current = -offset;
