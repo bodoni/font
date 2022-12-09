@@ -2,6 +2,17 @@ extern crate font;
 
 mod common;
 
+mod adobe_blank {
+    use crate::common::{setup, Fixture};
+
+    #[test]
+    fn draw_a() {
+        let font = &setup(Fixture::AdobeBlank)[0];
+        let glyph = font.case.draw('a').unwrap().unwrap();
+        assert_eq!(glyph.len(), 0);
+    }
+}
+
 mod numans {
     use crate::common::{setup, trace, Fixture};
 

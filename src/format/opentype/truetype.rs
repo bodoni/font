@@ -58,7 +58,7 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
     macro_rules! expect(
         ($condition:expr) => (
             if !$condition {
-                raise!("found a malformed glyph");
+                raise!(concat!("found a malformed glyph (", stringify!($condition), ")"));
             }
         )
     );
@@ -76,8 +76,7 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
     let mut i = 0;
     let mut sum = Offset::default();
     for k in end_points.iter().map(|&k| k as usize) {
-        expect!(i < k);
-        expect!(k < point_count);
+        expect!(i < point_count);
         let start = Offset::from((x[i], y[i]));
         let mut control = match flags[i].is_on_curve() {
             false => Some(Offset::default()),
@@ -86,6 +85,7 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
         let mut sum_delta = start;
         let mut offset = Offset::default();
         for j in (i + 1)..=k {
+            expect!(j < point_count);
             let current = (x[j], y[j]).into();
             sum_delta += current;
             match (flags[j].is_on_curve(), &mut control) {
@@ -118,7 +118,9 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
             }
             (false, Some(control)) => {
                 let current = ((sum + start) - (sum + sum_delta)) / 2.0;
-                builder.add_quadratic(control, current);
+                if !control.is_zero() || !current.is_zero() {
+                    builder.add_quadratic(control, current);
+                }
                 offset += control + current;
                 builder.move_control(current);
                 offset += current;
@@ -126,18 +128,22 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
             }
             (true, None) => {
                 let current = -offset;
-                builder.add_linear(current);
+                if !current.is_zero() {
+                    builder.add_linear(current);
+                }
                 offset += current;
                 builder.move_absolute(sum + start);
             }
             (true, Some(control)) => {
                 let current = -offset - control;
-                builder.add_quadratic(control, current);
+                if !control.is_zero() || !current.is_zero() {
+                    builder.add_quadratic(control, current);
+                }
                 offset += control + current;
                 builder.move_absolute(sum + start);
             }
         }
-        debug_assert_eq!(offset, Offset::default());
+        debug_assert!(offset.is_zero());
         builder.flush();
         sum += sum_delta;
         i = k + 1;

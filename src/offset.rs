@@ -6,6 +6,14 @@ use crate::Number;
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Offset(pub Number, pub Number);
 
+impl Offset {
+    // Check if the offset is zero.
+    #[inline]
+    pub fn is_zero(&self) -> bool {
+        self.0 == 0.0 && self.1 == 0.0
+    }
+}
+
 impl From<Offset> for (Number, Number) {
     #[inline]
     fn from(offset: Offset) -> Self {
