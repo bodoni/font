@@ -41,7 +41,7 @@ impl Case for TrueType {
             Some(glyph_index) => glyph_index,
             _ => return Ok(None),
         };
-        let glyph = match self.glyph_data.get(glyph_index) {
+        let glyph = match self.glyph_data.get(glyph_index as usize) {
             Some(glyph) => glyph,
             _ => raise!("found no data for glyph {}", glyph),
         };
@@ -151,7 +151,7 @@ fn draw_composite(
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
-        let glyph_index = component.glyph_index as usize;
+        let glyph_index = component.glyph_index;
         let offset = match &component.arguments {
             &Arguments::Offsets(x, y) => Offset::from((x, y)),
             &Arguments::Indices(..) => unimplemented!(),
@@ -162,7 +162,7 @@ fn draw_composite(
             &Options::Vector(..) => unimplemented!(),
             &Options::Matrix(..) => unimplemented!(),
         }
-        let glyph = match case.glyph_data.get(glyph_index) {
+        let glyph = match case.glyph_data.get(glyph_index as usize) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
             _ => raise!("found no data for glyph index {}", glyph_index),

@@ -46,11 +46,11 @@ impl Case for PostScript {
             )
         );
 
-        let index = match self.mapping.find(glyph) {
-            Some(index) => index,
+        let glyph_index = match self.mapping.find(glyph) {
+            Some(glyph_index) => glyph_index,
             _ => return Ok(None),
         };
-        let mut program = match self.font_set.char_strings[self.id].get(index) {
+        let mut program = match self.font_set.char_strings[self.id].get(glyph_index as usize) {
             Some(char_string) => Program::new(
                 char_string,
                 &self.font_set.subroutines,
@@ -245,7 +245,7 @@ impl Case for PostScript {
             }
         }
         builder.flush();
-        builder.set_horizontal_metrics(self.metrics.get(index));
+        builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         Ok(Some(builder.into()))
     }
 }

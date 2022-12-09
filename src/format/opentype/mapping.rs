@@ -33,7 +33,7 @@ impl Mapping {
     }
 
     #[inline]
-    pub fn find(&self, glyph: char) -> Option<usize> {
-        self.0.get(&(glyph as u32)).map(|id| *id as usize)
+    pub fn find(&self, glyph: char) -> Option<GlyphID> {
+        self.0.get(&(glyph as u32)).map(|id| *id)
     }
 }

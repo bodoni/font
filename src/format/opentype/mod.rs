@@ -1,7 +1,7 @@
 use ::postscript::compact1::FontSet;
 use ::truetype::{
     CharMapping, FontHeader, GlyphData, GlyphMapping, HorizontalHeader, HorizontalMetrics,
-    MaximumProfile,
+    MaximumProfile, WindowsMetrics,
 };
 use opentype;
 use std::io::{Read, Seek};
@@ -50,11 +50,19 @@ where
         font.take_given::<_, HorizontalMetrics>(tape, (&horizontal_header, &maximum_profile))?,
         "cannot find the horizontal metrics"
     );
+    let windows_metrics = some!(
+        font.take::<_, WindowsMetrics>(tape)?,
+        "cannot find the OS/2 and Windows metrics"
+    );
     let char_mapping = some!(
         font.take::<_, CharMapping>(tape)?,
         "cannot find the char-to-glyph mapping"
     );
-    let metrics = Rc::new(Metrics::new(horizontal_header, horizontal_metrics)?);
+    let metrics = Rc::new(Metrics::new(
+        horizontal_header,
+        horizontal_metrics,
+        windows_metrics,
+    )?);
     let mapping = Rc::new(Mapping::new(char_mapping)?);
     if let Some(font_set) = font.take::<_, FontSet>(tape)? {
         let font_set = Rc::new(font_set);
@@ -78,10 +86,11 @@ where
 
 #[inline]
 pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<dyn Case>) -> Font {
+    let (ascender, descender) = metrics.describe();
     Font {
         units_per_em: font_header.units_per_em as usize,
-        ascender: metrics.ascender as isize,
-        descender: metrics.descender as isize,
+        ascender: ascender,
+        descender: descender,
         case: case,
     }
 }
