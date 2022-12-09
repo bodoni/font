@@ -116,6 +116,9 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
                 offset += control;
                 builder.move_absolute(sum + sum_delta);
             }
+            (false, Some(_)) => {
+                unimplemented!();
+            }
             (true, None) => {
                 let current = -offset;
                 builder.add_linear(current);
@@ -128,7 +131,6 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
                 offset += control + current;
                 builder.move_absolute(sum + start);
             }
-            _ => unimplemented!(),
         }
         debug_assert_eq!(offset, Offset::default());
         builder.flush();

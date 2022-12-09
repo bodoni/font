@@ -3,6 +3,7 @@
 use font::{File, Glyph};
 
 pub enum Fixture {
+    Numans,
     OpenSans,
     SourceSerif,
     VesperLibre,
@@ -10,6 +11,7 @@ pub enum Fixture {
 
 pub fn setup(fixture: Fixture) -> File {
     match fixture {
+        Fixture::Numans => File::open("tests/fixtures/Numans-Regular.ttf").unwrap(),
         Fixture::OpenSans => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
         Fixture::SourceSerif => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
         Fixture::VesperLibre => File::open("tests/fixtures/VesperLibre-Regular.ttf").unwrap(),

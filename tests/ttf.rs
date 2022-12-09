@@ -2,6 +2,21 @@ extern crate font;
 
 mod common;
 
+mod numans {
+    use crate::common::{setup, trace, Fixture};
+
+    #[test]
+    #[should_panic]
+    fn draw_a() {
+        let font = &setup(Fixture::Numans)[0];
+        let glyph = font.case.draw('a').unwrap().unwrap();
+        assert_eq!(glyph.len(), 2);
+        #[rustfmt::skip]
+        assert_eq!(&trace(&glyph), &vec![
+        ]);
+    }
+}
+
 mod open_sans {
     use crate::common::{setup, trace, Fixture};
 
