@@ -79,38 +79,33 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
         expect!(i < k);
         expect!(k < point_count);
         let start = Offset::from((x[i], y[i]));
-        let mut control = if flags[i].is_on_curve() {
-            None
-        } else {
-            Some(Offset::default())
+        let mut control = match flags[i].is_on_curve() {
+            false => Some(Offset::default()),
+            _ => None,
         };
         let mut sum_delta = start;
         let mut offset = Offset::default();
         for j in (i + 1)..=k {
             let current = (x[j], y[j]).into();
             sum_delta += current;
-            if flags[j].is_on_curve() {
-                match control.take() {
-                    Some(control) => {
-                        builder.add_quadratic(control, current);
-                        offset += control + current;
-                    }
-                    _ => {
-                        builder.add_linear(current);
-                        offset += current;
-                    }
+            match (flags[j].is_on_curve(), &mut control) {
+                (false, control @ &mut None) => {
+                    *control = Some(current);
                 }
-            } else {
-                match &mut control {
-                    &mut Some(ref mut control) => {
-                        let current = current / 2.0;
-                        builder.add_quadratic(*control, current);
-                        offset += *control + current;
-                        *control = current;
-                    }
-                    control @ &mut None => {
-                        *control = Some(current);
-                    }
+                (false, &mut Some(ref mut control)) => {
+                    let current = current / 2.0;
+                    builder.add_quadratic(*control, current);
+                    offset += *control + current;
+                    *control = current;
+                }
+                (true, &mut None) => {
+                    builder.add_linear(current);
+                    offset += current;
+                }
+                (true, control @ &mut Some(_)) => {
+                    let control = control.take().unwrap();
+                    builder.add_quadratic(control, current);
+                    offset += control + current;
                 }
             }
         }
