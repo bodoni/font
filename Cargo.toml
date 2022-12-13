@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -13,7 +13,7 @@ exclude = ["tests/fixtures/*"]
 [dependencies]
 opentype = "0.20"
 postscript = "0.16"
-truetype = "0.33"
+truetype = "0.34"
 typeface = "0.1"
 
 [dev-dependencies]
