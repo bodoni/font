@@ -11,9 +11,9 @@ repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-opentype = "0.20"
+opentype = "0.21"
 postscript = "0.16"
-truetype = "0.34"
+truetype = "0.35"
 typeface = "0.1"
 
 [dev-dependencies]
