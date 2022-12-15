@@ -26,4 +26,4 @@ impl File {
     }
 }
 
-deref! { File::fonts => [Font] }
+dereference! { File::fonts => [Font] }

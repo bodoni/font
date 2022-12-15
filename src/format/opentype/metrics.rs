@@ -42,4 +42,4 @@ impl Metrics {
     }
 }
 
-deref! { Metrics::horizontal_header => HorizontalHeader }
+dereference! { Metrics::horizontal_header => HorizontalHeader }

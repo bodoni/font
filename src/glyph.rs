@@ -62,6 +62,6 @@ impl Default for Glyph {
     }
 }
 
-deref! { Glyph::contours => [Contour] }
+dereference! { Glyph::contours => [Contour] }
 
-deref! { Contour::segments => [Segment] }
+dereference! { Contour::segments => [Segment] }

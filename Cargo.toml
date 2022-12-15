@@ -14,7 +14,7 @@ exclude = ["tests/fixtures/*"]
 opentype = "0.21"
 postscript = "0.16"
 truetype = "0.35"
-typeface = "0.1"
+typeface = "0.2"
 
 [dev-dependencies]
 svg = "0.9"
