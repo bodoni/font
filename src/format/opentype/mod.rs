@@ -13,11 +13,11 @@ use ::truetype::{
 };
 use opentype;
 
-use crate::{Case, Font, Result};
 use self::mapping::Mapping;
 use self::metrics::Metrics;
 use self::postscript::PostScript;
 use self::truetype::TrueType;
+use crate::{Case, Font, Result};
 
 pub fn read<T>(tape: &mut T) -> Result<Vec<Font>>
 where
