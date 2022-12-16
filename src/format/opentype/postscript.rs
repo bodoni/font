@@ -1,6 +1,7 @@
+use std::rc::Rc;
+
 use postscript::compact1::FontSet;
 use postscript::type2::Program;
-use std::rc::Rc;
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;

@@ -1,19 +1,19 @@
+mod mapping;
+mod metrics;
+mod postscript;
+mod truetype;
+
+use std::io::{Read, Seek};
+use std::rc::Rc;
+
 use ::postscript::compact1::FontSet;
 use ::truetype::{
     CharMapping, FontHeader, GlyphData, GlyphMapping, HorizontalHeader, HorizontalMetrics,
     MaximumProfile, WindowsMetrics,
 };
 use opentype;
-use std::io::{Read, Seek};
-use std::rc::Rc;
 
 use crate::{Case, Font, Result};
-
-mod mapping;
-mod metrics;
-mod postscript;
-mod truetype;
-
 use self::mapping::Mapping;
 use self::metrics::Metrics;
 use self::postscript::PostScript;

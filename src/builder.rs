@@ -1,5 +1,3 @@
-use std::mem;
-
 use crate::glyph::{Contour, Glyph, Segment};
 use crate::{Number, Offset};
 
@@ -46,6 +44,8 @@ impl Builder {
 
 impl Builder {
     pub fn flush(&mut self) {
+        use std::mem;
+
         if self.contour.is_empty() {
             return;
         }

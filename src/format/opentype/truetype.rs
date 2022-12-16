@@ -1,4 +1,5 @@
 use std::rc::Rc;
+
 use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
 use super::mapping::Mapping;

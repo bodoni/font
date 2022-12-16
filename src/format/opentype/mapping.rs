@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+
 use truetype::char_mapping::Encoding;
 use truetype::{CharMapping, GlyphID};
 
