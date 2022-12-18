@@ -38,8 +38,8 @@ mod source_serif {
     fn draw_r() {
         let font = &setup(Fixture::SourceSerif)[0];
         let glyph = font.case.draw('r').unwrap().unwrap();
-        assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
-        assert_eq!(glyph.side_bearings, (34.0, 11.0));
+        assert_eq!(glyph.bounding_box, (34, 0, 412, 491));
+        assert_eq!(glyph.side_bearings, (34, 11));
     }
 
     #[test]

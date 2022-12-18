@@ -1,18 +1,11 @@
 use crate::glyph::{Contour, Glyph, Segment};
-use crate::{Number, Offset};
+use crate::Offset;
 
 #[derive(Default)]
 pub struct Builder {
     contour: Contour,
     glyph: Glyph,
     offset: Offset,
-}
-
-impl Builder {
-    #[inline]
-    pub fn new() -> Self {
-        Default::default()
-    }
 }
 
 impl Builder {
@@ -87,17 +80,14 @@ impl Builder {
 
 impl Builder {
     #[inline]
-    pub fn set_bounding_box<T: Into<Number>>(
-        &mut self,
-        (min_x, min_y, max_x, max_y): (T, T, T, T),
-    ) {
+    pub fn set_bounding_box<T: Into<isize>>(&mut self, (min_x, min_y, max_x, max_y): (T, T, T, T)) {
         self.glyph.bounding_box = (min_x.into(), min_y.into(), max_x.into(), max_y.into());
     }
 
     #[inline]
-    pub fn set_horizontal_metrics<T: Into<Number>>(
+    pub fn set_horizontal_metrics<T: Into<usize>, U: Into<isize>>(
         &mut self,
-        (advance_width, left_side_bearing): (T, T),
+        (advance_width, left_side_bearing): (T, U),
     ) {
         self.glyph.advance_width = advance_width.into();
         self.glyph.side_bearings.0 = left_side_bearing.into();
@@ -108,7 +98,7 @@ impl From<Builder> for Glyph {
     fn from(builder: Builder) -> Glyph {
         let Builder { mut glyph, .. } = builder;
         let width = glyph.bounding_box.2 - glyph.bounding_box.0;
-        glyph.side_bearings.1 = glyph.advance_width - (glyph.side_bearings.0 + width);
+        glyph.side_bearings.1 = glyph.advance_width as isize - (glyph.side_bearings.0 + width);
         glyph
     }
 }

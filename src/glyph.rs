@@ -1,14 +1,14 @@
-use crate::{Number, Offset};
+use crate::Offset;
 
 /// A glyph.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Glyph {
     /// The advance width.
-    pub advance_width: Number,
+    pub advance_width: usize,
     /// The left, bottom, right, and top edges.
-    pub bounding_box: (Number, Number, Number, Number),
+    pub bounding_box: (isize, isize, isize, isize),
     /// The left and right side bearings.
-    pub side_bearings: (Number, Number),
+    pub side_bearings: (isize, isize),
     /// The contours.
     pub contours: Vec<Contour>,
 }
@@ -38,26 +38,16 @@ pub enum Segment {
 impl Glyph {
     /// Return the height.
     #[inline]
-    pub fn height(&self) -> Number {
-        self.bounding_box.3 - self.bounding_box.1
+    pub fn height(&self) -> usize {
+        debug_assert!(self.bounding_box.3 >= self.bounding_box.1);
+        (self.bounding_box.3 - self.bounding_box.1) as usize
     }
 
     /// Return the width.
     #[inline]
-    pub fn width(&self) -> Number {
-        self.bounding_box.2 - self.bounding_box.0
-    }
-}
-
-impl Default for Glyph {
-    #[inline]
-    fn default() -> Self {
-        Glyph {
-            advance_width: Number::NAN,
-            bounding_box: (Number::NAN, Number::NAN, Number::NAN, Number::NAN),
-            side_bearings: (Number::NAN, Number::NAN),
-            contours: vec![],
-        }
+    pub fn width(&self) -> usize {
+        debug_assert!(self.bounding_box.2 >= self.bounding_box.0);
+        (self.bounding_box.2 - self.bounding_box.0) as usize
     }
 }
 

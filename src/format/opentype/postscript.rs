@@ -62,7 +62,7 @@ impl Case for PostScript {
             ),
             _ => raise!("found no char string for glyph {}", glyph),
         };
-        let mut builder = Builder::new();
+        let mut builder = Builder::default();
         let mut position = Offset::default();
         let (mut max, mut min) = (Offset::undefined(), Offset::undefined());
         macro_rules! build(
@@ -261,7 +261,12 @@ impl Case for PostScript {
             }
         }
         builder.flush();
-        builder.set_bounding_box((min.0, min.1, max.0, max.1));
+        builder.set_bounding_box((
+            min.0.floor() as isize,
+            min.1.floor() as isize,
+            max.0.ceil() as isize,
+            max.1.ceil() as isize,
+        ));
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         Ok(Some(builder.into()))
     }

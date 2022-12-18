@@ -48,6 +48,3 @@ pub use case::Case;
 pub use file::File;
 pub use glyph::{Contour, Glyph, Segment};
 pub use offset::Offset;
-
-/// A number.
-pub type Number = f32;

@@ -1,6 +1,6 @@
 use truetype::{GlyphID, HorizontalHeader, HorizontalMetrics, WindowsMetrics};
 
-use crate::{Number, Result};
+use crate::Result;
 
 pub struct Metrics {
     horizontal_header: HorizontalHeader,
@@ -36,9 +36,9 @@ impl Metrics {
     }
 
     #[inline]
-    pub fn get(&self, glyph_index: GlyphID) -> (Number, Number) {
+    pub fn get(&self, glyph_index: GlyphID) -> (usize, isize) {
         let (advance_width, left_side_bearing) = self.horizontal_metrics.get(glyph_index);
-        (advance_width.into(), left_side_bearing.into())
+        (advance_width as usize, left_side_bearing as isize)
     }
 }
 

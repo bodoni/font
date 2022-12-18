@@ -37,7 +37,7 @@ impl TrueType {
 
 impl Case for TrueType {
     fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
-        let mut builder = Builder::new();
+        let mut builder = Builder::default();
         let glyph_index = match self.mapping.find(glyph) {
             Some(glyph_index) => glyph_index,
             _ => return Ok(None),

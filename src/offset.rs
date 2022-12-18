@@ -1,10 +1,8 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use crate::Number;
-
 /// An offset.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Offset(pub Number, pub Number);
+pub struct Offset(pub f32, pub f32);
 
 impl Offset {
     // Check if the offset is zero.
@@ -30,7 +28,7 @@ impl Offset {
     /// Create an undefined offset.
     #[inline]
     pub fn undefined() -> Self {
-        Self(Number::NAN, Number::NAN)
+        Self(f32::NAN, f32::NAN)
     }
 
     /// Return the coordinate-wise maximum ignoring undefined values.
@@ -48,7 +46,7 @@ impl Offset {
     }
 }
 
-impl From<Offset> for (Number, Number) {
+impl From<Offset> for (f32, f32) {
     #[inline]
     fn from(offset: Offset) -> Self {
         (offset.0, offset.1)
@@ -60,7 +58,7 @@ macro_rules! implement(
         impl From<($x, $y)> for Offset {
             #[inline]
             fn from((x, y): ($x, $y)) -> Self {
-                Offset(Number::from(x), Number::from(y))
+                Offset(f32::from(x), f32::from(y))
             }
         }
     );
@@ -68,7 +66,7 @@ macro_rules! implement(
         impl From<$z> for Offset {
             #[inline]
             fn from(z: $z) -> Self {
-                Offset(Number::from(z), Number::from(z))
+                Offset(f32::from(z), f32::from(z))
             }
         }
 
@@ -85,8 +83,8 @@ macro_rules! implement(
         impl DivAssign<$z> for Offset {
             #[inline]
             fn div_assign(&mut self, other: $z) {
-                self.0 /= Number::from(other);
-                self.1 /= Number::from(other);
+                self.0 /= f32::from(other);
+                self.1 /= f32::from(other);
             }
         }
 
@@ -103,8 +101,8 @@ macro_rules! implement(
         impl MulAssign<$z> for Offset {
             #[inline]
             fn mul_assign(&mut self, other: $z) {
-                self.0 *= Number::from(other);
-                self.1 *= Number::from(other);
+                self.0 *= f32::from(other);
+                self.1 *= f32::from(other);
             }
         }
     );

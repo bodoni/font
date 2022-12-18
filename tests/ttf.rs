@@ -127,8 +127,8 @@ mod open_sans {
     fn draw_copyright() {
         let font = &setup(Fixture::OpenSans)[0];
         let glyph = font.case.draw('©').unwrap().unwrap();
-        assert_eq!(glyph.bounding_box, (139.0, -20.0, 1642.0, 1483.0));
-        assert_eq!(glyph.side_bearings, (139.0, 62.0));
+        assert_eq!(glyph.bounding_box, (139, -20, 1642, 1483));
+        assert_eq!(glyph.side_bearings, (139, 62));
     }
 
     #[test]
