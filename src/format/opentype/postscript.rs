@@ -8,7 +8,7 @@ use super::metrics::Metrics;
 use crate::builder::Builder;
 use crate::case::Case;
 use crate::glyph::Glyph;
-use crate::Result;
+use crate::{Offset, Result};
 
 pub struct PostScript {
     id: usize,
@@ -63,10 +63,25 @@ impl Case for PostScript {
             _ => raise!("found no char string for glyph {}", glyph),
         };
         let mut builder = Builder::new();
+        let mut position = Offset::default();
+        let (mut max, mut min) = (Offset::undefined(), Offset::undefined());
         macro_rules! build(
             ($function:ident($(($x:expr, $y:expr)),+ $(,)?)) => (
                 builder.$function($(($x, $y)),+);
-            )
+                build!(@track $function($(($x, $y)),+));
+            );
+            (@track move_relative($(($x:expr, $y:expr)),+)) => (
+                $(position += ($x, $y);)+
+            );
+            (@track $function:ident($(($x:expr, $y:expr)),+)) => (
+                build!(@update);
+                $(position += ($x, $y);)+
+                build!(@update);
+            );
+            (@update) => (
+                max = max.max(position);
+                min = min.min(position);
+            );
         );
         let mut clear = false;
         while let Some((operator, operands)) = program.next()? {
@@ -246,6 +261,7 @@ impl Case for PostScript {
             }
         }
         builder.flush();
+        builder.set_bounding_box((min.0, min.1, max.0, max.1));
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         Ok(Some(builder.into()))
     }

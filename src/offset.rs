@@ -14,6 +14,40 @@ impl Offset {
     }
 }
 
+macro_rules! extremum(
+    ($self:expr, $other:expr, $function:ident) => (
+        if $self.is_nan() {
+            $other
+        } else if $other.is_nan() {
+            $self
+        } else {
+            $self.$function($other)
+        }
+    )
+);
+
+impl Offset {
+    /// Create an undefined offset.
+    #[inline]
+    pub fn undefined() -> Self {
+        Self(Number::NAN, Number::NAN)
+    }
+
+    /// Return the coordinate-wise maximum ignoring undefined values.
+    pub fn max(&self, other: Self) -> Self {
+        let x = extremum!(self.0, other.0, max);
+        let y = extremum!(self.1, other.1, max);
+        Self(x, y)
+    }
+
+    /// Return the coordinate-wise minimum ignoring undefined values.
+    pub fn min(&self, other: Self) -> Self {
+        let x = extremum!(self.0, other.0, min);
+        let y = extremum!(self.1, other.1, min);
+        Self(x, y)
+    }
+}
+
 impl From<Offset> for (Number, Number) {
     #[inline]
     fn from(offset: Offset) -> Self {

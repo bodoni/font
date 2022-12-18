@@ -35,7 +35,6 @@ mod source_serif {
     }
 
     #[test]
-    #[should_panic]
     fn draw_r() {
         let font = &setup(Fixture::SourceSerif)[0];
         let glyph = font.case.draw('r').unwrap().unwrap();
