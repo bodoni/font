@@ -48,6 +48,9 @@ mod source_serif {
         let font = &file[0];
         assert_eq!(font.units_per_em, 1000.0);
         assert_eq!(font.ascender, 730.0);
+        assert_eq!(font.cap_height, 670.0);
+        assert_eq!(font.x_height, 475.0);
+        assert_eq!(font.baseline, 0.0);
         assert_eq!(font.descender, -270.0);
         assert_eq!(font.line_gap, 0.0);
     }

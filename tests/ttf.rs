@@ -193,6 +193,9 @@ mod open_sans {
         let font = &file[0];
         assert_eq!(font.units_per_em, 2048.0);
         assert_eq!(font.ascender, 1567.0);
+        assert_eq!(font.cap_height, 1462.0);
+        assert_eq!(font.x_height, 1096.0);
+        assert_eq!(font.baseline, 0.0);
         assert_eq!(font.descender, -492.0);
         assert_eq!(font.line_gap, 132.0);
     }

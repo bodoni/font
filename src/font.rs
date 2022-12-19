@@ -9,6 +9,12 @@ pub struct Font {
     pub units_per_em: Number,
     /// The typographical ascender.
     pub ascender: Number,
+    /// The cap height.
+    pub cap_height: Number,
+    /// The x-height.
+    pub x_height: Number,
+    /// The baseline.
+    pub baseline: Number,
     /// The typographical descender.
     pub descender: Number,
     /// The typographical line gap.
