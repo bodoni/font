@@ -1,5 +1,4 @@
 use std::io::{Read, Seek};
-use std::ops::Deref;
 use std::path::Path;
 
 use crate::{Case, File, Result};
@@ -8,10 +7,12 @@ use crate::{Case, File, Result};
 pub struct Font {
     /// The number of units per em.
     pub units_per_em: usize,
-    /// The ascender line relative to the base line.
+    /// The typographical ascender.
     pub ascender: isize,
-    /// The descender line relative to the base line.
+    /// The typographical descender.
     pub descender: isize,
+    /// The typographical line gap.
+    pub line_gap: isize,
     /// The collection of glyphs.
     pub case: Box<dyn Case>,
 }
@@ -34,11 +35,4 @@ impl Font {
     }
 }
 
-impl Deref for Font {
-    type Target = Box<dyn Case>;
-
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.case
-    }
-}
+dereference! { Font::case => Box<dyn Case> }

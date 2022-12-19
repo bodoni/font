@@ -22,17 +22,23 @@ impl Metrics {
         })
     }
 
-    pub fn describe(&self) -> (isize, isize) {
+    pub fn describe(&self) -> (isize, isize, isize) {
         macro_rules! get(
             ($($version:ident),+) => (
                 match self.windows_metrics {
-                    $(WindowsMetrics::$version(ref metrics) => (metrics.typographic_ascender, metrics.typographic_descender),)*
+                    $(
+                        WindowsMetrics::$version(ref metrics) => (
+                            metrics.typographic_ascender,
+                            metrics.typographic_descender,
+                            metrics.typographic_line_gap,
+                        ),
+                    )*
                 }
             )
         );
-        let (ascender, descender) =
+        let (ascender, descender, line_gap) =
             get!(Version0, Version1, Version2, Version3, Version4, Version5);
-        (ascender as isize, descender as isize)
+        (ascender as isize, descender as isize, line_gap as isize)
     }
 
     #[inline]

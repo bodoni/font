@@ -194,6 +194,7 @@ mod open_sans {
         assert_eq!(font.units_per_em, 2048);
         assert_eq!(font.ascender, 1567);
         assert_eq!(font.descender, -492);
+        assert_eq!(font.line_gap, 132);
     }
 }
 

@@ -49,5 +49,6 @@ mod source_serif {
         assert_eq!(font.units_per_em, 1000);
         assert_eq!(font.ascender, 730);
         assert_eq!(font.descender, -270);
+        assert_eq!(font.line_gap, 0);
     }
 }
