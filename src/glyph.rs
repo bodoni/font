@@ -1,14 +1,14 @@
-use crate::Offset;
+use crate::{Number, Offset};
 
 /// A glyph.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Glyph {
     /// The advance width.
-    pub advance_width: usize,
+    pub advance_width: Number,
     /// The left, bottom, right, and top edges.
-    pub bounding_box: (isize, isize, isize, isize),
+    pub bounding_box: (Number, Number, Number, Number),
     /// The left and right side bearings.
-    pub side_bearings: (isize, isize),
+    pub side_bearings: (Number, Number),
     /// The contours.
     pub contours: Vec<Contour>,
 }
@@ -38,19 +38,29 @@ pub enum Segment {
 impl Glyph {
     /// Return the height.
     #[inline]
-    pub fn height(&self) -> usize {
-        debug_assert!(self.bounding_box.3 >= self.bounding_box.1);
-        (self.bounding_box.3 - self.bounding_box.1) as usize
+    pub fn height(&self) -> Number {
+        self.bounding_box.3 - self.bounding_box.1
     }
 
     /// Return the width.
     #[inline]
-    pub fn width(&self) -> usize {
-        debug_assert!(self.bounding_box.2 >= self.bounding_box.0);
-        (self.bounding_box.2 - self.bounding_box.0) as usize
+    pub fn width(&self) -> Number {
+        self.bounding_box.2 - self.bounding_box.0
     }
 }
 
 dereference! { Glyph::contours => [Contour] }
 
 dereference! { Contour::segments => [Segment] }
+
+impl Default for Glyph {
+    #[inline]
+    fn default() -> Self {
+        Glyph {
+            advance_width: Number::NAN,
+            bounding_box: (Number::NAN, Number::NAN, Number::NAN, Number::NAN),
+            side_bearings: (Number::NAN, Number::NAN),
+            contours: Default::default(),
+        }
+    }
+}

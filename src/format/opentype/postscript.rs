@@ -261,12 +261,7 @@ impl Case for PostScript {
             }
         }
         builder.flush();
-        builder.set_bounding_box((
-            min.0.floor() as isize,
-            min.1.floor() as isize,
-            max.0.ceil() as isize,
-            max.1.ceil() as isize,
-        ));
+        builder.set_bounding_box((min.0, min.1, max.0, max.1));
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         Ok(Some(builder.into()))
     }

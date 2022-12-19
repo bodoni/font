@@ -88,7 +88,7 @@ where
 pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<dyn Case>) -> Font {
     let (ascender, descender, line_gap) = metrics.describe();
     Font {
-        units_per_em: font_header.units_per_em as usize,
+        units_per_em: font_header.units_per_em.into(),
         ascender: ascender,
         descender: descender,
         line_gap: line_gap,

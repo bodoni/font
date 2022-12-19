@@ -1,6 +1,6 @@
 use truetype::{GlyphID, HorizontalHeader, HorizontalMetrics, WindowsMetrics};
 
-use crate::Result;
+use crate::{Number, Result};
 
 pub struct Metrics {
     horizontal_header: HorizontalHeader,
@@ -22,29 +22,27 @@ impl Metrics {
         })
     }
 
-    pub fn describe(&self) -> (isize, isize, isize) {
+    pub fn describe(&self) -> (Number, Number, Number) {
         macro_rules! get(
             ($($version:ident),+) => (
                 match self.windows_metrics {
                     $(
                         WindowsMetrics::$version(ref metrics) => (
-                            metrics.typographic_ascender,
-                            metrics.typographic_descender,
-                            metrics.typographic_line_gap,
+                            metrics.typographic_ascender.into(),
+                            metrics.typographic_descender.into(),
+                            metrics.typographic_line_gap.into(),
                         ),
                     )*
                 }
             )
         );
-        let (ascender, descender, line_gap) =
-            get!(Version0, Version1, Version2, Version3, Version4, Version5);
-        (ascender as isize, descender as isize, line_gap as isize)
+        get!(Version0, Version1, Version2, Version3, Version4, Version5)
     }
 
     #[inline]
-    pub fn get(&self, glyph_index: GlyphID) -> (usize, isize) {
+    pub fn get(&self, glyph_index: GlyphID) -> (Number, Number) {
         let (advance_width, left_side_bearing) = self.horizontal_metrics.get(glyph_index);
-        (advance_width as usize, left_side_bearing as isize)
+        (advance_width.into(), left_side_bearing.into())
     }
 }
 

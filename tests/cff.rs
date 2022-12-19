@@ -38,17 +38,17 @@ mod source_serif {
     fn draw_r() {
         let font = &setup(Fixture::SourceSerif)[0];
         let glyph = font.case.draw('r').unwrap().unwrap();
-        assert_eq!(glyph.bounding_box, (34, 0, 412, 491));
-        assert_eq!(glyph.side_bearings, (34, 11));
+        assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
+        assert_eq!(glyph.side_bearings, (34.0, 11.0));
     }
 
     #[test]
     fn open() {
         let file = setup(Fixture::SourceSerif);
         let font = &file[0];
-        assert_eq!(font.units_per_em, 1000);
-        assert_eq!(font.ascender, 730);
-        assert_eq!(font.descender, -270);
-        assert_eq!(font.line_gap, 0);
+        assert_eq!(font.units_per_em, 1000.0);
+        assert_eq!(font.ascender, 730.0);
+        assert_eq!(font.descender, -270.0);
+        assert_eq!(font.line_gap, 0.0);
     }
 }

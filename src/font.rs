@@ -1,18 +1,18 @@
 use std::io::{Read, Seek};
 use std::path::Path;
 
-use crate::{Case, File, Result};
+use crate::{Case, File, Number, Result};
 
 /// A font.
 pub struct Font {
     /// The number of units per em.
-    pub units_per_em: usize,
+    pub units_per_em: Number,
     /// The typographical ascender.
-    pub ascender: isize,
+    pub ascender: Number,
     /// The typographical descender.
-    pub descender: isize,
+    pub descender: Number,
     /// The typographical line gap.
-    pub line_gap: isize,
+    pub line_gap: Number,
     /// The collection of glyphs.
     pub case: Box<dyn Case>,
 }
