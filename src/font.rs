@@ -7,6 +7,8 @@ use crate::{Case, File, Number, Result};
 pub struct Font {
     /// The number of units per em.
     pub units_per_em: Number,
+    /// The point above which clipping can occur.
+    pub clipping_ascender: Number,
     /// The typographical ascender.
     pub ascender: Number,
     /// The cap height.
@@ -17,6 +19,8 @@ pub struct Font {
     pub baseline: Number,
     /// The typographical descender.
     pub descender: Number,
+    /// The point below which clipping can occur.
+    pub clipping_descender: Number,
     /// The typographical line gap.
     pub line_gap: Number,
     /// The collection of glyphs.

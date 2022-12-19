@@ -22,13 +22,15 @@ impl Metrics {
         })
     }
 
-    pub fn describe(&self) -> (Number, Number, Number, Number, Number) {
+    pub fn describe(&self) -> (Number, Number, Number, Number, Number, Number, Number) {
         macro_rules! get(
             (@version0 $($version:ident),+) => (
                 match self.windows_metrics {
                     $(WindowsMetrics::$version(ref metrics) => (
+                        metrics.windows_ascender.into(),
                         metrics.typographic_ascender.into(),
                         metrics.typographic_descender.into(),
+                        -Number::from(metrics.windows_descender),
                         metrics.typographic_line_gap.into(),
                     ),)*
                 }
@@ -46,10 +48,18 @@ impl Metrics {
                 }
             );
         );
-        let (ascender, descender, line_gap) =
+        let (clipping_ascender, ascender, descender, clipping_descender, line_gap) =
             get!(@version0 Version0, Version1, Version2, Version3, Version4, Version5);
         let (cap_height, x_height) = get!(@version2 Version2, Version3, Version4, Version5);
-        (ascender, cap_height, x_height, descender, line_gap)
+        (
+            clipping_ascender,
+            ascender,
+            cap_height,
+            x_height,
+            descender,
+            clipping_descender,
+            line_gap,
+        )
     }
 
     #[inline]

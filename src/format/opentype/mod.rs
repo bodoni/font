@@ -86,9 +86,18 @@ where
 
 #[inline]
 pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<dyn Case>) -> Font {
-    let (ascender, cap_height, x_height, descender, line_gap) = metrics.describe();
+    let (
+        clipping_ascender,
+        ascender,
+        cap_height,
+        x_height,
+        descender,
+        clipping_descender,
+        line_gap,
+    ) = metrics.describe();
     Font {
         units_per_em: font_header.units_per_em.into(),
+        clipping_ascender: clipping_ascender,
         ascender: ascender,
         cap_height: cap_height,
         x_height: x_height,
@@ -98,6 +107,7 @@ pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<dyn Case>
             Number::NAN
         },
         descender: descender,
+        clipping_descender: clipping_descender,
         line_gap: line_gap,
         case: case,
     }
