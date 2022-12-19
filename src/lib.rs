@@ -30,9 +30,6 @@ extern crate truetype;
 #[macro_use(dereference, raise)]
 extern crate typeface;
 
-#[macro_use]
-mod macros;
-
 mod builder;
 mod case;
 mod file;

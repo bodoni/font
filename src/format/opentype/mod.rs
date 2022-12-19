@@ -34,29 +34,37 @@ fn read_font<T>(tape: &mut T, fonts: &mut Vec<Font>, font: &opentype::Font) -> R
 where
     T: Read + Seek,
 {
-    let font_header = some!(
+    macro_rules! get(
+        ($option:expr, $message:expr,) => (
+            match $option {
+                Some(value) => value,
+                _ => raise!($message),
+            }
+        );
+    );
+    let font_header = get!(
         font.take::<_, FontHeader>(tape)?,
-        "cannot find the font header"
+        "cannot find the font header",
     );
-    let horizontal_header = some!(
+    let horizontal_header = get!(
         font.take::<_, HorizontalHeader>(tape)?,
-        "cannot find the horizontal header"
+        "cannot find the horizontal header",
     );
-    let maximum_profile = some!(
+    let maximum_profile = get!(
         font.take::<_, MaximumProfile>(tape)?,
-        "cannot find the maximum profile"
+        "cannot find the maximum profile",
     );
-    let horizontal_metrics = some!(
+    let horizontal_metrics = get!(
         font.take_given::<_, HorizontalMetrics>(tape, (&horizontal_header, &maximum_profile))?,
-        "cannot find the horizontal metrics"
+        "cannot find the horizontal metrics",
     );
-    let windows_metrics = some!(
+    let windows_metrics = get!(
         font.take::<_, WindowsMetrics>(tape)?,
-        "cannot find the OS/2 and Windows metrics"
+        "cannot find the OS/2 and Windows metrics",
     );
-    let char_mapping = some!(
+    let char_mapping = get!(
         font.take::<_, CharMapping>(tape)?,
-        "cannot find the char-to-glyph mapping"
+        "cannot find the char-to-glyph mapping",
     );
     let metrics = Rc::new(Metrics::new(
         horizontal_header,
