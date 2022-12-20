@@ -7,7 +7,7 @@ The package provides a font toolbox.
 ```rust
 use font::{Font, Segment};
 
-let path = "SourceSerifPro-Regular.otf";
+let path = "OpenSans-Italic.otf";
 let font = Font::open(path).unwrap();
 let glyph = font.draw('&').unwrap().unwrap();
 for contour in glyph.iter() {

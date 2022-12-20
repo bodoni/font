@@ -3,13 +3,9 @@
 //! # Example
 //!
 //! ```
-//! extern crate font;
-//!
 //! use font::{Font, Segment};
 //!
-//! # fn main() {
-//! let path = "SourceSerifPro-Regular.otf";
-//! # let path = "tests/fixtures/SourceSerifPro-Regular.otf";
+//! let path = "OpenSans-Italic.otf";
 //! let font = Font::open(path).unwrap();
 //! let glyph = font.draw('&').unwrap().unwrap();
 //! for contour in glyph.iter() {
@@ -21,7 +17,6 @@
 //!         }
 //!     }
 //! }
-//! # }
 //! ```
 
 extern crate opentype;
