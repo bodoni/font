@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.5.3"
+version = "0.6.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -11,9 +11,9 @@ repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-opentype = "0.22"
+opentype = "0.23"
 postscript = "0.16"
-truetype = "0.36"
+truetype = "0.37"
 typeface = "0.2"
 
 [dev-dependencies]
