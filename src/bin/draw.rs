@@ -17,15 +17,15 @@ fn main() {
             return;
         }
     };
-    let glyph = match arguments.get::<String>("glyph") {
-        Some(glyph) => glyph.chars().next().unwrap(),
+    let character = match arguments.get::<String>("character") {
+        Some(character) => character.chars().next().unwrap(),
         _ => {
-            println!("Error: --glyph should be given.");
+            println!("Error: --character should be given.");
             return;
         }
     };
     let font = Font::open(font).unwrap();
-    let glyph = font.draw(glyph).unwrap().unwrap();
+    let glyph = font.draw(character).unwrap().unwrap();
     let (width, height) = (glyph.advance_width, font.ascender - font.descender);
     let background = element::Rectangle::new()
         .set("width", width)

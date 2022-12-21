@@ -5,19 +5,19 @@ tests: tests-unit tests-draw tests-scan tests-sign
 tests-draw:
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/AdobeBlank-Regular.ttf \
-		--glyph "a" > assets/AdobeBlank-Regular.svg
+		--character "a" > assets/AdobeBlank-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/Numans-Regular.ttf \
-		--glyph "a" > assets/Numans-Regular.svg
+		--character "a" > assets/Numans-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/OpenSans-Italic.ttf \
-		--glyph "&" > assets/OpenSans-Italic.svg
+		--character "&" > assets/OpenSans-Italic.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/SourceSerifPro-Regular.otf \
-		--glyph "ö" > assets/SourceSerifPro-Regular.svg
+		--character "ö" > assets/SourceSerifPro-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/VesperLibre-Regular.ttf \
-		--glyph "å" > assets/VesperLibre-Regular.svg
+		--character "å" > assets/VesperLibre-Regular.svg
 	[ "$$(git diff assets | wc -l | xargs)" = 0 ] || exit 1
 
 tests-scan:

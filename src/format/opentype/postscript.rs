@@ -35,7 +35,7 @@ impl PostScript {
 }
 
 impl Case for PostScript {
-    fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
+    fn draw(&self, character: char) -> Result<Option<Glyph>> {
         use postscript::compact1::font_set::Record;
         use postscript::type2::Operator::*;
 
@@ -47,7 +47,7 @@ impl Case for PostScript {
             )
         );
 
-        let glyph_index = match self.mapping.find(glyph) {
+        let glyph_index = match self.mapping.find(character) {
             Some(glyph_index) => glyph_index,
             _ => return Ok(None),
         };
@@ -60,7 +60,11 @@ impl Case for PostScript {
                     _ => unimplemented!(),
                 },
             ),
-            _ => raise!("found no char string for glyph {}", glyph),
+            _ => raise!(
+                "found no char string for character {} with glyph {}",
+                character,
+                glyph_index,
+            ),
         };
         let mut builder = Builder::default();
         let mut position = Offset::default();

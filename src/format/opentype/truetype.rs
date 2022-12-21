@@ -36,15 +36,19 @@ impl TrueType {
 }
 
 impl Case for TrueType {
-    fn draw(&self, glyph: char) -> Result<Option<Glyph>> {
+    fn draw(&self, character: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::default();
-        let glyph_index = match self.mapping.find(glyph) {
+        let glyph_index = match self.mapping.find(character) {
             Some(glyph_index) => glyph_index,
             _ => return Ok(None),
         };
         let glyph = match self.glyph_data.get(glyph_index as usize) {
             Some(glyph) => glyph,
-            _ => raise!("found no data for glyph {}", glyph),
+            _ => raise!(
+                "found no data for character {} with glyph {}",
+                character,
+                glyph_index,
+            ),
         };
         builder.set_horizontal_metrics(self.metrics.get(glyph_index));
         if let &Some(ref glyph) = glyph {
