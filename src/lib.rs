@@ -5,7 +5,8 @@
 //! ```
 //! use font::{Font, Segment};
 //!
-//! let path = "OpenSans-Italic.otf";
+//! let path = "OpenSans-Italic.ttf";
+//! # let path = "tests/fixtures/OpenSans-Italic.ttf";
 //! let font = Font::open(path).unwrap();
 //! let glyph = font.draw('&').unwrap().unwrap();
 //! for contour in glyph.iter() {

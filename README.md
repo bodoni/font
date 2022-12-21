@@ -7,7 +7,7 @@ The package provides a font toolbox.
 ```rust
 use font::{Font, Segment};
 
-let path = "OpenSans-Italic.otf";
+let path = "OpenSans-Italic.ttf";
 let font = Font::open(path).unwrap();
 let glyph = font.draw('&').unwrap().unwrap();
 for contour in glyph.iter() {
@@ -22,7 +22,7 @@ for contour in glyph.iter() {
 ```
 
 <div align="center">
-  <a href="https://github.com/bodoni/workbench/blob/main/workbench/src/draw.rs">
+  <a href="https://github.com/bodoni/font/blob/main/src/bin/draw.rs">
     <img src="https://cdn.rawgit.com/bodoni/font/main/assets/OpenSans-Italic.svg">
   </a>
 </div>
@@ -40,4 +40,4 @@ will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 [package-img]: https://img.shields.io/crates/v/font.svg
 [package-url]: https://crates.io/crates/font
 
-[example]: https://github.com/bodoni/workbench/blob/main/workbench/src/draw.rs
+[example]: src/bin/draw.rs

@@ -1,0 +1,3 @@
+[submodule "tests/fixtures/google-fonts"]
+	path = tests/fixtures/google-fonts
+	url = https://github.com/google/fonts.git

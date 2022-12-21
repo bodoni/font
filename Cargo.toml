@@ -10,11 +10,35 @@ homepage = "https://github.com/bodoni/font"
 repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
 
+[features]
+drawing = ["arguments", "svg"]
+scanning = ["arguments", "walkdir"]
+
+[lib]
+name = "font"
+path = "src/lib.rs"
+
+[[bin]]
+name = "draw"
+path = "src/bin/draw.rs"
+required-features = ["drawing"]
+
+[[bin]]
+name = "scan"
+path = "src/bin/scan.rs"
+required-features = ["scanning"]
+
+[[bin]]
+name = "sign"
+path = "src/bin/sign.rs"
+required-features = ["drawing", "scanning"]
+
 [dependencies]
 opentype = "0.23"
 postscript = "0.16"
 truetype = "0.37"
 typeface = "0.2"
 
-[dev-dependencies]
-svg = "0.9"
+arguments = { version = "0.7", optional = true }
+svg = { version = "0.9", optional = true }
+walkdir = { version = "2.3", optional = true }

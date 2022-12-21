@@ -9,6 +9,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.head_ref || 'main' }}
+  cancel-in-progress: true
+
 jobs:
   agnostic:
     runs-on: macos-latest
@@ -21,12 +25,30 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions-rs/cargo@v1
-        with: {command: test}
+        with: {submodules: true}
+      - uses: actions-rs/toolchain@v1
+        with: {toolchain: stable}
+      - run: make tests-unit
+        shell: bash
+      - run: make tests-draw
+        shell: bash
+      - run: make tests-scan
+        shell: bash
+      - run: make tests-sign
+        shell: bash
 
   ubuntu:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions-rs/cargo@v1
-        with: {command: test}
+        with: {submodules: true}
+      - uses: actions-rs/toolchain@v1
+        with: {toolchain: stable}
+      - run: make tests-unit
+        shell: bash
+      - run: make tests-draw
+        shell: bash
+      - run: make tests-scan
+        shell: bash
+      - run: make tests-sign
+        shell: bash
