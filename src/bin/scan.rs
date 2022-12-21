@@ -20,7 +20,7 @@ fn main() {
     };
     let ignores = arguments.get_all::<String>("ignore").unwrap_or(vec![]);
     let workers = arguments.get::<usize>("workers").unwrap_or(1);
-    let values = support::scanning::scan(&path, process, workers);
+    let values = support::scanning::scan(&path, process, (), workers);
     let (succeeded, other): (Vec<_>, Vec<_>) =
         values.into_iter().partition(|(_, result)| result.is_ok());
     let (ignored, failed): (Vec<_>, Vec<_>) = other.into_iter().partition(|(path, _)| {
@@ -39,7 +39,7 @@ fn main() {
     assert_eq!(failed.len(), 0);
 }
 
-fn process(path: PathBuf) -> (PathBuf, Result<()>) {
+fn process(path: PathBuf, _: ()) -> (PathBuf, Result<()>) {
     let result = match Font::open(&path) {
         Ok(_) => {
             println!("[success] {:?}", path);

@@ -38,8 +38,10 @@ tests-sign:
 	# https://github.com/google/fonts/issues/5551
 	# https://github.com/google/fonts/issues/5553
 	# https://github.com/google/fonts/issues/5724
+	rm -rf target/signatures && mkdir -p target/signatures
 	RUST_BACKTRACE=full cargo run --bin sign --features drawing,scanning -- \
-		--path tests/fixtures \
+		--input tests/fixtures \
+		--output target/signatures \
 		--ignore bungeecolor \
 		--ignore bungeespice \
 		--ignore gruppo \

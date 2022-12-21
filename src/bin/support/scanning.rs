@@ -6,25 +6,34 @@ use std::thread;
 
 use walkdir::WalkDir;
 
-pub fn scan<F, T>(path: &Path, process: F, workers: usize) -> Vec<(PathBuf, io::Result<T>)>
+pub fn scan<F, T, U>(
+    path: &Path,
+    process: F,
+    parameter: T,
+    workers: usize,
+) -> Vec<(PathBuf, io::Result<U>)>
 where
-    F: Fn(PathBuf) -> (PathBuf, io::Result<T>) + Copy + Send + 'static,
-    T: Send + 'static,
+    F: Fn(PathBuf, T) -> (PathBuf, io::Result<U>) + Copy + Send + 'static,
+    T: Clone + Send + 'static,
+    U: Send + 'static,
 {
     let (forward_sender, forward_receiver) = mpsc::channel::<PathBuf>();
-    let (backward_sender, backward_receiver) = mpsc::channel::<(PathBuf, io::Result<T>)>();
+    let (backward_sender, backward_receiver) = mpsc::channel::<(PathBuf, io::Result<U>)>();
     let forward_receiver = Arc::new(Mutex::new(forward_receiver));
 
     let _: Vec<_> = (0..workers)
         .map(|_| {
             let forward_receiver = forward_receiver.clone();
             let backward_sender = backward_sender.clone();
+            let parameter = parameter.clone();
             thread::spawn(move || loop {
                 let path = match forward_receiver.lock().unwrap().recv() {
                     Ok(path) => path,
                     Err(_) => break,
                 };
-                backward_sender.send(process(path)).unwrap();
+                backward_sender
+                    .send(process(path, parameter.clone()))
+                    .unwrap();
             })
         })
         .collect();
