@@ -2,7 +2,7 @@ extern crate arguments;
 extern crate font;
 extern crate svg;
 
-mod common;
+mod support;
 
 use font::Font;
 use svg::node::element;
@@ -31,7 +31,7 @@ fn main() {
         font.ascender - font.descender,
     );
     let transform = format!("translate(0, {}) scale(1, -1)", font.ascender);
-    let glyph = common::drawing::draw(&glyph).set("transform", transform);
+    let glyph = support::drawing::draw(&glyph).set("transform", transform);
     let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
     let document = Document::new()
         .set("width", width)

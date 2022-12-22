@@ -1,9 +1,9 @@
 extern crate font;
 
-mod common;
+mod support;
 
 mod adobe_blank {
-    use crate::common::{setup, Fixture};
+    use crate::support::{setup, Fixture};
 
     #[test]
     fn draw_a() {
@@ -14,7 +14,7 @@ mod adobe_blank {
 }
 
 mod crimson_text {
-    use crate::common::{setup, Fixture};
+    use crate::support::{setup, Fixture};
 
     #[test]
     fn open() {
@@ -33,7 +33,7 @@ mod crimson_text {
 }
 
 mod numans {
-    use crate::common::{setup, trace, Fixture};
+    use crate::support::{setup, trace, Fixture};
 
     #[test]
     fn draw_a() {
@@ -84,7 +84,7 @@ mod numans {
 }
 
 mod open_sans {
-    use crate::common::{setup, trace, Fixture};
+    use crate::support::{setup, trace, Fixture};
 
     #[test]
     fn draw_a_ring() {
@@ -223,7 +223,7 @@ mod open_sans {
 }
 
 mod vesper_libre {
-    use crate::common::{setup, trace, Fixture};
+    use crate::support::{setup, trace, Fixture};
 
     #[test]
     fn draw_a() {

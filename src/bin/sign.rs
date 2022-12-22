@@ -3,7 +3,7 @@ extern crate font;
 extern crate svg;
 extern crate walkdir;
 
-mod common;
+mod support;
 
 use std::io::Result;
 use std::path::{Path, PathBuf};
@@ -33,7 +33,7 @@ fn main() {
     };
     let ignores = arguments.get_all::<String>("ignore").unwrap_or(vec![]);
     let workers = arguments.get::<usize>("workers").unwrap_or(1);
-    let values = common::scanning::scan(&input, process, (characters, output), workers);
+    let values = support::scanning::scan(&input, process, (characters, output), workers);
     let (positives, negatives): (Vec<_>, Vec<_>) =
         values.into_iter().partition(|(_, result)| result.is_ok());
     let (successes, missing): (Vec<_>, Vec<_>) = positives
@@ -123,7 +123,7 @@ fn draw(path: &Path, characters: &[char], document_size: f32) -> Result<Option<e
             (glyph_size - glyph.advance_width) / 2.0,
             font.ascender,
         );
-        let mut glyph = common::drawing::draw(&glyph);
+        let mut glyph = support::drawing::draw(&glyph);
         glyph.assign("transform", transform);
         group.append(glyph);
     }

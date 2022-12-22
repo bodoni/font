@@ -1,9 +1,9 @@
 extern crate font;
 
-mod common;
+mod support;
 
 mod source_serif {
-    use crate::common::{setup, trace, Fixture};
+    use crate::support::{setup, trace, Fixture};
 
     #[test]
     fn draw_from_a_to_z() {
