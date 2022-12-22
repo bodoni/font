@@ -2,7 +2,7 @@ extern crate arguments;
 extern crate font;
 extern crate walkdir;
 
-mod support;
+mod common;
 
 use std::io::Result;
 use std::path::PathBuf;
@@ -20,7 +20,7 @@ fn main() {
     };
     let ignores = arguments.get_all::<String>("ignore").unwrap_or(vec![]);
     let workers = arguments.get::<usize>("workers").unwrap_or(1);
-    let values = support::scanning::scan(&path, process, (), workers);
+    let values = common::scanning::scan(&path, process, (), workers);
     let (successes, negatives): (Vec<_>, Vec<_>) =
         values.into_iter().partition(|(_, result)| result.is_ok());
     let (ignored, failures): (Vec<_>, Vec<_>) = negatives.into_iter().partition(|(path, _)| {
