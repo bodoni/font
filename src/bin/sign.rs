@@ -109,9 +109,10 @@ fn process(
 fn draw(path: &Path, characters: &[char], size: usize) -> Result<Option<element::Group>> {
     let mut group = element::Group::new();
     let font = Font::open(path)?;
+    let em = font.ascender - font.descender;
     let columns = (characters.len() as f32).sqrt().ceil() as usize;
     let offset = size as f32 / columns as f32;
-    let scale = size as f32 / columns as f32 / font.units_per_em;
+    let scale = size as f32 / columns as f32 / em;
     for (index, character) in characters.iter().enumerate() {
         let glyph = match font.draw(*character)? {
             Some(glyph) => glyph,
@@ -124,7 +125,7 @@ fn draw(path: &Path, characters: &[char], size: usize) -> Result<Option<element:
             i as f32 * offset,
             j as f32 * offset,
             scale,
-            (font.units_per_em - glyph.advance_width) / 2.0,
+            (em - glyph.advance_width) / 2.0,
             font.ascender,
         );
         let mut glyph = common::drawing::draw(&glyph);
