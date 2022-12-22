@@ -37,32 +37,35 @@ fn main() {
     let ignores = arguments.get_all::<String>("ignore").unwrap_or(vec![]);
     let workers = arguments.get::<usize>("workers").unwrap_or(1);
     let values = support::scanning::scan(&input, process, (characters, output), workers);
-    let (succeeded, other): (Vec<_>, Vec<_>) =
+    let (positives, negatives): (Vec<_>, Vec<_>) =
         values.into_iter().partition(|(_, result)| result.is_ok());
-    let (found, missing): (Vec<_>, Vec<_>) = succeeded
+    let (successes, missing): (Vec<_>, Vec<_>) = positives
         .into_iter()
         .partition(|(_, result)| result.as_ref().unwrap().is_some());
-    let (ignored, failed): (Vec<_>, Vec<_>) = other.into_iter().partition(|(path, _)| {
+    let (ignored, failures): (Vec<_>, Vec<_>) = negatives.into_iter().partition(|(path, _)| {
         let path = path.to_str().unwrap();
         ignores.iter().any(|name| path.contains(name))
     });
-    println!("Found: {}", found.len());
+    println!("Successes: {}", successes.len());
     println!("Missing: {}", missing.len());
-    println!("Failed: {}", failed.len());
-    for (path, result) in failed.iter() {
+    for (path, result) in missing.iter() {
         println!("{:?}: {}", path, result.as_ref().err().unwrap());
     }
     println!("Ignored: {}", ignored.len());
     for (path, result) in ignored.iter() {
         println!("{:?}: {}", path, result.as_ref().err().unwrap());
     }
-    assert_eq!(failed.len(), 0);
+    println!("Failures: {}", failures.len());
+    for (path, result) in failures.iter() {
+        println!("{:?}: {}", path, result.as_ref().err().unwrap());
+    }
+    assert_eq!(failures.len(), 0);
 }
 
 fn process(
     path: PathBuf,
     (characters, output): (Vec<char>, PathBuf),
-) -> (PathBuf, Result<Option<()>>) {
+) -> (PathBuf, Result<Option<PathBuf>>) {
     const SIZE: usize = 512;
     let result = match draw(&path, &characters, SIZE) {
         Ok(Some(group)) => {
@@ -77,11 +80,11 @@ fn process(
                 .add(style)
                 .add(background)
                 .add(group);
-            let path = output.join(path.file_stem().unwrap()).with_extension("svg");
-            match svg::save(&path, &document) {
+            let output = output.join(path.file_stem().unwrap()).with_extension("svg");
+            match svg::save(&output, &document) {
                 Ok(_) => {
                     println!("[success] {:?}", path);
-                    Ok(Some(()))
+                    Ok(Some(output))
                 }
                 Err(error) => {
                     println!("[failure] {:?} ({:?})", path, error);
@@ -90,7 +93,7 @@ fn process(
             }
         }
         Ok(None) => {
-            println!("[success] {:?}", path);
+            println!("[missing] {:?}", path);
             Ok(None)
         }
         Err(error) => {
