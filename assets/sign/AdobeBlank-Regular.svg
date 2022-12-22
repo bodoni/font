@@ -2,7 +2,6 @@
 <style>
 path { fill: black; fill-rule: nonzero }
 </style>
-<rect fill="#eee" height="512" width="512"/>
 <g>
 <g transform="translate(0.00, 0.00) scale(0.26) translate(500.00, 880.00) scale(1, -1)"/>
 <g transform="translate(256.00, 0.00) scale(0.26) translate(500.00, 880.00) scale(1, -1)"/>

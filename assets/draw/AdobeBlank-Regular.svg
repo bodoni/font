@@ -2,6 +2,5 @@
 <style>
 path { fill: black; fill-rule: nonzero }
 </style>
-<rect fill="#eee" height="1000" width="0"/>
 <g transform="translate(0, 880) scale(1, -1)"/>
 </svg>

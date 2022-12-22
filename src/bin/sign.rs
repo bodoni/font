@@ -76,15 +76,10 @@ fn process(
         Ok(Some(group)) => group,
     };
     let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
-    let background = element::Rectangle::new()
-        .set("width", DOCUMENT_SIZE)
-        .set("height", DOCUMENT_SIZE)
-        .set("fill", "#eee");
     let document = element::SVG::new()
         .set("width", DOCUMENT_SIZE)
         .set("height", DOCUMENT_SIZE)
         .add(style)
-        .add(background)
         .add(group);
     let output = match output {
         None => {

@@ -30,10 +30,6 @@ fn main() {
         glyph.width() + 2.0 * glyph.side_bearings.0,
         font.ascender - font.descender,
     );
-    let background = element::Rectangle::new()
-        .set("width", width)
-        .set("height", height)
-        .set("fill", "#eee");
     let transform = format!("translate(0, {}) scale(1, -1)", font.ascender);
     let glyph = common::drawing::draw(&glyph).set("transform", transform);
     let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
@@ -41,7 +37,6 @@ fn main() {
         .set("width", width)
         .set("height", height)
         .add(style)
-        .add(background)
         .add(glyph);
     print!("{}", document);
 }
