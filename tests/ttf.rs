@@ -13,6 +13,25 @@ mod adobe_blank {
     }
 }
 
+mod crimson_text {
+    use crate::common::{setup, Fixture};
+
+    #[test]
+    fn open() {
+        let file = setup(Fixture::CrimsonText);
+        let font = &file[0];
+        assert_eq!(font.units_per_em, 1024.0);
+        assert_eq!(font.clipping_ascender, 1106.0);
+        assert_eq!(font.ascender, 972.0);
+        assert_eq!(font.cap_height, 656.0);
+        assert_eq!(font.x_height, 430.0);
+        assert_eq!(font.baseline, 0.0);
+        assert_eq!(font.descender, -359.0);
+        assert_eq!(font.clipping_descender, -297.0);
+        assert_eq!(font.line_gap, 0.0);
+    }
+}
+
 mod numans {
     use crate::common::{setup, trace, Fixture};
 

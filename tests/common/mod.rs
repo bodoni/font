@@ -4,6 +4,7 @@ use font::{File, Glyph};
 
 pub enum Fixture {
     AdobeBlank,
+    CrimsonText,
     Numans,
     OpenSans,
     SourceSerif,
@@ -13,6 +14,7 @@ pub enum Fixture {
 pub fn setup(fixture: Fixture) -> File {
     match fixture {
         Fixture::AdobeBlank => File::open("tests/fixtures/AdobeBlank-Regular.ttf").unwrap(),
+        Fixture::CrimsonText => File::open("tests/fixtures/CrimsonText-Regular.ttf").unwrap(),
         Fixture::Numans => File::open("tests/fixtures/Numans-Regular.ttf").unwrap(),
         Fixture::OpenSans => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
         Fixture::SourceSerif => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
