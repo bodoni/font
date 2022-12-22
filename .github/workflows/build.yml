@@ -30,7 +30,9 @@ jobs:
         with: {toolchain: stable}
       - run: make tests-unit
         shell: bash
-      - run: make tests-draw
+      - run: make tests-draw-selected
+        shell: bash
+      - run: make tests-sign-selected
         shell: bash
       - run: make tests-scan
         shell: bash
@@ -46,7 +48,9 @@ jobs:
         with: {toolchain: stable}
       - run: make tests-unit
         shell: bash
-      - run: make tests-draw
+      - run: make tests-draw-selected
+        shell: bash
+      - run: make tests-sign-selected
         shell: bash
       - run: make tests-scan
         shell: bash

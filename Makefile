@@ -1,24 +1,34 @@
 all: tests-unit
 
-tests: tests-unit tests-draw tests-scan tests-sign
+tests: tests-unit tests-draw-selected tests-sign-selected tests-scan tests-sign
 
-tests-draw:
+tests-unit:
+	cargo test
+
+tests-draw-selected:
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/AdobeBlank-Regular.ttf \
+		--font ../font/tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf \
 		--character "a" > assets/draw/AdobeBlank-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/Numans-Regular.ttf \
+		--font ../font/tests/fixtures/selected-fonts/Numans-Regular.ttf \
 		--character "a" > assets/draw/Numans-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/OpenSans-Italic.ttf \
+		--font ../font/tests/fixtures/selected-fonts/OpenSans-Italic.ttf \
 		--character "&" > assets/draw/OpenSans-Italic.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/SourceSerifPro-Regular.otf \
+		--font ../font/tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf \
 		--character "ö" > assets/draw/SourceSerifPro-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/VesperLibre-Regular.ttf \
+		--font ../font/tests/fixtures/selected-fonts/VesperLibre-Regular.ttf \
 		--character "å" > assets/draw/VesperLibre-Regular.svg
 	[ "$$(git diff assets/draw | wc -l | xargs)" = 0 ] || exit 1
+
+tests-sign-selected:
+	RUST_BACKTRACE=full cargo run --bin sign --features drawing,scanning -- \
+		--input tests/fixtures/selected-fonts \
+		--output assets/sign \
+		--characters anop
+	[ "$$(git diff assets/sign | wc -l | xargs)" = 0 ] || exit 1
 
 tests-scan:
 	# https://github.com/google/fonts/issues/5551
@@ -38,10 +48,9 @@ tests-sign:
 	# https://github.com/google/fonts/issues/5551
 	# https://github.com/google/fonts/issues/5553
 	# https://github.com/google/fonts/issues/5724
-	rm -rf target/signatures && mkdir -p target/signatures
 	RUST_BACKTRACE=full cargo run --bin sign --features drawing,scanning -- \
 		--input tests/fixtures \
-		--output target/signatures \
+		--output assets/sign \
 		--characters anop \
 		--ignore bungeecolor \
 		--ignore bungeespice \
@@ -51,7 +60,7 @@ tests-sign:
 		--ignore ubuntu \
 		--workers 4
 
-tests-unit:
-	cargo test
-
-.PHONY: tests tests-draw tests-scan tests-sign tests-unit
+.PHONY: tests
+.PHONY: tests-unit
+.PHONY: tests-draw-selected tests-sign-selected
+.PHONY: tests-scan tests-sign

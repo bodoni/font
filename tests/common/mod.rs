@@ -12,14 +12,15 @@ pub enum Fixture {
 }
 
 pub fn setup(fixture: Fixture) -> File {
-    match fixture {
-        Fixture::AdobeBlank => File::open("tests/fixtures/AdobeBlank-Regular.ttf").unwrap(),
-        Fixture::CrimsonText => File::open("tests/fixtures/CrimsonText-Regular.ttf").unwrap(),
-        Fixture::Numans => File::open("tests/fixtures/Numans-Regular.ttf").unwrap(),
-        Fixture::OpenSans => File::open("tests/fixtures/OpenSans-Italic.ttf").unwrap(),
-        Fixture::SourceSerif => File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap(),
-        Fixture::VesperLibre => File::open("tests/fixtures/VesperLibre-Regular.ttf").unwrap(),
-    }
+    File::open(match fixture {
+        Fixture::AdobeBlank => "tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf",
+        Fixture::CrimsonText => "tests/fixtures/selected-fonts/CrimsonText-Regular.ttf",
+        Fixture::Numans => "tests/fixtures/selected-fonts/Numans-Regular.ttf",
+        Fixture::OpenSans => "tests/fixtures/selected-fonts/OpenSans-Italic.ttf",
+        Fixture::SourceSerif => "tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf",
+        Fixture::VesperLibre => "tests/fixtures/selected-fonts/VesperLibre-Regular.ttf",
+    })
+    .unwrap()
 }
 
 pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {

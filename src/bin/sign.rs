@@ -20,12 +20,9 @@ fn main() {
             return;
         }
     };
-    let output: PathBuf = match arguments.get::<String>("output") {
-        Some(output) => output.into(),
-        _ => {
-            println!("Error: --output should be given.");
-            return;
-        }
+    let output: Option<PathBuf> = match arguments.get::<String>("output") {
+        Some(output) => Some(output.into()),
+        _ => None,
     };
     let characters: Vec<_> = match arguments.get::<String>("characters") {
         Some(characters) => characters.chars().collect(),
@@ -64,44 +61,49 @@ fn main() {
 
 fn process(
     path: PathBuf,
-    (characters, output): (Vec<char>, PathBuf),
-) -> (PathBuf, Result<Option<PathBuf>>) {
+    (characters, output): (Vec<char>, Option<PathBuf>),
+) -> (PathBuf, Result<Option<()>>) {
     const SIZE: usize = 512;
-    let result = match draw(&path, &characters, SIZE) {
-        Ok(Some(group)) => {
-            let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
-            let background = element::Rectangle::new()
-                .set("width", SIZE)
-                .set("height", SIZE)
-                .set("fill", "#eee");
-            let document = element::SVG::new()
-                .set("width", SIZE)
-                .set("height", SIZE)
-                .add(style)
-                .add(background)
-                .add(group);
-            let output = output.join(path.file_stem().unwrap()).with_extension("svg");
-            match svg::save(&output, &document) {
-                Ok(_) => {
-                    println!("[success] {:?}", path);
-                    Ok(Some(output))
-                }
-                Err(error) => {
-                    println!("[failure] {:?} ({:?})", path, error);
-                    Err(error)
-                }
-            }
-        }
+    let group = match draw(&path, &characters, SIZE) {
         Ok(None) => {
             println!("[missing] {:?}", path);
-            Ok(None)
+            return (path, Ok(None));
         }
         Err(error) => {
             println!("[failure] {:?} ({:?})", path, error);
-            Err(error)
+            return (path, Err(error));
         }
+        Ok(Some(group)) => group,
     };
-    (path, result)
+    let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
+    let background = element::Rectangle::new()
+        .set("width", SIZE)
+        .set("height", SIZE)
+        .set("fill", "#eee");
+    let document = element::SVG::new()
+        .set("width", SIZE)
+        .set("height", SIZE)
+        .add(style)
+        .add(background)
+        .add(group);
+    let output = match output {
+        None => {
+            println!("[success] {:?}", path);
+            return (path, Ok(Some(())));
+        }
+        Some(output) => output,
+    };
+    let output = output.join(path.file_stem().unwrap()).with_extension("svg");
+    match svg::save(&output, &document) {
+        Ok(_) => {
+            println!("[success] {:?}", path);
+            return (path, Ok(Some(())));
+        }
+        Err(error) => {
+            println!("[failure] {:?} ({:?})", path, error);
+            return (path, Err(error));
+        }
+    }
 }
 
 fn draw(path: &Path, characters: &[char], size: usize) -> Result<Option<element::Group>> {
