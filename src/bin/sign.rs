@@ -63,8 +63,8 @@ fn process(
     path: PathBuf,
     (characters, output): (Vec<char>, Option<PathBuf>),
 ) -> (PathBuf, Result<Option<()>>) {
-    const SIZE: usize = 512;
-    let group = match draw(&path, &characters, SIZE) {
+    const DOCUMENT_SIZE: f32 = 512.0;
+    let group = match draw(&path, &characters, DOCUMENT_SIZE) {
         Ok(None) => {
             println!("[missing] {:?}", path);
             return (path, Ok(None));
@@ -77,12 +77,12 @@ fn process(
     };
     let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
     let background = element::Rectangle::new()
-        .set("width", SIZE)
-        .set("height", SIZE)
+        .set("width", DOCUMENT_SIZE)
+        .set("height", DOCUMENT_SIZE)
         .set("fill", "#eee");
     let document = element::SVG::new()
-        .set("width", SIZE)
-        .set("height", SIZE)
+        .set("width", DOCUMENT_SIZE)
+        .set("height", DOCUMENT_SIZE)
         .add(style)
         .add(background)
         .add(group);
@@ -106,13 +106,13 @@ fn process(
     }
 }
 
-fn draw(path: &Path, characters: &[char], size: usize) -> Result<Option<element::Group>> {
+fn draw(path: &Path, characters: &[char], document_size: f32) -> Result<Option<element::Group>> {
     let mut group = element::Group::new();
     let font = Font::open(path)?;
-    let em = font.ascender - font.descender;
+    let glyph_size = font.ascender - font.descender;
     let columns = (characters.len() as f32).sqrt().ceil() as usize;
-    let offset = size as f32 / columns as f32;
-    let scale = size as f32 / columns as f32 / em;
+    let offset = document_size / columns as f32;
+    let scale = document_size / columns as f32 / glyph_size;
     for (index, character) in characters.iter().enumerate() {
         let glyph = match font.draw(*character)? {
             Some(glyph) => glyph,
@@ -125,7 +125,7 @@ fn draw(path: &Path, characters: &[char], size: usize) -> Result<Option<element:
             i as f32 * offset,
             j as f32 * offset,
             scale,
-            (em - glyph.advance_width) / 2.0,
+            (glyph_size - glyph.advance_width) / 2.0,
             font.ascender,
         );
         let mut glyph = common::drawing::draw(&glyph);
