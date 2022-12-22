@@ -36,13 +36,13 @@ pub enum Segment {
 }
 
 impl Glyph {
-    /// Return the height.
+    /// Return the height of the bounding box.
     #[inline]
     pub fn height(&self) -> Number {
         self.bounding_box.3 - self.bounding_box.1
     }
 
-    /// Return the width.
+    /// Return the width of the bounding box.
     #[inline]
     pub fn width(&self) -> Number {
         self.bounding_box.2 - self.bounding_box.0

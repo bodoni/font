@@ -26,7 +26,10 @@ fn main() {
     };
     let font = Font::open(font).unwrap();
     let glyph = font.draw(character).unwrap().unwrap();
-    let (width, height) = (glyph.advance_width, font.ascender - font.descender);
+    let (width, height) = (
+        glyph.width() + 2.0 * glyph.side_bearings.0,
+        font.ascender - font.descender,
+    );
     let background = element::Rectangle::new()
         .set("width", width)
         .set("height", height)
