@@ -10,6 +10,9 @@ tests-draw-selected:
 		--font ../font/tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf \
 		--character "a" > assets/draw/AdobeBlank-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
+		--font ../font/tests/fixtures/selected-fonts/CrimsonText-Regular.ttf \
+		--character "Q" > assets/draw/CrimsonText-Regular.svg
+	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/selected-fonts/Numans-Regular.ttf \
 		--character "a" > assets/draw/Numans-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
