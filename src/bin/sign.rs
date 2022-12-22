@@ -45,8 +45,8 @@ fn main() {
     });
     println!("Successes: {}", successes.len());
     println!("Missing: {}", missing.len());
-    for (path, result) in missing.iter() {
-        println!("{:?}: {}", path, result.as_ref().err().unwrap());
+    for (path, _) in missing.iter() {
+        println!("{:?}", path);
     }
     println!("Ignored: {}", ignored.len());
     for (path, result) in ignored.iter() {
