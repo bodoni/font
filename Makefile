@@ -42,6 +42,7 @@ tests-sign:
 	RUST_BACKTRACE=full cargo run --bin sign --features drawing,scanning -- \
 		--input tests/fixtures \
 		--output target/signatures \
+		--characters anop \
 		--ignore bungeecolor \
 		--ignore bungeespice \
 		--ignore gruppo \

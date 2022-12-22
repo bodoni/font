@@ -9,8 +9,7 @@ use std::io::Result;
 use std::path::{Path, PathBuf};
 
 use font::Font;
-use svg::node::element;
-use svg::{Document, Node};
+use svg::node::{element, Node};
 
 fn main() {
     let arguments = arguments::parse(std::env::args()).unwrap();
@@ -30,9 +29,10 @@ fn main() {
     };
     let characters: Vec<_> = match arguments.get::<String>("characters") {
         Some(characters) => characters.chars().collect(),
-        // Reference:
-        // https://youtu.be/_zmodHxs1XY?t=1531
-        _ => ['a', 'n', 'o', 'p'].into(),
+        _ => {
+            println!("Error: --characters should be given.");
+            return;
+        }
     };
     let ignores = arguments.get_all::<String>("ignore").unwrap_or(vec![]);
     let workers = arguments.get::<usize>("workers").unwrap_or(1);
@@ -63,8 +63,20 @@ fn process(
     path: PathBuf,
     (characters, output): (Vec<char>, PathBuf),
 ) -> (PathBuf, Result<Option<()>>) {
-    let result = match draw(&path, &characters) {
-        Ok(Some(document)) => {
+    const SIZE: usize = 512;
+    let result = match draw(&path, &characters, SIZE) {
+        Ok(Some(group)) => {
+            let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
+            let background = element::Rectangle::new()
+                .set("width", SIZE)
+                .set("height", SIZE)
+                .set("fill", "#eee");
+            let document = element::SVG::new()
+                .set("width", SIZE)
+                .set("height", SIZE)
+                .add(style)
+                .add(background)
+                .add(group);
             let path = output.join(path.file_stem().unwrap()).with_extension("svg");
             match svg::save(&path, &document) {
                 Ok(_) => {
@@ -89,22 +101,12 @@ fn process(
     (path, result)
 }
 
-fn draw(path: &Path, characters: &[char]) -> Result<Option<Document>> {
-    const SIZE: usize = 512;
-    let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
-    let background = element::Rectangle::new()
-        .set("width", SIZE)
-        .set("height", SIZE)
-        .set("fill", "#eee");
-    let mut document = Document::new()
-        .set("width", SIZE)
-        .set("height", SIZE)
-        .add(style)
-        .add(background);
+fn draw(path: &Path, characters: &[char], size: usize) -> Result<Option<element::Group>> {
+    let mut group = element::Group::new();
     let font = Font::open(path)?;
     let columns = (characters.len() as f32).sqrt().ceil() as usize;
-    let offset = SIZE as f32 / columns as f32;
-    let scale = SIZE as f32 / columns as f32 / font.units_per_em;
+    let offset = size as f32 / columns as f32;
+    let scale = size as f32 / columns as f32 / font.units_per_em;
     for (index, character) in characters.iter().enumerate() {
         let glyph = match font.draw(*character)? {
             Some(glyph) => glyph,
@@ -122,7 +124,7 @@ fn draw(path: &Path, characters: &[char]) -> Result<Option<Document>> {
         );
         let mut glyph = support::drawing::draw(&glyph);
         glyph.assign("transform", transform);
-        document.append(glyph);
+        group.append(glyph);
     }
-    Ok(Some(document))
+    Ok(Some(group))
 }
