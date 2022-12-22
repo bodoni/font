@@ -5,20 +5,20 @@ tests: tests-unit tests-draw tests-scan tests-sign
 tests-draw:
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/AdobeBlank-Regular.ttf \
-		--character "a" > assets/AdobeBlank-Regular.svg
+		--character "a" > assets/draw/AdobeBlank-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/Numans-Regular.ttf \
-		--character "a" > assets/Numans-Regular.svg
+		--character "a" > assets/draw/Numans-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/OpenSans-Italic.ttf \
-		--character "&" > assets/OpenSans-Italic.svg
+		--character "&" > assets/draw/OpenSans-Italic.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/SourceSerifPro-Regular.otf \
-		--character "ö" > assets/SourceSerifPro-Regular.svg
+		--character "ö" > assets/draw/SourceSerifPro-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
 		--font ../font/tests/fixtures/VesperLibre-Regular.ttf \
-		--character "å" > assets/VesperLibre-Regular.svg
-	[ "$$(git diff assets | wc -l | xargs)" = 0 ] || exit 1
+		--character "å" > assets/draw/VesperLibre-Regular.svg
+	[ "$$(git diff assets/draw | wc -l | xargs)" = 0 ] || exit 1
 
 tests-scan:
 	# https://github.com/google/fonts/issues/5551
