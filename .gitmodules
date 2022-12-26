@@ -2,3 +2,7 @@
 	path = tests/fixtures/google-fonts
 	url = https://github.com/google/fonts.git
 	shallow = true
+[submodule "tests/fixtures/web-platform-tests"]
+	path = tests/fixtures/web-platform-tests
+	url = https://github.com/web-platform-tests/wpt.git
+	shallow = true
