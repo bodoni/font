@@ -39,12 +39,18 @@ tests-scan:
 	# https://github.com/google/fonts/issues/5724
 	RUST_BACKTRACE=full cargo run --bin scan --features scanning -- \
 		--path tests/fixtures \
-		--ignore bungeecolor \
-		--ignore bungeespice \
-		--ignore gruppo \
-		--ignore iceland \
-		--ignore kaushanscript \
-		--ignore ubuntu \
+		--ignore google-fonts/ofl/bungeecolor \
+		--ignore google-fonts/ofl/bungeespice \
+		--ignore google-fonts/ofl/gruppo \
+		--ignore google-fonts/ofl/iceland \
+		--ignore google-fonts/ofl/kaushanscript \
+		--ignore google-fonts/ufl/ubuntu \
+		--ignore web-platform-tests/css/WOFF2/support/SFNT-CFF-Fallback \
+		--ignore web-platform-tests/css/WOFF2/support/SFNT-CFF-Reference \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/FontWithFancyFeatures \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/FontWithFeatures2 \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/gsubtest-lookup1 \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/gsubtest-lookup3 \
 		--workers 4
 
 tests-sign:
@@ -55,12 +61,18 @@ tests-sign:
 		--input tests/fixtures \
 		--output assets/sign \
 		--characters anop \
-		--ignore bungeecolor \
-		--ignore bungeespice \
-		--ignore gruppo \
-		--ignore iceland \
-		--ignore kaushanscript \
-		--ignore ubuntu \
+		--ignore google-fonts/ofl/bungeecolor \
+		--ignore google-fonts/ofl/bungeespice \
+		--ignore google-fonts/ofl/gruppo \
+		--ignore google-fonts/ofl/iceland \
+		--ignore google-fonts/ofl/kaushanscript \
+		--ignore google-fonts/ufl/ubuntu \
+		--ignore web-platform-tests/css/WOFF2/support/SFNT-CFF-Fallback \
+		--ignore web-platform-tests/css/WOFF2/support/SFNT-CFF-Reference \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/FontWithFancyFeatures \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/FontWithFeatures2 \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/gsubtest-lookup1 \
+		--ignore web-platform-tests/css/css-fonts/support/fonts/gsubtest-lookup3 \
 		--workers 4
 
 .PHONY: tests
