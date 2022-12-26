@@ -7,22 +7,22 @@ tests-unit:
 
 tests-draw-selected:
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf \
+		--font tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf \
 		--character "a" > assets/draw/AdobeBlank-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/selected-fonts/CrimsonText-Regular.ttf \
+		--font tests/fixtures/selected-fonts/CrimsonText-Regular.ttf \
 		--character "Q" > assets/draw/CrimsonText-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/selected-fonts/Numans-Regular.ttf \
+		--font tests/fixtures/selected-fonts/Numans-Regular.ttf \
 		--character "a" > assets/draw/Numans-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/selected-fonts/OpenSans-Italic.ttf \
+		--font tests/fixtures/selected-fonts/OpenSans-Italic.ttf \
 		--character "&" > assets/draw/OpenSans-Italic.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf \
+		--font tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf \
 		--character "ö" > assets/draw/SourceSerifPro-Regular.svg
 	cargo run --bin draw --features drawing --quiet -- \
-		--font ../font/tests/fixtures/selected-fonts/VesperLibre-Regular.ttf \
+		--font tests/fixtures/selected-fonts/VesperLibre-Regular.ttf \
 		--character "å" > assets/draw/VesperLibre-Regular.svg
 	[ "$$(git diff assets/draw | wc -l | xargs)" = 0 ] || exit 1
 
