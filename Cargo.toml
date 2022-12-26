@@ -35,9 +35,9 @@ required-features = ["drawing", "scanning"]
 
 [dependencies]
 opentype = "0.23.1"
-postscript = "0.16"
-truetype = "0.38"
-typeface = "0.2"
+postscript = "0.16.3"
+truetype = "0.38.1"
+typeface = "0.2.2"
 
 arguments = { version = "0.7", optional = true }
 svg = { version = "0.9", optional = true }
