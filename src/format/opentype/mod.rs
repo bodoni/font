@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use ::postscript::compact1::FontSet;
 use ::truetype::{
-    CharMapping, FontHeader, GlyphData, GlyphMapping, HorizontalHeader, HorizontalMetrics,
+    CharacterMapping, FontHeader, GlyphData, GlyphMapping, HorizontalHeader, HorizontalMetrics,
     MaximumProfile, WindowsMetrics,
 };
 use opentype;
@@ -62,16 +62,16 @@ where
         font.take::<_, WindowsMetrics>(tape)?,
         "cannot find the OS/2 and Windows metrics",
     );
-    let char_mapping = get!(
-        font.take::<_, CharMapping>(tape)?,
-        "cannot find the char-to-glyph mapping",
+    let character_mapping = get!(
+        font.take::<_, CharacterMapping>(tape)?,
+        "cannot find the character-to-glyph mapping",
     );
     let metrics = Rc::new(Metrics::new(
         horizontal_header,
         horizontal_metrics,
         windows_metrics,
     )?);
-    let mapping = Rc::new(Mapping::new(char_mapping)?);
+    let mapping = Rc::new(Mapping::new(character_mapping)?);
     if let Some(font_set) = font.take::<_, FontSet>(tape)? {
         let font_set = Rc::new(font_set);
         for id in 0..font_set.char_strings.len() {
