@@ -1,3 +1,7 @@
+mod builder;
+
+pub use builder::Builder;
+
 use crate::{Number, Offset};
 
 /// A glyph.

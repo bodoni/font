@@ -26,12 +26,12 @@ extern crate truetype;
 #[macro_use(dereference, raise)]
 extern crate typeface;
 
-mod builder;
 mod case;
 mod file;
 mod font;
 mod format;
 mod glyph;
+mod metrics;
 mod offset;
 
 pub use typeface::{Error, Result};
@@ -40,6 +40,7 @@ pub use self::font::Font;
 pub use case::Case;
 pub use file::File;
 pub use glyph::{Contour, Glyph, Segment};
+pub use metrics::Metrics;
 pub use offset::Offset;
 
 /// A number.

@@ -4,9 +4,8 @@ use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescript
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
-use crate::builder::Builder;
 use crate::case::Case;
-use crate::glyph::Glyph;
+use crate::glyph::{Builder, Glyph};
 use crate::{Offset, Result};
 
 pub struct TrueType {

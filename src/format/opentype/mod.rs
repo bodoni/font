@@ -104,19 +104,21 @@ pub fn new_font(font_header: &FontHeader, metrics: &Metrics, case: Box<dyn Case>
         line_gap,
     ) = metrics.describe();
     Font {
-        units_per_em: font_header.units_per_em.into(),
-        clipping_ascender: clipping_ascender,
-        ascender: ascender,
-        cap_height: cap_height,
-        x_height: x_height,
-        baseline: if font_header.flags.is_baseline_at_0() {
-            0.0
-        } else {
-            Number::NAN
+        metrics: crate::metrics::Metrics {
+            units_per_em: font_header.units_per_em.into(),
+            clipping_ascender: clipping_ascender,
+            ascender: ascender,
+            cap_height: cap_height,
+            x_height: x_height,
+            baseline: if font_header.flags.is_baseline_at_0() {
+                0.0
+            } else {
+                Number::NAN
+            },
+            descender: descender,
+            clipping_descender: clipping_descender,
+            line_gap: line_gap,
         },
-        descender: descender,
-        clipping_descender: clipping_descender,
-        line_gap: line_gap,
         case: case,
     }
 }

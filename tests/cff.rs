@@ -46,14 +46,14 @@ mod source_serif {
     fn open() {
         let file = setup(Fixture::SourceSerif);
         let font = &file[0];
-        assert_eq!(font.units_per_em, 1000.0);
-        assert_eq!(font.clipping_ascender, 918.0);
-        assert_eq!(font.ascender, 730.0);
-        assert_eq!(font.cap_height, 670.0);
-        assert_eq!(font.x_height, 475.0);
-        assert_eq!(font.baseline, 0.0);
-        assert_eq!(font.descender, -270.0);
-        assert_eq!(font.clipping_descender, -335.0);
-        assert_eq!(font.line_gap, 0.0);
+        assert_eq!(font.metrics.units_per_em, 1000.0);
+        assert_eq!(font.metrics.clipping_ascender, 918.0);
+        assert_eq!(font.metrics.ascender, 730.0);
+        assert_eq!(font.metrics.cap_height, 670.0);
+        assert_eq!(font.metrics.x_height, 475.0);
+        assert_eq!(font.metrics.baseline, 0.0);
+        assert_eq!(font.metrics.descender, -270.0);
+        assert_eq!(font.metrics.clipping_descender, -335.0);
+        assert_eq!(font.metrics.line_gap, 0.0);
     }
 }

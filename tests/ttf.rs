@@ -20,15 +20,15 @@ mod crimson_text {
     fn open() {
         let file = setup(Fixture::CrimsonText);
         let font = &file[0];
-        assert_eq!(font.units_per_em, 1024.0);
-        assert_eq!(font.clipping_ascender, 1106.0);
-        assert_eq!(font.ascender, 972.0);
-        assert_eq!(font.cap_height, 656.0);
-        assert_eq!(font.x_height, 430.0);
-        assert_eq!(font.baseline, 0.0);
-        assert_eq!(font.descender, -359.0);
-        assert_eq!(font.clipping_descender, -297.0);
-        assert_eq!(font.line_gap, 0.0);
+        assert_eq!(font.metrics.units_per_em, 1024.0);
+        assert_eq!(font.metrics.clipping_ascender, 1106.0);
+        assert_eq!(font.metrics.ascender, 972.0);
+        assert_eq!(font.metrics.cap_height, 656.0);
+        assert_eq!(font.metrics.x_height, 430.0);
+        assert_eq!(font.metrics.baseline, 0.0);
+        assert_eq!(font.metrics.descender, -359.0);
+        assert_eq!(font.metrics.clipping_descender, -297.0);
+        assert_eq!(font.metrics.line_gap, 0.0);
     }
 }
 
@@ -210,15 +210,15 @@ mod open_sans {
     fn open() {
         let file = setup(Fixture::OpenSans);
         let font = &file[0];
-        assert_eq!(font.units_per_em, 2048.0);
-        assert_eq!(font.clipping_ascender, 2189.0);
-        assert_eq!(font.ascender, 1567.0);
-        assert_eq!(font.cap_height, 1462.0);
-        assert_eq!(font.x_height, 1096.0);
-        assert_eq!(font.baseline, 0.0);
-        assert_eq!(font.descender, -492.0);
-        assert_eq!(font.clipping_descender, -600.0);
-        assert_eq!(font.line_gap, 132.0);
+        assert_eq!(font.metrics.units_per_em, 2048.0);
+        assert_eq!(font.metrics.clipping_ascender, 2189.0);
+        assert_eq!(font.metrics.ascender, 1567.0);
+        assert_eq!(font.metrics.cap_height, 1462.0);
+        assert_eq!(font.metrics.x_height, 1096.0);
+        assert_eq!(font.metrics.baseline, 0.0);
+        assert_eq!(font.metrics.descender, -492.0);
+        assert_eq!(font.metrics.clipping_descender, -600.0);
+        assert_eq!(font.metrics.line_gap, 132.0);
     }
 }
 

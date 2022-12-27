@@ -5,9 +5,8 @@ use postscript::type2::Program;
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
-use crate::builder::Builder;
 use crate::case::Case;
-use crate::glyph::Glyph;
+use crate::glyph::{Builder, Glyph};
 use crate::{Offset, Result};
 
 pub struct PostScript {
