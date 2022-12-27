@@ -5,9 +5,9 @@ use postscript::type2::Program;
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
-use crate::case::Case;
 use crate::glyph::{Builder, Glyph};
-use crate::{Offset, Result};
+use crate::offset::Offset;
+use crate::Result;
 
 pub struct PostScript {
     id: usize,
@@ -33,7 +33,7 @@ impl PostScript {
     }
 }
 
-impl Case for PostScript {
+impl super::case::Case for PostScript {
     fn draw(&self, character: char) -> Result<Option<Glyph>> {
         use postscript::compact1::font_set::Record;
         use postscript::type2::Operator::*;

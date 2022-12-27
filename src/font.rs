@@ -3,16 +3,10 @@ use std::path::Path;
 
 use crate::case::Case;
 use crate::file::File;
-use crate::metrics::Metrics;
 use crate::Result;
 
 /// A font.
-pub struct Font {
-    /// Metrics.
-    pub metrics: Metrics,
-    /// A collection of glyphs.
-    pub case: Box<dyn Case>,
-}
+pub struct Font(Box<dyn Case>);
 
 impl Font {
     /// Open a file.
@@ -27,9 +21,14 @@ impl Font {
         match fonts.len() {
             0 => raise!("found an empty file"),
             1 => return Ok(fonts.remove(0)),
-            _ => raise!("found a file with multiple fonts, which is not supported yet"),
+            _ => raise!("found a file with multiple fonts, which is not allowed"),
         }
     }
 }
 
-dereference! { Font::case => Box<dyn Case> }
+dereference! { Font::0 => Box<dyn Case> }
+
+#[inline]
+pub fn new(case: Box<dyn Case>) -> Font {
+    Font(case)
+}

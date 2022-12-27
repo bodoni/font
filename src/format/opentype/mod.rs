@@ -1,3 +1,5 @@
+mod cache;
+mod case;
 mod file;
 mod font;
 mod mapping;

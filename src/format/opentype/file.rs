@@ -1,21 +1,26 @@
 use std::io::{Read, Seek};
+use std::ops::DerefMut;
+use std::{cell::RefCell, rc::Rc};
 
-use crate::font::Font;
-use crate::format::opentype::font;
 use crate::Result;
 
-pub struct File<T: Read + Seek>(T);
+pub struct File<T: Read + Seek>(Rc<RefCell<T>>);
 
 impl<T: Read + Seek> File<T> {
     #[inline]
     pub fn open(tape: T) -> Self {
-        Self(tape)
+        Self(Rc::new(RefCell::new(tape)))
     }
 
-    pub fn read(&mut self) -> Result<Vec<Font>> {
+    pub fn read(&mut self) -> Result<Vec<crate::font::Font>> {
         let mut fonts = vec![];
-        for font in &opentype::File::read(&mut self.0)?.fonts {
-            font::read(&mut self.0, &mut fonts, font)?;
+        for font in opentype::File::read(self.0.borrow_mut().deref_mut())?
+            .fonts
+            .into_iter()
+        {
+            for font in crate::format::opentype::font::read(self.0.clone(), font)? {
+                fonts.push(crate::font::new(Box::new(font)));
+            }
         }
         Ok(fonts)
     }

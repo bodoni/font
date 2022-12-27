@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use truetype::character_mapping::Encoding;
-use truetype::{CharacterMapping, GlyphID};
+use truetype::character_mapping::{CharacterMapping, Encoding};
+use truetype::GlyphID;
 
 use crate::Result;
 
@@ -19,7 +19,7 @@ macro_rules! remap(
 );
 
 impl Mapping {
-    pub fn new(character_mapping: CharacterMapping) -> Result<Self> {
+    pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
         if character_mapping.encodings.is_empty() {
             raise!("found no char-to-glyph encoding");
         }
