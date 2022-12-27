@@ -14,14 +14,14 @@ impl File {
     /// Open a file.
     #[inline]
     pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
-        File::read(&mut ::std::fs::File::open(path)?)
+        File::read(::std::fs::File::open(path)?)
     }
 
     /// Read a file.
     #[inline]
-    pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Self> {
+    pub fn read<T: Read + Seek>(tape: T) -> Result<Self> {
         Ok(File {
-            fonts: opentype::read(tape)?,
+            fonts: opentype::File::open(tape).read()?,
         })
     }
 }

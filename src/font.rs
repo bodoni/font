@@ -15,14 +15,14 @@ pub struct Font {
 }
 
 impl Font {
-    /// Open a file containing a single font.
+    /// Open a file.
     #[inline]
     pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
-        Font::read(&mut ::std::fs::File::open(path)?)
+        Font::read(::std::fs::File::open(path)?)
     }
 
-    /// Read a file containing a single font.
-    pub fn read<T: Read + Seek>(tape: &mut T) -> Result<Self> {
+    /// Read a file.
+    pub fn read<T: Read + Seek>(tape: T) -> Result<Self> {
         let File { mut fonts, .. } = File::read(tape)?;
         match fonts.len() {
             0 => raise!("found an empty file"),
