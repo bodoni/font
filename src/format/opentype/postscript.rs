@@ -57,7 +57,7 @@ impl Case for PostScript {
                 &self.font_set.subroutines,
                 match &self.font_set.records[self.id] {
                     Record::CharacterNameKeyed(ref record) => &*record.subroutines,
-                    _ => unimplemented!(),
+                    _ => raise!("found a character-ID-keyed font, which is not supported yet"),
                 },
             ),
             _ => raise!(

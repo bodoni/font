@@ -40,7 +40,7 @@ impl Font {
         match fonts.len() {
             0 => raise!("found an empty file"),
             1 => return Ok(fonts.remove(0)),
-            _ => raise!("files with multiple fonts are not supported yet"),
+            _ => raise!("found a file with multiple fonts, which is not supported yet"),
         }
     }
 }

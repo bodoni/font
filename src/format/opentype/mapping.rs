@@ -21,7 +21,7 @@ macro_rules! remap(
 impl Mapping {
     pub fn new(char_mapping: CharMapping) -> Result<Self> {
         if char_mapping.encodings.is_empty() {
-            raise!("cannot find a char-to-glyph encoding");
+            raise!("found no char-to-glyph encoding");
         }
         Ok(Mapping(match &char_mapping.encodings[0] {
             Encoding::Format0(encoding) => remap!(encoding.mapping()),
@@ -29,7 +29,7 @@ impl Mapping {
             Encoding::Format6(encoding) => remap!(encoding.mapping()),
             Encoding::Format12(encoding) => encoding.mapping(),
             Encoding::Format14(encoding) => encoding.mapping(),
-            _ => unimplemented!(),
+            _ => raise!("found an unsupported char-to-glyph encoding"),
         }))
     }
 

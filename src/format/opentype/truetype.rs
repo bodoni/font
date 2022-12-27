@@ -63,7 +63,7 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
     macro_rules! expect(
         ($condition:expr) => (
             if !$condition {
-                raise!(concat!("found a malformed glyph (", stringify!($condition), ")"));
+                raise!("found a malformed glyph");
             }
         )
     );
@@ -167,13 +167,11 @@ fn draw_composite(
         let glyph_index = component.glyph_index;
         let offset = match &component.arguments {
             &Arguments::Offsets(x, y) => Offset::from((x, y)),
-            &Arguments::Indices(..) => unimplemented!(),
+            _ => raise!("found unsupported component arguments"),
         };
         match &component.options {
             &Options::None => {}
-            &Options::Scalar(..) => unimplemented!(),
-            &Options::Vector(..) => unimplemented!(),
-            &Options::Matrix(..) => unimplemented!(),
+            _ => raise!("found unsupported component options"),
         }
         let glyph = match case.glyph_data.get(glyph_index as usize) {
             Some(&Some(ref glyph)) => glyph,
