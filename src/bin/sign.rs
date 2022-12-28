@@ -103,8 +103,9 @@ fn process(
 
 fn draw(path: &Path, characters: &[char], document_size: f32) -> Result<Option<element::Group>> {
     let mut group = element::Group::new();
-    let font = Font::open(path)?;
-    let glyph_size = font.metrics.ascender - font.metrics.descender;
+    let mut font = Font::open(path)?;
+    let metrics = font.metrics()?;
+    let glyph_size = metrics.ascender - metrics.descender;
     let columns = (characters.len() as f32).sqrt().ceil() as usize;
     let offset = document_size / columns as f32;
     let scale = document_size / columns as f32 / glyph_size;
@@ -121,7 +122,7 @@ fn draw(path: &Path, characters: &[char], document_size: f32) -> Result<Option<e
             j as f32 * offset,
             scale,
             (glyph_size - glyph.advance_width) / 2.0,
-            font.metrics.ascender,
+            metrics.ascender,
         );
         let mut glyph = support::drawing::draw(&glyph);
         glyph.assign("transform", transform);
