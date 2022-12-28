@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+macro_rules! ok(($result:expr) => ($result.unwrap()));
+
 use font::{File, Glyph};
 
 pub enum Fixture {

@@ -19,7 +19,7 @@ impl File {
 
     /// Read a file.
     #[inline]
-    pub fn read<T: Read + Seek>(tape: T) -> Result<Self> {
+    pub fn read<T: Read + Seek + 'static>(tape: T) -> Result<Self> {
         Ok(File {
             fonts: crate::format::opentype::File::open(tape).read()?,
         })

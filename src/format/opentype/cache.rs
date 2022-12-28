@@ -41,6 +41,7 @@ macro_rules! cache(
         }
     );
     (@implement $field:ident -> $try_field:ident(), $type:ty, $name:literal) => (
+        #[allow(dead_code)]
         pub fn $field(&mut self) -> Result<&Rc<$type>> {
             match self.$try_field()? {
                 Some(table) => Ok(table),
@@ -48,9 +49,12 @@ macro_rules! cache(
             }
         }
 
+        #[allow(dead_code)]
         pub fn $try_field(&mut self) -> Result<Option<&Rc<$type>>> {
             if self.$field.is_none() {
-                self.$field = match self.backend.take::<_, $type>(self.tape.borrow_mut().deref_mut())? {
+                self.$field = match self.backend.take::<_, $type>(
+                    self.tape.borrow_mut().deref_mut(),
+                )? {
                     Some(value) => Some(Rc::new(value)),
                     _ => None,
                 };
@@ -59,6 +63,7 @@ macro_rules! cache(
         }
     );
     (@implement $field:ident -> $try_field:ident($($argument:ident),+), $type:ty, $name:literal) => (
+        #[allow(dead_code)]
         pub fn $field(&mut self) -> Result<&Rc<$type>> {
             match self.$try_field()? {
                 Some(table) => Ok(table),
@@ -66,9 +71,14 @@ macro_rules! cache(
             }
         }
 
+        #[allow(dead_code)]
         pub fn $try_field(&mut self) -> Result<Option<&Rc<$type>>> {
             if self.$field.is_none() {
-                self.$field = match self.backend.take_given::<_, $type>(self.tape.borrow_mut().deref_mut(), ($(self.$argument()?),+))? {
+                $(let $argument = self.$argument()?.clone();)+
+                self.$field = match self.backend.take_given::<_, $type>(
+                    self.tape.borrow_mut().deref_mut(),
+                    ($(&$argument),+)
+                )? {
                     Some(value) => Some(Rc::new(value)),
                     _ => None,
                 };

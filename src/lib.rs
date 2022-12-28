@@ -7,7 +7,7 @@
 //!
 //! let path = "OpenSans-Italic.ttf";
 //! # let path = "tests/fixtures/selected-fonts/OpenSans-Italic.ttf";
-//! let font = Font::open(path).unwrap();
+//! let mut font = Font::open(path).unwrap();
 //! let glyph = font.draw('&').unwrap().unwrap();
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {

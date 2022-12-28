@@ -1,5 +1,4 @@
 use std::io::{Read, Seek};
-use std::ops::Deref;
 use std::{cell::RefCell, rc::Rc};
 
 use opentype;
@@ -9,7 +8,7 @@ use super::case::Case;
 use crate::{Number, Result};
 
 pub struct Font<T: Read + Seek> {
-    cache: Rc<Cache<T>>,
+    cache: Rc<RefCell<Cache<T>>>,
     case: Box<dyn Case>,
 }
 
@@ -20,11 +19,12 @@ impl<T: Read + Seek> crate::case::Case for Font<T> {
     }
 
     fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
-        let font_header = self.cache.font_header()?.deref();
-        let windows_metrics = self.cache.windows_metrics()?.deref();
+        let mut cache_borrowed = self.cache.borrow_mut();
+        let font_header = cache_borrowed.font_header()?.clone();
+        let windows_metrics = cache_borrowed.windows_metrics()?.clone();
         macro_rules! get(
             (@version0 $($version:ident),+) => (
-                match windows_metrics {
+                match &*windows_metrics {
                     $(truetype::WindowsMetrics::$version(ref metrics) => (
                         metrics.windows_ascender.into(),
                         metrics.typographic_ascender.into(),
@@ -35,7 +35,7 @@ impl<T: Read + Seek> crate::case::Case for Font<T> {
                 }
             );
             (@version2 $($version:ident),+) => (
-                match windows_metrics {
+                match &*windows_metrics {
                     $(truetype::WindowsMetrics::$version(ref metrics) => (
                         metrics.cap_height.into(),
                         metrics.x_height.into(),
@@ -76,10 +76,11 @@ where
     use super::truetype::TrueType;
 
     let mut fonts = vec![];
-    let mut cache = Rc::new(Cache::new(tape.clone(), backend));
-    let metrics = cache.metrics()?;
-    let mapping = cache.mapping()?;
-    if let Some(font_set) = cache.try_font_set()? {
+    let cache = Rc::new(RefCell::new(Cache::new(tape.clone(), backend)));
+    let mut cache_borrowed = cache.borrow_mut();
+    let metrics = cache_borrowed.metrics()?.clone();
+    let mapping = cache_borrowed.mapping()?.clone();
+    if let Some(font_set) = cache_borrowed.try_font_set()? {
         for id in 0..font_set.char_strings.len() {
             let case = PostScript::new(id, font_set.clone(), metrics.clone(), mapping.clone());
             fonts.push(Font {
@@ -88,8 +89,8 @@ where
             });
         }
     }
-    if let Some(_) = cache.try_glyph_mapping()? {
-        if let Some(glyph_data) = cache.try_glyph_data()? {
+    if let Some(_) = cache_borrowed.try_glyph_mapping()? {
+        if let Some(glyph_data) = cache_borrowed.try_glyph_data()? {
             let case = TrueType::new(glyph_data.clone(), metrics.clone(), mapping.clone());
             fonts.push(Font {
                 cache: cache.clone(),

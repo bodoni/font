@@ -8,7 +8,7 @@ The package provides a font toolbox.
 use font::{Font, Segment};
 
 let path = "OpenSans-Italic.ttf";
-let font = Font::open(path).unwrap();
+let mut font = Font::open(path).unwrap();
 let glyph = font.draw('&').unwrap().unwrap();
 for contour in glyph.iter() {
     for segment in contour.iter() {

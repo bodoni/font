@@ -16,7 +16,7 @@ impl Font {
     }
 
     /// Read a file.
-    pub fn read<T: Read + Seek>(tape: T) -> Result<Self> {
+    pub fn read<T: Read + Seek + 'static>(tape: T) -> Result<Self> {
         let File { mut fonts, .. } = File::read(tape)?;
         match fonts.len() {
             0 => raise!("found an empty file"),
