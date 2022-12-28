@@ -8,7 +8,7 @@ mod support;
 use std::io::Result;
 use std::path::{Path, PathBuf};
 
-use font::Font;
+use font::File;
 use svg::node::{element, Node};
 
 fn main() {
@@ -103,7 +103,7 @@ fn process(
 
 fn draw(path: &Path, characters: &[char], document_size: f32) -> Result<Option<element::Group>> {
     let mut group = element::Group::new();
-    let mut font = Font::open(path)?;
+    let mut font = File::open(path).unwrap().fonts.pop().unwrap();
     let metrics = font.metrics()?;
     let glyph_size = metrics.ascender - metrics.descender;
     let columns = (characters.len() as f32).sqrt().ceil() as usize;

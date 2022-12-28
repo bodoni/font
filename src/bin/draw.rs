@@ -4,7 +4,7 @@ extern crate svg;
 
 mod support;
 
-use font::Font;
+use font::File;
 use svg::node::element;
 use svg::Document;
 
@@ -24,7 +24,7 @@ fn main() {
             return;
         }
     };
-    let mut font = Font::open(font).unwrap();
+    let mut font = File::open(font).unwrap().fonts.pop().unwrap();
     let metrics = font.metrics().unwrap();
     let glyph = font.draw(character).unwrap().unwrap();
     let (width, height) = (
