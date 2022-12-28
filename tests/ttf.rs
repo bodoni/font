@@ -9,7 +9,7 @@ mod adobe_blank {
     #[test]
     fn draw_a() {
         let font = &mut setup(Fixture::AdobeBlank)[0];
-        let glyph = font.draw('a').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('a')));
         assert_eq!(glyph.len(), 0);
     }
 }
@@ -39,7 +39,7 @@ mod numans {
     #[test]
     fn draw_a() {
         let font = &mut setup(Fixture::Numans)[0];
-        let glyph = font.draw('a').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('a')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -90,7 +90,7 @@ mod open_sans {
     #[test]
     fn draw_a_ring() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = font.draw('å').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('å')));
         assert_eq!(glyph.len(), 4);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -146,7 +146,7 @@ mod open_sans {
     #[test]
     fn draw_copyright() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = font.draw('©').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('©')));
         assert_eq!(glyph.bounding_box, (139.0, -20.0, 1642.0, 1483.0));
         assert_eq!(glyph.side_bearings, (139.0, 62.0));
     }
@@ -155,14 +155,14 @@ mod open_sans {
     fn draw_from_a_to_z() {
         let font = &mut setup(Fixture::OpenSans)[0];
         for code in b'a'..(b'z' + 1) {
-            font.draw(code as char).unwrap().unwrap();
+            ok!(ok!(font.draw(code as char)));
         }
     }
 
     #[test]
     fn draw_o() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = font.draw('o').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('o')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -195,7 +195,7 @@ mod open_sans {
     #[test]
     fn draw_slash() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = font.draw('/').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('/')));
         assert_eq!(glyph.len(), 1);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -229,7 +229,7 @@ mod vesper_libre {
     #[test]
     fn draw_a() {
         let font = &mut setup(Fixture::VesperLibre)[0];
-        let glyph = font.draw('a').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('a')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -289,7 +289,7 @@ mod vesper_libre {
     #[test]
     fn draw_ellipsis() {
         let font = &mut setup(Fixture::VesperLibre)[0];
-        let glyph = font.draw('…').unwrap().unwrap();
+        let glyph = ok!(ok!(font.draw('…')));
         assert_eq!(glyph.len(), 3);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
