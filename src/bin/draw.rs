@@ -28,9 +28,9 @@ fn main() {
     let glyph = font.draw(character).unwrap().unwrap();
     let (width, height) = (
         glyph.width() + 2.0 * glyph.side_bearings.0,
-        font.ascender - font.descender,
+        font.metrics.ascender - font.metrics.descender,
     );
-    let transform = format!("translate(0, {}) scale(1, -1)", font.ascender);
+    let transform = format!("translate(0, {}) scale(1, -1)", font.metrics.ascender);
     let glyph = support::drawing::draw(&glyph).set("transform", transform);
     let style = element::Style::new("path { fill: black; fill-rule: nonzero }");
     let document = Document::new()
