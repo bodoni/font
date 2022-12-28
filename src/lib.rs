@@ -3,12 +3,12 @@
 //! # Example
 //!
 //! ```
-//! use font::{Font, Segment};
+//! use font::{File, Segment};
 //!
 //! let path = "OpenSans-Italic.ttf";
 //! # let path = "tests/fixtures/selected-fonts/OpenSans-Italic.ttf";
-//! let mut font = Font::open(path).unwrap();
-//! let glyph = font.draw('&').unwrap().unwrap();
+//! let File { mut fonts } = File::open(path).unwrap();
+//! let glyph = fonts[0].draw('&').unwrap().unwrap();
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {
