@@ -73,6 +73,9 @@ tests-sign:
 		--ignore web-platform-tests/css/css-fonts/support/fonts/FontWithFeatures2 \
 		--ignore web-platform-tests/css/css-fonts/support/fonts/gsubtest-lookup1 \
 		--ignore web-platform-tests/css/css-fonts/support/fonts/gsubtest-lookup3 \
+		--ignore web-platform-tests/css/css-writing-modes/support/tcu-font \
+		--ignore web-platform-tests/fonts/adobe-fonts/CSSFWOrientationTest \
+		--ignore web-platform-tests/fonts/adobe-fonts/CSSHWOrientationTest \
 		--workers 4
 
 .PHONY: tests
