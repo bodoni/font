@@ -1,5 +1,6 @@
+use std::cell::RefCell;
 use std::io::{Read, Seek};
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use opentype;
 
@@ -89,14 +90,12 @@ where
             });
         }
     }
-    if let Some(_) = cache_borrowed.try_glyph_mapping()? {
-        if let Some(glyph_data) = cache_borrowed.try_glyph_data()? {
-            let case = TrueType::new(glyph_data.clone(), metrics.clone(), mapping.clone());
-            fonts.push(Font {
-                cache: cache.clone(),
-                case: Box::new(case),
-            });
-        }
+    if let Some(glyph_data) = cache_borrowed.try_glyph_data()? {
+        let case = TrueType::new(glyph_data.clone(), metrics.clone(), mapping.clone());
+        fonts.push(Font {
+            cache: cache.clone(),
+            case: Box::new(case),
+        });
     }
     Ok(fonts)
 }

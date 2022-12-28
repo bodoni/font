@@ -1,6 +1,7 @@
+use std::cell::RefCell;
 use std::io::{Read, Seek};
 use std::ops::DerefMut;
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use crate::Result;
 

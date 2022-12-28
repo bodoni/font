@@ -1,6 +1,7 @@
+use std::cell::RefCell;
 use std::io::{Read, Seek};
 use std::ops::DerefMut;
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use opentype;
 
@@ -74,7 +75,12 @@ macro_rules! cache(
         #[allow(dead_code)]
         pub fn $try_field(&mut self) -> Result<Option<&Rc<$type>>> {
             if self.$field.is_none() {
-                $(let $argument = self.$argument()?.clone();)+
+                $(
+                    let $argument = match self.$argument()? {
+                        Some(argument) => argument.clone(),
+                        _ => return Ok(None),
+                    };
+                )+
                 self.$field = match self.backend.take_given::<_, $type>(
                     self.tape.borrow_mut().deref_mut(),
                     ($(&$argument),+)
@@ -92,10 +98,10 @@ cache! {
     (character_mapping -> try_character_mapping(), ::truetype::CharacterMapping, "the character-to-glyph mapping"),
     (font_header -> try_font_header(), ::truetype::FontHeader, "the font header"),
     (font_set -> try_font_set(), ::postscript::compact1::FontSet, "the font set"),
-    (glyph_data -> try_glyph_data(glyph_mapping), ::truetype::GlyphData, "the glyph data"),
-    (glyph_mapping -> try_glyph_mapping(font_header, maximum_profile), ::truetype::GlyphMapping, "the glyph mapping"),
+    (glyph_data -> try_glyph_data(try_glyph_mapping), ::truetype::GlyphData, "the glyph data"),
+    (glyph_mapping -> try_glyph_mapping(try_font_header, try_maximum_profile), ::truetype::GlyphMapping, "the glyph mapping"),
     (horizontal_header -> try_horizontal_header(), ::truetype::HorizontalHeader, "the horizontal header"),
-    (horizontal_metrics -> try_horizontal_metrics(horizontal_header, maximum_profile), ::truetype::HorizontalMetrics, "the horizontal metrics"),
+    (horizontal_metrics -> try_horizontal_metrics(try_horizontal_header, try_maximum_profile), ::truetype::HorizontalMetrics, "the horizontal metrics"),
     (maximum_profile -> try_maximum_profile(), ::truetype::MaximumProfile, "the maximum profile"),
     (windows_metrics -> try_windows_metrics(), ::truetype::WindowsMetrics, "the OS/2 and Windows metrics"),
 }
