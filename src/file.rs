@@ -1,5 +1,6 @@
-use std::io::{Read, Seek};
 use std::path::Path;
+
+use typeface::Tape;
 
 use crate::font::Font;
 use crate::Result;
@@ -19,9 +20,9 @@ impl File {
 
     /// Read a file.
     #[inline]
-    pub fn read<T: Read + Seek + 'static>(tape: T) -> Result<Self> {
+    pub fn read<T: Tape + 'static>(tape: T) -> Result<Self> {
         Ok(File {
-            fonts: crate::format::opentype::File::open(tape).read()?,
+            fonts: crate::format::opentype::read(tape)?,
         })
     }
 }

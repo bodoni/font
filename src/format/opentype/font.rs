@@ -1,19 +1,19 @@
 use std::cell::RefCell;
-use std::io::{Read, Seek};
 use std::rc::Rc;
 
 use opentype;
+use typeface::Tape;
 
 use super::cache::Cache;
 use super::case::Case;
 use crate::{Number, Result};
 
-pub struct Font<T: Read + Seek> {
+pub struct Font<T: Tape> {
     cache: Rc<RefCell<Cache<T>>>,
     case: Box<dyn Case>,
 }
 
-impl<T: Read + Seek> crate::case::Case for Font<T> {
+impl<T: Tape> crate::case::Case for Font<T> {
     #[inline]
     fn draw(&mut self, character: char) -> Result<Option<crate::glyph::Glyph>> {
         self.case.draw(character)
@@ -71,7 +71,7 @@ impl<T: Read + Seek> crate::case::Case for Font<T> {
 
 pub fn read<T>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Vec<Font<T>>>
 where
-    T: Read + Seek,
+    T: Tape,
 {
     use super::postscript::PostScript;
     use super::truetype::TrueType;

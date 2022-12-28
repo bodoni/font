@@ -1,9 +1,9 @@
 use std::cell::RefCell;
-use std::io::{Read, Seek};
 use std::ops::DerefMut;
 use std::rc::Rc;
 
 use opentype;
+use typeface::Tape;
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
@@ -13,7 +13,7 @@ macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal),)+) => (
         cache!(@define $($field, $type),+);
 
-        impl<T: Read + Seek> Cache<T> {
+        impl<T: Tape> Cache<T> {
             #[inline]
             pub fn new(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Self {
                 Self {
@@ -31,7 +31,7 @@ macro_rules! cache(
         }
     );
     (@define $($field:ident, $type:ty),+) => (
-        pub struct Cache<T: Read + Seek> {
+        pub struct Cache<T: Tape> {
             tape: Rc<RefCell<T>>,
             backend: opentype::Font,
 
@@ -106,7 +106,7 @@ cache! {
     (windows_metrics -> try_windows_metrics(), ::truetype::WindowsMetrics, "the OS/2 and Windows metrics"),
 }
 
-impl<T: Read + Seek> Cache<T> {
+impl<T: Tape> Cache<T> {
     pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
         if self.mapping.is_none() {
             self.mapping = Some(Rc::new(Mapping::new(self.character_mapping()?)?));

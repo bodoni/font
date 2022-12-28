@@ -1,5 +1,6 @@
-use std::io::{Read, Seek};
 use std::path::Path;
+
+use typeface::Tape;
 
 use crate::case::Case;
 use crate::file::File;
@@ -16,7 +17,7 @@ impl Font {
     }
 
     /// Read a file.
-    pub fn read<T: Read + Seek + 'static>(tape: T) -> Result<Self> {
+    pub fn read<T: Tape + 'static>(tape: T) -> Result<Self> {
         let File { mut fonts, .. } = File::read(tape)?;
         match fonts.len() {
             0 => raise!("found an empty file"),
