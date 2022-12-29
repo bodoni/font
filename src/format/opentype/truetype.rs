@@ -4,9 +4,9 @@ use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescript
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
-use crate::case::Case;
 use crate::glyph::{Builder, Glyph};
-use crate::{Offset, Result};
+use crate::offset::Offset;
+use crate::Result;
 
 pub struct TrueType {
     glyph_data: Rc<GlyphData>,
@@ -34,7 +34,7 @@ impl TrueType {
     }
 }
 
-impl Case for TrueType {
+impl super::case::Case for TrueType {
     fn draw(&self, character: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::default();
         let glyph_index = match self.mapping.find(character) {

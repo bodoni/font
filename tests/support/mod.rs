@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+macro_rules! ok(($result:expr) => ($result.unwrap()));
+
 use font::{File, Glyph};
 
 pub enum Fixture {
@@ -12,15 +14,14 @@ pub enum Fixture {
 }
 
 pub fn setup(fixture: Fixture) -> File {
-    File::open(match fixture {
+    ok!(File::open(match fixture {
         Fixture::AdobeBlank => "tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf",
         Fixture::CrimsonText => "tests/fixtures/selected-fonts/CrimsonText-Regular.ttf",
         Fixture::Numans => "tests/fixtures/selected-fonts/Numans-Regular.ttf",
         Fixture::OpenSans => "tests/fixtures/selected-fonts/OpenSans-Italic.ttf",
         Fixture::SourceSerif => "tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf",
         Fixture::VesperLibre => "tests/fixtures/selected-fonts/VesperLibre-Regular.ttf",
-    })
-    .unwrap()
+    }))
 }
 
 pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {

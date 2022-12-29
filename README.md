@@ -5,11 +5,11 @@ The package provides a font toolbox.
 ## [Example]
 
 ```rust
-use font::{Font, Segment};
+use font::{File, Segment};
 
 let path = "OpenSans-Italic.ttf";
-let font = Font::open(path).unwrap();
-let glyph = font.draw('&').unwrap().unwrap();
+let File { mut fonts } = File::open(path).unwrap();
+let glyph = fonts[0].draw('&').unwrap().unwrap();
 for contour in glyph.iter() {
     for segment in contour.iter() {
         match segment {

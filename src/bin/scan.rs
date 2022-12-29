@@ -7,7 +7,7 @@ mod support;
 use std::io::Result;
 use std::path::PathBuf;
 
-use font::Font;
+use font::File;
 
 fn main() {
     let arguments = arguments::parse(std::env::args()).unwrap();
@@ -40,7 +40,7 @@ fn main() {
 }
 
 fn process(path: PathBuf, _: ()) -> (PathBuf, Result<()>) {
-    let result = match Font::open(&path) {
+    let result = match File::open(&path) {
         Ok(_) => {
             println!("[success] {:?}", path);
             Ok(())
