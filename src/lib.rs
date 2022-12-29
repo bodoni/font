@@ -5,10 +5,12 @@
 //! ```
 //! use font::{File, Segment};
 //!
+//! macro_rules! ok(($result:expr) => ($result.unwrap()));
+//!
 //! let path = "OpenSans-Italic.ttf";
 //! # let path = "tests/fixtures/selected-fonts/OpenSans-Italic.ttf";
-//! let File { mut fonts } = File::open(path).unwrap();
-//! let glyph = fonts[0].draw('&').unwrap().unwrap();
+//! let File { mut fonts } = ok!(File::open(path));
+//! let glyph = ok!(ok!(fonts[0].draw('&')));
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {
