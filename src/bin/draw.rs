@@ -24,9 +24,9 @@ fn main() {
             return;
         }
     };
-    let mut font = File::open(font).unwrap().fonts.pop().unwrap();
-    let metrics = font.metrics().unwrap();
-    let glyph = font.draw(character).unwrap().unwrap();
+    let File { mut fonts } = File::open(font).unwrap();
+    let metrics = fonts[0].metrics().unwrap();
+    let glyph = fonts[0].draw(character).unwrap().unwrap();
     let (width, height) = (
         glyph.width() + 2.0 * glyph.side_bearings.0,
         metrics.ascender - metrics.descender,

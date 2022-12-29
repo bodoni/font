@@ -103,14 +103,14 @@ fn process(
 
 fn draw(path: &Path, characters: &[char], document_size: f32) -> Result<Option<element::Group>> {
     let mut group = element::Group::new();
-    let mut font = File::open(path)?.fonts.pop().unwrap();
-    let metrics = font.metrics()?;
+    let File { mut fonts } = File::open(path)?;
+    let metrics = fonts[0].metrics()?;
     let glyph_size = metrics.ascender - metrics.descender;
     let columns = (characters.len() as f32).sqrt().ceil() as usize;
     let offset = document_size / columns as f32;
     let scale = document_size / columns as f32 / glyph_size;
     for (index, character) in characters.iter().enumerate() {
-        let glyph = match font.draw(*character)? {
+        let glyph = match fonts[0].draw(*character)? {
             Some(glyph) => glyph,
             _ => return Ok(None),
         };
