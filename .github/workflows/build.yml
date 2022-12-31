@@ -32,6 +32,8 @@ jobs:
         shell: bash
       - run: make tests-draw-selected
         shell: bash
+      - run: make tests-name-selected
+        shell: bash
       - run: make tests-sign-selected
         shell: bash
       - run: make tests-scan
@@ -49,6 +51,8 @@ jobs:
       - run: make tests-unit
         shell: bash
       - run: make tests-draw-selected
+        shell: bash
+      - run: make tests-name-selected
         shell: bash
       - run: make tests-sign-selected
         shell: bash

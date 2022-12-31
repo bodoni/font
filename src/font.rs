@@ -1,3 +1,6 @@
+use std::rc::Rc;
+
+use truetype::NamingTable;
 use typeface::Tape;
 
 use crate::glyph::Glyph;
@@ -27,6 +30,14 @@ impl<T: Tape> Font<T> {
     pub fn metrics(&mut self) -> Result<Metrics> {
         match &mut self.case {
             Case::OpenType(ref mut case) => case.metrics(),
+        }
+    }
+
+    /// Return names.
+    #[inline]
+    pub fn names(&mut self) -> Result<Rc<NamingTable>> {
+        match &mut self.case {
+            Case::OpenType(ref mut case) => case.names(),
         }
     }
 }

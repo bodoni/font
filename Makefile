@@ -1,6 +1,8 @@
 all: tests-unit
 
-tests: tests-unit tests-draw-selected tests-sign-selected tests-scan tests-sign
+tests: tests-unit
+tests: tests-draw-selected tests-name-selected tests-sign-selected
+tests: tests-scan tests-sign
 
 tests-unit:
 	cargo test
@@ -25,6 +27,10 @@ tests-draw-selected:
 		--font tests/fixtures/selected-fonts/VesperLibre-Regular.ttf \
 		--character "å" > assets/draw/VesperLibre-Regular.svg
 	[ "$$(git diff assets/draw | wc -l | xargs)" = 0 ] || exit 1
+
+tests-name-selected:
+	cargo run --bin name --features naming --quiet -- \
+		--font tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf
 
 tests-sign-selected:
 	RUST_BACKTRACE=full cargo run --bin sign --features drawing,scanning -- \
@@ -80,5 +86,5 @@ tests-sign:
 
 .PHONY: tests
 .PHONY: tests-unit
-.PHONY: tests-draw-selected tests-sign-selected
+.PHONY: tests-draw-selected tests-name-selected tests-sign-selected
 .PHONY: tests-scan tests-sign

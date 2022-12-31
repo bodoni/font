@@ -103,6 +103,7 @@ cache! {
     (horizontal_header -> try_horizontal_header(), ::truetype::HorizontalHeader, "the horizontal header"),
     (horizontal_metrics -> try_horizontal_metrics(try_horizontal_header, try_maximum_profile), ::truetype::HorizontalMetrics, "the horizontal metrics"),
     (maximum_profile -> try_maximum_profile(), ::truetype::MaximumProfile, "the maximum profile"),
+    (naming_table -> try_naming_table(), ::truetype::NamingTable, "the naming table"),
     (windows_metrics -> try_windows_metrics(), ::truetype::WindowsMetrics, "the OS/2 and Windows metrics"),
 }
 

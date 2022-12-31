@@ -12,6 +12,7 @@ exclude = ["tests/fixtures/*"]
 
 [features]
 drawing = ["arguments", "svg"]
+naming = ["arguments"]
 scanning = ["arguments", "walkdir"]
 
 [lib]
@@ -22,6 +23,11 @@ path = "src/lib.rs"
 name = "draw"
 path = "src/bin/draw.rs"
 required-features = ["drawing"]
+
+[[bin]]
+name = "name"
+path = "src/bin/name.rs"
+required-features = ["naming"]
 
 [[bin]]
 name = "scan"

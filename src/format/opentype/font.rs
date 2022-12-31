@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use truetype::NamingTable;
 use typeface::Tape;
 
 use super::cache::Cache;
@@ -74,6 +75,11 @@ impl<T: Tape> Font<T> {
             clipping_descender: clipping_descender,
             line_gap: line_gap,
         })
+    }
+
+    pub fn names(&mut self) -> Result<Rc<NamingTable>> {
+        let mut cache_borrowed = self.cache.borrow_mut();
+        Ok(cache_borrowed.naming_table()?.clone())
     }
 }
 
