@@ -24,18 +24,7 @@ impl TrueType {
         }
     }
 
-    fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
-        use truetype::glyph_data::Description::*;
-
-        match &glyph.description {
-            &Simple(ref description) => draw_simple(builder, description),
-            &Composite(ref description) => draw_composite(self, builder, description),
-        }
-    }
-}
-
-impl super::case::Case for TrueType {
-    fn draw(&self, character: char) -> Result<Option<Glyph>> {
+    pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::default();
         let glyph_index = match self.mapping.find(character) {
             Some(glyph_index) => glyph_index,
@@ -55,6 +44,15 @@ impl super::case::Case for TrueType {
             builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
         }
         Ok(Some(builder.into()))
+    }
+
+    fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
+        use truetype::glyph_data::Description::*;
+
+        match &glyph.description {
+            &Simple(ref description) => draw_simple(builder, description),
+            &Composite(ref description) => draw_composite(self, builder, description),
+        }
     }
 }
 

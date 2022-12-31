@@ -13,7 +13,7 @@ pub enum Fixture {
     VesperLibre,
 }
 
-pub fn setup(fixture: Fixture) -> File {
+pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
     ok!(File::open(match fixture {
         Fixture::AdobeBlank => "tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf",
         Fixture::CrimsonText => "tests/fixtures/selected-fonts/CrimsonText-Regular.ttf",

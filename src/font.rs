@@ -1,11 +1,41 @@
-use crate::case::Case;
+use typeface::Tape;
+
+use crate::glyph::Glyph;
+use crate::metrics::Metrics;
+use crate::Result;
 
 /// A font.
-pub struct Font(Box<dyn Case>);
+pub struct Font<T> {
+    case: Case<T>,
+}
 
-dereference! { Font::0 => Box<dyn Case> }
+pub enum Case<T> {
+    OpenType(crate::format::opentype::Font<T>),
+}
 
-#[inline]
-pub fn new(case: Box<dyn Case>) -> Font {
-    Font(case)
+impl<T: Tape> Font<T> {
+    /// Draw a character.
+    #[inline]
+    pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
+        match &mut self.case {
+            Case::OpenType(ref mut case) => case.draw(character),
+        }
+    }
+
+    /// Return metrics.
+    #[inline]
+    pub fn metrics(&mut self) -> Result<Metrics> {
+        match &mut self.case {
+            Case::OpenType(ref mut case) => case.metrics(),
+        }
+    }
+}
+
+pub fn read<T: Tape + 'static>(tape: T) -> Result<Vec<Font<T>>> {
+    Ok(crate::format::opentype::read(tape)?
+        .into_iter()
+        .map(|font| Font {
+            case: Case::OpenType(font),
+        })
+        .collect())
 }

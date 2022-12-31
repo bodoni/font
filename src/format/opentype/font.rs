@@ -1,25 +1,33 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use opentype;
 use typeface::Tape;
 
 use super::cache::Cache;
-use super::case::Case;
+use super::postscript::PostScript;
+use super::truetype::TrueType;
 use crate::{Number, Result};
 
-pub struct Font<T: Tape> {
+pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
-    case: Box<dyn Case>,
+    case: Case,
 }
 
-impl<T: Tape> crate::case::Case for Font<T> {
+enum Case {
+    PostScript(PostScript),
+    TrueType(TrueType),
+}
+
+impl<T: Tape> Font<T> {
     #[inline]
-    fn draw(&mut self, character: char) -> Result<Option<crate::glyph::Glyph>> {
-        self.case.draw(character)
+    pub fn draw(&mut self, character: char) -> Result<Option<crate::glyph::Glyph>> {
+        match &self.case {
+            Case::PostScript(ref case) => case.draw(character),
+            Case::TrueType(ref case) => case.draw(character),
+        }
     }
 
-    fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
+    pub fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         let mut cache_borrowed = self.cache.borrow_mut();
         let font_header = cache_borrowed.font_header()?.clone();
         let windows_metrics = cache_borrowed.windows_metrics()?.clone();
@@ -73,9 +81,6 @@ pub fn read<T>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Vec<Font
 where
     T: Tape,
 {
-    use super::postscript::PostScript;
-    use super::truetype::TrueType;
-
     let mut fonts = vec![];
     let cache = Rc::new(RefCell::new(Cache::new(tape.clone(), backend)));
     let mut cache_borrowed = cache.borrow_mut();
@@ -86,7 +91,7 @@ where
             let case = PostScript::new(id, font_set.clone(), metrics.clone(), mapping.clone());
             fonts.push(Font {
                 cache: cache.clone(),
-                case: Box::new(case),
+                case: Case::PostScript(case),
             });
         }
     }
@@ -94,7 +99,7 @@ where
         let case = TrueType::new(glyph_data.clone(), metrics.clone(), mapping.clone());
         fonts.push(Font {
             cache: cache.clone(),
-            case: Box::new(case),
+            case: Case::TrueType(case),
         });
     }
     Ok(fonts)

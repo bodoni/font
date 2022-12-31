@@ -31,10 +31,8 @@ impl PostScript {
             mapping: mapping,
         }
     }
-}
 
-impl super::case::Case for PostScript {
-    fn draw(&self, character: char) -> Result<Option<Glyph>> {
+    pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
         use postscript::compact1::font_set::Record;
         use postscript::type2::Operator::*;
 
