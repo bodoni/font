@@ -30,7 +30,7 @@ tests-draw-selected:
 
 tests-name-selected:
 	cargo run --bin name --features bin --quiet -- \
-		--font tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf
+		--font tests/fixtures/web-platform-tests/fonts/CSSTest/csstest-ascii.ttf
 
 tests-sign-selected:
 	RUST_BACKTRACE=full cargo run --bin sign --features bin -- \
