@@ -17,7 +17,7 @@ fn main() {
         let name_id = format!("{:?}", name_id);
         let language_tag = language_tag.as_deref().unwrap_or("NA");
         let value = truncate(value.as_deref().unwrap_or("NA"));
-        println!("{: <20} {: <10} {}", name_id, language_tag, value);
+        println!("{: <25} {: <5} {}", name_id, language_tag, value);
     }
 }
 
