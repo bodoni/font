@@ -11,9 +11,7 @@ repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
 
 [features]
-drawing = ["arguments", "svg"]
-naming = ["arguments"]
-scanning = ["arguments", "walkdir"]
+bin = ["arguments", "svg", "walkdir"]
 
 [lib]
 name = "font"
@@ -22,22 +20,22 @@ path = "src/lib.rs"
 [[bin]]
 name = "draw"
 path = "src/bin/draw.rs"
-required-features = ["drawing"]
+required-features = ["bin"]
 
 [[bin]]
 name = "name"
 path = "src/bin/name.rs"
-required-features = ["naming"]
+required-features = ["bin"]
 
 [[bin]]
 name = "scan"
 path = "src/bin/scan.rs"
-required-features = ["scanning"]
+required-features = ["bin"]
 
 [[bin]]
 name = "sign"
 path = "src/bin/sign.rs"
-required-features = ["drawing", "scanning"]
+required-features = ["bin"]
 
 [dependencies]
 opentype = "0.24.0"
