@@ -15,8 +15,8 @@ fn main() {
     let File { mut fonts } = File::open(font).unwrap();
     for ((name_id, language_tag), value) in fonts[0].names().unwrap().iter() {
         let name_id = format!("{:?}", name_id);
-        let language_tag = language_tag.as_deref().unwrap_or("NA");
-        let value = truncate(value.as_deref().unwrap_or("NA"));
+        let language_tag = language_tag.as_deref().unwrap_or("--");
+        let value = truncate(value.as_deref().unwrap_or("--"));
         println!("{: <25} {: <5} {}", name_id, language_tag, value);
     }
 }
