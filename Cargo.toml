@@ -38,10 +38,10 @@ path = "src/bin/sign.rs"
 required-features = ["bin"]
 
 [dependencies]
-opentype = "0.24.0"
+opentype = "0.24.2"
 postscript = "0.16.4"
-truetype = "0.39.0"
-typeface = "0.2.2"
+truetype = "0.40.0"
+typeface = "0.2.3"
 
 arguments = { version = "0.7", optional = true }
 svg = { version = "0.9", optional = true }
