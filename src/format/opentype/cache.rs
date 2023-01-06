@@ -99,7 +99,7 @@ cache! {
     (font_header -> try_font_header(), ::truetype::FontHeader, "the font header"),
     (font_set -> try_font_set(), ::postscript::compact1::FontSet, "the font set"),
     (glyph_data -> try_glyph_data(try_glyph_mapping), ::truetype::GlyphData, "the glyph data"),
-    (glyph_mapping -> try_glyph_mapping(try_font_header, try_maximum_profile), ::truetype::GlyphMapping, "the glyph mapping"),
+    (glyph_mapping -> try_glyph_mapping(try_font_header, try_maximum_profile), ::truetype::GlyphMapping, "the glyph-to-location mapping"),
     (horizontal_header -> try_horizontal_header(), ::truetype::HorizontalHeader, "the horizontal header"),
     (horizontal_metrics -> try_horizontal_metrics(try_horizontal_header, try_maximum_profile), ::truetype::HorizontalMetrics, "the horizontal metrics"),
     (maximum_profile -> try_maximum_profile(), ::truetype::MaximumProfile, "the maximum profile"),
