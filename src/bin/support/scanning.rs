@@ -6,6 +6,7 @@ use std::thread;
 
 use walkdir::WalkDir;
 
+#[allow(dead_code)]
 pub fn scan<F, T, U>(
     path: &Path,
     process: F,

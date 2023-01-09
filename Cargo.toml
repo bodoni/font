@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.8.1"
+version = "0.9.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -18,22 +18,22 @@ name = "font"
 path = "src/lib.rs"
 
 [[bin]]
-name = "draw"
+name = "font-draw"
 path = "src/bin/draw.rs"
 required-features = ["bin"]
 
 [[bin]]
-name = "name"
+name = "font-name"
 path = "src/bin/name.rs"
 required-features = ["bin"]
 
 [[bin]]
-name = "scan"
+name = "font-scan"
 path = "src/bin/scan.rs"
 required-features = ["bin"]
 
 [[bin]]
-name = "sign"
+name = "font-sign"
 path = "src/bin/sign.rs"
 required-features = ["bin"]
 

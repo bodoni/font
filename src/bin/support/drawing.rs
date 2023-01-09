@@ -2,6 +2,7 @@ use font::{Glyph, Offset, Segment};
 use svg::node::element;
 use svg::node::Node;
 
+#[allow(dead_code)]
 pub fn draw(glyph: &Glyph) -> element::Group {
     let mut group = element::Group::new();
     let mut data = element::path::Data::new();
