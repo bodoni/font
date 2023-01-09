@@ -1,4 +1,4 @@
-//! Font toolbox.
+//! A parser for fonts.
 //!
 //! # Example
 //!
