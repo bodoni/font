@@ -1,48 +1,17 @@
 [package]
 name = "font"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
-description = "The package provides a font toolbox."
+description = "The package provides a parser for fonts."
 documentation = "https://docs.rs/font"
 homepage = "https://github.com/bodoni/font"
 repository = "https://github.com/bodoni/font"
 exclude = ["tests/fixtures/*"]
-
-[features]
-bin = ["arguments", "svg", "walkdir"]
-
-[lib]
-name = "font"
-path = "src/lib.rs"
-
-[[bin]]
-name = "font-draw"
-path = "src/bin/draw.rs"
-required-features = ["bin"]
-
-[[bin]]
-name = "font-name"
-path = "src/bin/name.rs"
-required-features = ["bin"]
-
-[[bin]]
-name = "font-scan"
-path = "src/bin/scan.rs"
-required-features = ["bin"]
-
-[[bin]]
-name = "font-sign"
-path = "src/bin/sign.rs"
-required-features = ["bin"]
 
 [dependencies]
 opentype = "0.24.3"
 postscript = "0.16.5"
 truetype = "0.40.0"
 typeface = "0.2.3"
-
-arguments = { version = "0.7", optional = true }
-svg = { version = "0.9", optional = true }
-walkdir = { version = "2.3", optional = true }

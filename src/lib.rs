@@ -8,7 +8,7 @@
 //! macro_rules! ok(($result:expr) => ($result.unwrap()));
 //!
 //! let path = "OpenSans-Italic.ttf";
-//! # let path = "tests/fixtures/selected-fonts/OpenSans-Italic.ttf";
+//! # let path = "tests/fixtures/OpenSans-Italic.ttf";
 //! let File { mut fonts } = ok!(File::open(path));
 //! let glyph = ok!(ok!(fonts[0].draw('&')));
 //! for contour in glyph.iter() {

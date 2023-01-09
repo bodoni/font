@@ -15,12 +15,12 @@ pub enum Fixture {
 
 pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
     ok!(File::open(match fixture {
-        Fixture::AdobeBlank => "tests/fixtures/selected-fonts/AdobeBlank-Regular.ttf",
-        Fixture::CrimsonText => "tests/fixtures/selected-fonts/CrimsonText-Regular.ttf",
-        Fixture::Numans => "tests/fixtures/selected-fonts/Numans-Regular.ttf",
-        Fixture::OpenSans => "tests/fixtures/selected-fonts/OpenSans-Italic.ttf",
-        Fixture::SourceSerif => "tests/fixtures/selected-fonts/SourceSerifPro-Regular.otf",
-        Fixture::VesperLibre => "tests/fixtures/selected-fonts/VesperLibre-Regular.ttf",
+        Fixture::AdobeBlank => "tests/fixtures/AdobeBlank-Regular.ttf",
+        Fixture::CrimsonText => "tests/fixtures/CrimsonText-Regular.ttf",
+        Fixture::Numans => "tests/fixtures/Numans-Regular.ttf",
+        Fixture::OpenSans => "tests/fixtures/OpenSans-Italic.ttf",
+        Fixture::SourceSerif => "tests/fixtures/SourceSerifPro-Regular.otf",
+        Fixture::VesperLibre => "tests/fixtures/VesperLibre-Regular.ttf",
     }))
 }
 
