@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.8.0"
+version = "0.8.1"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -38,8 +38,8 @@ path = "src/bin/sign.rs"
 required-features = ["bin"]
 
 [dependencies]
-opentype = "0.24.2"
-postscript = "0.16.4"
+opentype = "0.24.3"
+postscript = "0.16.5"
 truetype = "0.40.0"
 typeface = "0.2.3"
 
