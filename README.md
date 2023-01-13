@@ -24,8 +24,8 @@ for contour in glyph.iter() {
 ```
 
 <div align="center">
-  <a href="https://github.com/bodoni/founder/blob/main/src/drawing.rs">
-    <img src="https://raw.githubusercontent.com/bodoni/founder/main/assets/draw/OpenSans-Italic.svg">
+  <a href="https://github.com/bodoni/workbench/blob/main/founder/src/drawing.rs">
+    <img src="https://raw.githubusercontent.com/bodoni/workbench/main/founder/assets/draw/OpenSans-Italic.svg">
   </a>
 </div>
 
@@ -42,4 +42,4 @@ will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 [package-img]: https://img.shields.io/crates/v/font.svg
 [package-url]: https://crates.io/crates/font
 
-[example]: https://github.com/bodoni/founder/blob/main/src/drawing.rs
+[example]: https://github.com/bodoni/workbench/blob/main/founder/src/drawing.rs
