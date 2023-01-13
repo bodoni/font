@@ -7,10 +7,10 @@
 //!
 //! macro_rules! ok(($result:expr) => ($result.unwrap()));
 //!
-//! let path = "OpenSans-Italic.ttf";
-//! # let path = "tests/fixtures/OpenSans-Italic.ttf";
+//! let path = "SourceSerifPro-Regular.otf";
+//! # let path = "tests/fixtures/SourceSerifPro-Regular.otf";
 //! let File { mut fonts } = ok!(File::open(path));
-//! let glyph = ok!(ok!(fonts[0].draw('&')));
+//! let glyph = ok!(ok!(fonts[0].draw('a')));
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {
