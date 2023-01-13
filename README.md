@@ -25,7 +25,7 @@ for contour in glyph.iter() {
 
 <div align="center">
   <a href="https://github.com/bodoni/workbench/blob/main/founder/src/drawing.rs">
-    <img src="https://raw.githubusercontent.com/bodoni/workbench/main/founder/assets/draw/OpenSans-Italic.svg">
+    <img src="https://raw.githubusercontent.com/bodoni/font/main/assets/SourceSerifPro-Regular.svg">
   </a>
 </div>
 
