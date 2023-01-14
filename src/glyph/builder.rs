@@ -21,12 +21,14 @@ impl Builder {
             .push(mem::replace(&mut self.contour, Default::default()));
     }
 
-    pub fn nest<T, U, F>(&mut self, offset: T, scale: Number, build: F) -> U
+    pub fn nest<T, U, V, F>(&mut self, offset: T, scale: U, build: F) -> V
     where
         T: Into<Offset>,
-        F: Fn(&mut Builder) -> U,
+        U: Into<Number>,
+        F: Fn(&mut Builder) -> V,
     {
         let offset = offset.into();
+        let scale = scale.into();
         self.offset += offset;
         self.scale *= scale;
         let result = build(self);
