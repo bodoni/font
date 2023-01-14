@@ -33,6 +33,20 @@ mod crimson_text {
     }
 }
 
+mod monte_carlo {
+    use crate::support::{setup, Fixture};
+
+    #[test]
+    fn draw_letters() {
+        let font = &mut setup(Fixture::MonteCarlo)[0];
+        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        for character in characters.chars() {
+            let result = font.draw(character);
+            assert!(result.is_ok(), "{}: {:?}", character, result);
+        }
+    }
+}
+
 mod numans {
     use crate::support::{setup, trace, Fixture};
 

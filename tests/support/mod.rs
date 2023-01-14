@@ -7,6 +7,7 @@ use font::{File, Glyph};
 pub enum Fixture {
     AdobeBlank,
     CrimsonText,
+    MonteCarlo,
     Numans,
     OpenSans,
     SourceSerif,
@@ -17,6 +18,7 @@ pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
     ok!(File::open(match fixture {
         Fixture::AdobeBlank => "tests/fixtures/AdobeBlank-Regular.ttf",
         Fixture::CrimsonText => "tests/fixtures/CrimsonText-Regular.ttf",
+        Fixture::MonteCarlo => "tests/fixtures/MonteCarlo-Regular.ttf",
         Fixture::Numans => "tests/fixtures/Numans-Regular.ttf",
         Fixture::OpenSans => "tests/fixtures/OpenSans-Italic.ttf",
         Fixture::SourceSerif => "tests/fixtures/SourceSerifPro-Regular.otf",
