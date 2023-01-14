@@ -1,11 +1,12 @@
 use crate::glyph::{Contour, Glyph, Segment};
 use crate::{Number, Offset};
 
-#[derive(Default)]
 pub struct Builder {
     contour: Contour,
     glyph: Glyph,
+
     offset: Offset,
+    scale: Number,
 }
 
 impl Builder {
@@ -47,14 +48,16 @@ impl Builder {
             .push(mem::replace(&mut self.contour, Default::default()));
     }
 
-    pub fn nest<T, U, F>(&mut self, offset: T, build: F) -> U
+    pub fn nest<T, U, F>(&mut self, offset: T, scale: Number, build: F) -> U
     where
         T: Into<Offset>,
         F: Fn(&mut Builder) -> U,
     {
         let offset = offset.into();
         self.offset += offset;
+        self.scale *= scale;
         let result = build(self);
+        self.scale /= scale;
         self.offset -= offset;
         result
     }
@@ -91,6 +94,19 @@ impl Builder {
     pub fn set_horizontal_metrics(&mut self, (advance_width, left_side_bearing): (Number, Number)) {
         self.glyph.advance_width = advance_width;
         self.glyph.side_bearings.0 = left_side_bearing;
+    }
+}
+
+impl Default for Builder {
+    #[inline]
+    fn default() -> Self {
+        Self {
+            contour: Default::default(),
+            glyph: Default::default(),
+
+            offset: Default::default(),
+            scale: 1.0,
+        }
     }
 }
 
