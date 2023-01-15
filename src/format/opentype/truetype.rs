@@ -164,12 +164,14 @@ fn draw_composite(
         let glyph_index = component.glyph_index;
         let offset = match &component.arguments {
             &Arguments::Offsets(x, y) => Offset::from((x, y)),
-            _ => raise!("found unsupported component arguments"),
+            value => raise!("found unsupported component arguments ({:?})", value),
         };
-        match &component.options {
-            &Options::None => {}
-            _ => raise!("found unsupported component options"),
-        }
+        let scale = match &component.options {
+            &Options::None => (1.0, 0.0, 0.0, 1.0),
+            &Options::Scalar(value) => (value.into(), 0.0, 0.0, value.into()),
+            &Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
+            &Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
+        };
         let glyph = match case.glyph_data.get(glyph_index as usize) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
@@ -178,7 +180,7 @@ fn draw_composite(
         if component.flags.should_use_metrics() {
             builder.set_horizontal_metrics(case.metrics.get(glyph_index));
         }
-        builder.nest(offset, |builder| case.draw_glyph(builder, glyph))?;
+        builder.nest(offset, scale, |builder| case.draw_glyph(builder, glyph))?;
     }
     Ok(())
 }
