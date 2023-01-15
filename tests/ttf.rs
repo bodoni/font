@@ -37,7 +37,7 @@ mod monte_carlo {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
-    fn draw_letters() {
+    fn draw_i() {
         let font = &mut setup(Fixture::MonteCarlo)[0];
         let glyph = ok!(ok!(font.draw('i')));
         assert_eq!(glyph.len(), 2);
@@ -388,6 +388,49 @@ mod vesper_libre {
             (1293.0, 143.0),
             (1281.5,  56.5),
             (1255.0,   1.0),
+        ]);
+    }
+}
+
+mod zen_loop {
+    use crate::support::{setup, trace, Fixture};
+
+    #[test]
+    fn draw_d() {
+        let font = &mut setup(Fixture::ZenLoop)[0];
+        let glyph = ok!(ok!(font.draw('d')));
+        assert_eq!(glyph.len(), 2);
+        #[rustfmt::skip]
+        assert_eq!(&trace(&glyph), &vec![
+            (228.0,   0.0),
+            (238.0,  10.0),
+            (238.0, 703.0),
+            (228.0, 713.0),
+            (217.0, 703.0),
+            (217.0, 438.0),
+            (145.0, 482.0),
+            ( 86.5, 450.5),
+            ( 51.5, 364.5),
+            ( 40.0, 239.0),
+            ( 51.5, 113.0),
+            ( 86.5,  26.5),
+            (145.0,  -5.0),
+            (217.0,  39.0),
+            (217.0,  10.0),
+            (228.0,   0.0),
+
+            (145.0, 461.0),
+            (184.0, 446.0),
+            (217.0, 404.0),
+            (217.0,  74.0),
+            (184.0,  31.0),
+            (145.0,  16.0),
+            ( 98.5,  45.0),
+            ( 71.0, 124.5),
+            ( 62.0, 239.0),
+            ( 71.0, 353.0),
+            ( 98.5, 432.0),
+            (145.0, 461.0),
         ]);
     }
 }

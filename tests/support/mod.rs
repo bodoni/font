@@ -12,6 +12,7 @@ pub enum Fixture {
     OpenSans,
     SourceSerif,
     VesperLibre,
+    ZenLoop,
 }
 
 pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
@@ -23,6 +24,7 @@ pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
         Fixture::OpenSans => "tests/fixtures/OpenSans-Italic.ttf",
         Fixture::SourceSerif => "tests/fixtures/SourceSerifPro-Regular.otf",
         Fixture::VesperLibre => "tests/fixtures/VesperLibre-Regular.ttf",
+        Fixture::ZenLoop => "tests/fixtures/ZenLoop-Regular.ttf",
     }))
 }
 

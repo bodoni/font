@@ -167,9 +167,10 @@ fn draw_composite(
             value => raise!("found unsupported component arguments ({:?})", value),
         };
         let scale = match &component.options {
-            &Options::None => 1.0,
-            &Options::Scalar(value) => value.into(),
-            value => raise!("found unsupported component options ({:?})", value),
+            &Options::None => (1.0, 0.0, 0.0, 1.0),
+            &Options::Scalar(value) => (value.into(), 0.0, 0.0, value.into()),
+            &Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
+            &Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
         };
         let glyph = match case.glyph_data.get(glyph_index as usize) {
             Some(&Some(ref glyph)) => glyph,

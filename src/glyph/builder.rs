@@ -6,7 +6,7 @@ pub struct Builder {
     glyph: Glyph,
 
     offset: Offset,
-    scale: Number,
+    scale: (Number, Number, Number, Number),
 }
 
 impl Builder {
@@ -21,25 +21,50 @@ impl Builder {
             .push(mem::replace(&mut self.contour, Default::default()));
     }
 
-    pub fn nest<T, U, V, F>(&mut self, offset: T, scale: U, build: F) -> V
+    pub fn nest<T, U, V, F>(&mut self, offset: T, scale: (U, U, U, U), build: F) -> V
     where
         T: Into<Offset>,
         U: Into<Number>,
         F: Fn(&mut Builder) -> V,
     {
+        macro_rules! multiply(
+            ($product:expr, $left:expr, $right:expr) => (
+                $product.0 = $left.0 * $right.0 + $left.1 * $right.2;
+                $product.1 = $left.0 * $right.1 + $left.1 * $right.3;
+                $product.2 = $left.2 * $right.0 + $left.3 * $right.2;
+                $product.3 = $left.2 * $right.1 + $left.3 * $right.3;
+            )
+        );
+
         let offset = offset.into();
-        let scale = scale.into();
+        let scale = (
+            scale.0.into(),
+            scale.1.into(),
+            scale.2.into(),
+            scale.3.into(),
+        );
+        let previous_offset = self.offset.clone();
+        let previous_scale = self.scale.clone();
         self.offset += offset;
-        self.scale *= scale;
+        multiply!(self.scale, scale, self.scale);
         let result = build(self);
-        self.scale /= scale;
-        self.offset -= offset;
+        self.scale = previous_scale;
+        self.offset = previous_offset;
         result
     }
 
     #[inline]
     pub fn transform<T: Into<Offset>>(&self, value: T) -> Offset {
-        value.into() * self.scale
+        macro_rules! multiply(
+            ($product:expr, $left:expr, $right:expr) => (
+                $product.0 = $left.0 * $right.0 + $left.1 * $right.1;
+                $product.1 = $left.2 * $right.0 + $left.3 * $right.1;
+            )
+        );
+
+        let mut value = value.into();
+        multiply!(value, self.scale, value);
+        value
     }
 }
 
@@ -117,7 +142,7 @@ impl Default for Builder {
             glyph: Default::default(),
 
             offset: Default::default(),
-            scale: 1.0,
+            scale: (1.0, 0.0, 0.0, 1.0),
         }
     }
 }
