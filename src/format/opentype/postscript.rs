@@ -251,7 +251,10 @@ impl PostScript {
                     ));
                 }
                 HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {}
-                _ => unreachable!(),
+                operator => raise!(
+                    "found an unsupported operation with operator {:?}",
+                    operator,
+                ),
             }
             match operator {
                 HMoveTo | VMoveTo | RMoveTo | HStem | HStemHM | VStem | VStemHM | CntrMask
