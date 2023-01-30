@@ -93,7 +93,7 @@ where
     let metrics = cache_borrowed.metrics()?.clone();
     let mapping = cache_borrowed.mapping()?.clone();
     if let Some(font_set) = cache_borrowed.try_font_set()? {
-        for id in 0..font_set.char_strings.len() {
+        for id in 0..font_set.character_strings.len() {
             let case = PostScript::new(id, font_set.clone(), metrics.clone(), mapping.clone());
             fonts.push(Font {
                 cache: cache.clone(),

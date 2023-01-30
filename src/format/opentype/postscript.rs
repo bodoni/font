@@ -48,9 +48,9 @@ impl PostScript {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };
-        let mut program = match self.font_set.char_strings[self.id].get(glyph_id as usize) {
-            Some(char_string) => Program::new(
-                char_string,
+        let mut program = match self.font_set.character_strings[self.id].get(glyph_id as usize) {
+            Some(character_string) => Program::new(
+                character_string,
                 &self.font_set.subroutines,
                 match &self.font_set.records[self.id] {
                     Record::CharacterNameKeyed(ref record) => &*record.subroutines,
