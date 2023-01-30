@@ -250,7 +250,8 @@ impl PostScript {
                         (operands[j + 4], operands[j + 5]),
                     ));
                 }
-                HStem | HStemHM | VStem | VStemHM | CntrMask | HintMask => {}
+                CntrMask | HintMask | HStem | HStemHM | VStem | VStemHM => {}
+                Flex | Flex1 | HFlex | HFlex1 => {}
                 operator => raise!(
                     "found an unsupported operation with operator {:?}",
                     operator,
