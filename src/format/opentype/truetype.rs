@@ -26,19 +26,19 @@ impl TrueType {
 
     pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::default();
-        let glyph_index = match self.mapping.find(character) {
-            Some(glyph_index) => glyph_index,
+        let glyph_id = match self.mapping.find(character) {
+            Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };
-        let glyph = match self.glyph_data.get(glyph_index as usize) {
+        let glyph = match self.glyph_data.get(glyph_id as usize) {
             Some(glyph) => glyph,
             _ => raise!(
                 "found no data for character {} with glyph {}",
                 character,
-                glyph_index,
+                glyph_id,
             ),
         };
-        builder.set_horizontal_metrics(self.metrics.get(glyph_index));
+        builder.set_horizontal_metrics(self.metrics.get(glyph_id));
         if let &Some(ref glyph) = glyph {
             self.draw_glyph(&mut builder, glyph)?;
             builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
@@ -161,7 +161,7 @@ fn draw_composite(
     use truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
-        let glyph_index = component.glyph_index;
+        let glyph_id = component.glyph_id;
         let offset = match &component.arguments {
             &Arguments::Offsets(x, y) => Offset::from((x, y)),
             arguments => raise!(
@@ -175,13 +175,13 @@ fn draw_composite(
             &Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
             &Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
         };
-        let glyph = match case.glyph_data.get(glyph_index as usize) {
+        let glyph = match case.glyph_data.get(glyph_id as usize) {
             Some(&Some(ref glyph)) => glyph,
             Some(&None) => continue,
-            _ => raise!("found no data for glyph index {}", glyph_index),
+            _ => raise!("found no data for glyph {}", glyph_id),
         };
         if component.flags.should_use_metrics() {
-            builder.set_horizontal_metrics(case.metrics.get(glyph_index));
+            builder.set_horizontal_metrics(case.metrics.get(glyph_id));
         }
         builder.nest(offset, scale, |builder| case.draw_glyph(builder, glyph))?;
     }

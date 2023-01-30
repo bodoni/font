@@ -44,11 +44,11 @@ impl PostScript {
             )
         );
 
-        let glyph_index = match self.mapping.find(character) {
-            Some(glyph_index) => glyph_index,
+        let glyph_id = match self.mapping.find(character) {
+            Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };
-        let mut program = match self.font_set.char_strings[self.id].get(glyph_index as usize) {
+        let mut program = match self.font_set.char_strings[self.id].get(glyph_id as usize) {
             Some(char_string) => Program::new(
                 char_string,
                 &self.font_set.subroutines,
@@ -60,7 +60,7 @@ impl PostScript {
             _ => raise!(
                 "found no char string for character {} with glyph {}",
                 character,
-                glyph_index,
+                glyph_id,
             ),
         };
         let mut builder = Builder::default();
@@ -266,7 +266,7 @@ impl PostScript {
         }
         builder.flush();
         builder.set_bounding_box((min.0, min.1, max.0, max.1));
-        builder.set_horizontal_metrics(self.metrics.get(glyph_index));
+        builder.set_horizontal_metrics(self.metrics.get(glyph_id));
         Ok(Some(builder.into()))
     }
 }
