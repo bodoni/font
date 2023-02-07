@@ -62,18 +62,18 @@ impl<T: Tape> Font<T> {
         let (cap_height, x_height) = get!(@version2 Version2, Version3, Version4, Version5);
         Ok(crate::metrics::Metrics {
             units_per_em: font_header.units_per_em.into(),
-            clipping_ascender: clipping_ascender,
-            ascender: ascender,
-            cap_height: cap_height,
-            x_height: x_height,
+            clipping_ascender,
+            ascender,
+            cap_height,
+            x_height,
             baseline: if font_header.flags.is_baseline_at_0() {
                 0.0
             } else {
                 Number::NAN
             },
-            descender: descender,
-            clipping_descender: clipping_descender,
-            line_gap: line_gap,
+            descender,
+            clipping_descender,
+            line_gap,
         })
     }
 
@@ -88,7 +88,7 @@ where
     T: Tape,
 {
     let mut fonts = vec![];
-    let cache = Rc::new(RefCell::new(Cache::new(tape.clone(), backend)));
+    let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     let mut cache_borrowed = cache.borrow_mut();
     let metrics = cache_borrowed.metrics()?.clone();
     let mapping = cache_borrowed.mapping()?.clone();
@@ -102,7 +102,7 @@ where
         }
     }
     if let Some(glyph_data) = cache_borrowed.try_glyph_data()? {
-        let case = TrueType::new(glyph_data.clone(), metrics.clone(), mapping.clone());
+        let case = TrueType::new(glyph_data.clone(), metrics, mapping);
         fonts.push(Font {
             cache: cache.clone(),
             case: Case::TrueType(case),

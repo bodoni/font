@@ -11,14 +11,10 @@ pub struct Builder {
 
 impl Builder {
     pub fn flush(&mut self) {
-        use std::mem;
-
         if self.contour.is_empty() {
             return;
         }
-        self.glyph
-            .contours
-            .push(mem::replace(&mut self.contour, Default::default()));
+        self.glyph.contours.push(std::mem::take(&mut self.contour));
     }
 
     pub fn nest<T, U, V, F>(&mut self, offset: T, scale: (U, U, U, U), build: F) -> V
@@ -43,8 +39,8 @@ impl Builder {
             scale.2.into(),
             scale.3.into(),
         );
-        let previous_offset = self.offset.clone();
-        let previous_scale = self.scale.clone();
+        let previous_offset = self.offset;
+        let previous_scale = self.scale;
         self.offset += offset;
         multiply!(self.scale, scale, self.scale);
         let result = build(self);

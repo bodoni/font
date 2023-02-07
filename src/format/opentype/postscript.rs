@@ -25,10 +25,10 @@ impl PostScript {
         mapping: Rc<Mapping>,
     ) -> Self {
         PostScript {
-            id: id,
-            font_set: font_set,
-            metrics: metrics,
-            mapping: mapping,
+            id,
+            font_set,
+            metrics,
+            mapping,
         }
     }
 
@@ -53,7 +53,7 @@ impl PostScript {
                 character_string,
                 &self.font_set.subroutines,
                 match &self.font_set.records[self.id] {
-                    Record::CharacterNameKeyed(ref record) => &*record.subroutines,
+                    Record::CharacterNameKeyed(ref record) => &record.subroutines,
                     _ => raise!("found a character-ID-keyed font, which is not supported yet"),
                 },
             ),
@@ -112,20 +112,20 @@ impl PostScript {
                     }
                 }
                 HLineTo => {
-                    for i in 0..count {
+                    for (i, operand) in operands.iter().enumerate().take(count) {
                         if i % 2 == 0 {
-                            build!(add_linear((operands[i], 0.0)));
+                            build!(add_linear((*operand, 0.0)));
                         } else {
-                            build!(add_linear((0.0, operands[i])));
+                            build!(add_linear((0.0, *operand)));
                         }
                     }
                 }
                 VLineTo => {
-                    for i in 0..count {
+                    for (i, operand) in operands.iter().enumerate().take(count) {
                         if i % 2 == 1 {
-                            build!(add_linear((operands[i], 0.0)));
+                            build!(add_linear((*operand, 0.0)));
                         } else {
-                            build!(add_linear((0.0, operands[i])));
+                            build!(add_linear((0.0, *operand)));
                         }
                     }
                 }

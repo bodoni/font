@@ -17,8 +17,8 @@ macro_rules! cache(
             #[inline]
             pub fn new(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Self {
                 Self {
-                    tape: tape,
-                    backend: backend,
+                    tape,
+                    backend,
 
                     mapping: Default::default(),
                     metrics: Default::default(),

@@ -18,9 +18,9 @@ impl TrueType {
     #[inline]
     pub fn new(glyph_data: Rc<GlyphData>, metrics: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
         TrueType {
-            glyph_data: glyph_data,
-            metrics: metrics,
-            mapping: mapping,
+            glyph_data,
+            metrics,
+            mapping,
         }
     }
 
@@ -39,7 +39,7 @@ impl TrueType {
             ),
         };
         builder.set_horizontal_metrics(self.metrics.get(glyph_id));
-        if let &Some(ref glyph) = glyph {
+        if let Some(ref glyph) = glyph {
             self.draw_glyph(&mut builder, glyph)?;
             builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
         }
@@ -50,8 +50,8 @@ impl TrueType {
         use truetype::glyph_data::Description::*;
 
         match &glyph.description {
-            &Simple(ref description) => draw_simple(builder, description),
-            &Composite(ref description) => draw_composite(self, builder, description),
+            Simple(ref description) => draw_simple(builder, description),
+            Composite(ref description) => draw_composite(self, builder, description),
         }
     }
 }
@@ -65,11 +65,11 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
         )
     );
 
-    let &SimpleDescription {
-        ref end_points,
-        ref flags,
-        ref x,
-        ref y,
+    let SimpleDescription {
+        end_points,
+        flags,
+        x,
+        y,
         ..
     } = description;
     let point_count = flags.len();
@@ -169,14 +169,14 @@ fn draw_composite(
                 arguments,
             ),
         };
-        let scale = match &component.options {
-            &Options::None => (1.0, 0.0, 0.0, 1.0),
-            &Options::Scalar(value) => (value.into(), 0.0, 0.0, value.into()),
-            &Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
-            &Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
+        let scale = match component.options {
+            Options::None => (1.0, 0.0, 0.0, 1.0),
+            Options::Scalar(value) => (value.into(), 0.0, 0.0, value.into()),
+            Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
+            Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
         };
         let glyph = match case.glyph_data.get(glyph_id as usize) {
-            Some(&Some(ref glyph)) => glyph,
+            Some(Some(glyph)) => glyph,
             Some(&None) => continue,
             _ => raise!("found no data for glyph {}", glyph_id),
         };
