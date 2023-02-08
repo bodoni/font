@@ -23,8 +23,9 @@
 //! ```
 
 pub extern crate opentype;
-pub extern crate postscript;
-pub extern crate truetype;
+
+extern crate postscript;
+extern crate truetype;
 
 #[macro_use(dereference, raise)]
 extern crate typeface;
