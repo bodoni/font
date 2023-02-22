@@ -28,6 +28,26 @@ impl<T: Tape> Font<T> {
         }
     }
 
+    pub fn flags(&mut self) -> Result<crate::flags::Flags> {
+        let mut cache_borrowed = self.cache.borrow_mut();
+        let font_header = cache_borrowed.font_header()?.clone();
+        let windows_metrics = cache_borrowed.windows_metrics()?.clone();
+        macro_rules! get(
+            ($($version:ident),+) => (
+                match &*windows_metrics {
+                    $(truetype::WindowsMetrics::$version(ref metrics) => (
+                        metrics.selection_flags
+                    ),)*
+                }
+            );
+        );
+        let machintosh_flags = font_header.macintosh_flags;
+        let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
+        Ok(crate::flags::Flags {
+            italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
+        })
+    }
+
     pub fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         let mut cache_borrowed = self.cache.borrow_mut();
         let font_header = cache_borrowed.font_header()?.clone();

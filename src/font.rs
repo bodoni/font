@@ -3,6 +3,7 @@ use std::rc::Rc;
 use truetype::NamingTable;
 use typeface::Tape;
 
+use crate::flags::Flags;
 use crate::glyph::Glyph;
 use crate::metrics::Metrics;
 use crate::Result;
@@ -22,6 +23,14 @@ impl<T: Tape> Font<T> {
     pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
         match &mut self.case {
             Case::OpenType(ref mut case) => case.draw(character),
+        }
+    }
+
+    /// Return flags.
+    #[inline]
+    pub fn flags(&mut self) -> Result<Flags> {
+        match &mut self.case {
+            Case::OpenType(ref mut case) => case.flags(),
         }
     }
 

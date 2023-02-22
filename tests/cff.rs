@@ -44,7 +44,7 @@ mod source_serif {
     }
 
     #[test]
-    fn open() {
+    fn metrics() {
         let mut file = setup(Fixture::SourceSerif);
         let metrics = ok!(file[0].metrics());
         assert_eq!(metrics.units_per_em, 1000.0);

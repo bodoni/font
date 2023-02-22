@@ -18,7 +18,14 @@ mod crimson_text {
     use crate::support::{setup, Fixture};
 
     #[test]
-    fn open() {
+    fn flags() {
+        let mut file = setup(Fixture::CrimsonText);
+        let flags = ok!(file[0].flags());
+        assert!(!flags.italic);
+    }
+
+    #[test]
+    fn metrics() {
         let mut file = setup(Fixture::CrimsonText);
         let metrics = ok!(file[0].metrics());
         assert_eq!(metrics.units_per_em, 1024.0);
