@@ -8,6 +8,8 @@ description = "The package provides a parser for fonts."
 documentation = "https://docs.rs/font"
 homepage = "https://github.com/bodoni/font"
 repository = "https://github.com/bodoni/font"
+categories = ["parsing"]
+keywords = ["font", "opentype", "typeface", "typography"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
