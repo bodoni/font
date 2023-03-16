@@ -29,7 +29,7 @@ impl Mapping {
             Encoding::Format6(encoding) => remap!(encoding.mapping()),
             Encoding::Format12(encoding) => encoding.mapping(),
             Encoding::Format14(encoding) => encoding.mapping(),
-            _ => raise!("found an unsupported character-to-glyph encoding"),
+            _ => raise!("found an unknown character-to-glyph encoding"),
         }))
     }
 

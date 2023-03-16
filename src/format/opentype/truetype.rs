@@ -164,10 +164,7 @@ fn draw_composite(
         let glyph_id = component.glyph_id;
         let offset = match &component.arguments {
             &Arguments::Offsets(x, y) => Offset::from((x, y)),
-            arguments => raise!(
-                "found an unsupported component with arguments {:?}",
-                arguments,
-            ),
+            arguments => raise!("found a unknown component with arguments {arguments:?}"),
         };
         let scale = match component.options {
             Options::None => (1.0, 0.0, 0.0, 1.0),

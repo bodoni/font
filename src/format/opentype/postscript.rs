@@ -252,10 +252,7 @@ impl PostScript {
                 }
                 CntrMask | HintMask | HStem | HStemHM | VStem | VStemHM => {}
                 Flex | Flex1 | HFlex | HFlex1 => {}
-                operator => raise!(
-                    "found an unsupported operation with operator {:?}",
-                    operator,
-                ),
+                operator => raise!("found an unknown operation with operator {operator:?}"),
             }
             match operator {
                 HMoveTo | VMoveTo | RMoveTo | HStem | HStemHM | VStem | VStemHM | CntrMask
