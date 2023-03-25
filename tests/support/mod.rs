@@ -2,6 +2,8 @@
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
+use std::path::PathBuf;
+
 use font::{File, Glyph};
 
 pub enum Fixture {
@@ -16,16 +18,19 @@ pub enum Fixture {
 }
 
 pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
-    ok!(File::open(match fixture {
-        Fixture::AdobeBlank => "tests/fixtures/AdobeBlank-Regular.ttf",
-        Fixture::CrimsonText => "tests/fixtures/CrimsonText-Regular.ttf",
-        Fixture::MonteCarlo => "tests/fixtures/MonteCarlo-Regular.ttf",
-        Fixture::Numans => "tests/fixtures/Numans-Regular.ttf",
-        Fixture::OpenSans => "tests/fixtures/OpenSans-Italic.ttf",
-        Fixture::SourceSerif => "tests/fixtures/SourceSerifPro-Regular.otf",
-        Fixture::VesperLibre => "tests/fixtures/VesperLibre-Regular.ttf",
-        Fixture::ZenLoop => "tests/fixtures/ZenLoop-Regular.ttf",
-    }))
+    let file_name = match fixture {
+        Fixture::AdobeBlank => "AdobeBlank-Regular.ttf",
+        Fixture::CrimsonText => "CrimsonText-Regular.ttf",
+        Fixture::MonteCarlo => "MonteCarlo-Regular.ttf",
+        Fixture::Numans => "Numans-Regular.ttf",
+        Fixture::OpenSans => "OpenSans-Italic.ttf",
+        Fixture::SourceSerif => "SourceSerifPro-Regular.otf",
+        Fixture::VesperLibre => "VesperLibre-Regular.ttf",
+        Fixture::ZenLoop => "ZenLoop-Regular.ttf",
+    };
+    ok!(File::open(
+        PathBuf::from("tests").join("fixtures").join(file_name)
+    ))
 }
 
 pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {

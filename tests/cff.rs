@@ -1,5 +1,3 @@
-extern crate font;
-
 #[macro_use]
 mod support;
 
