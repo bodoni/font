@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use truetype::{GlyphID, HorizontalMetrics};
+use opentype::truetype::{GlyphID, HorizontalMetrics};
 
 use crate::Number;
 

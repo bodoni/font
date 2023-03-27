@@ -10,7 +10,7 @@ use super::metrics::Metrics;
 use crate::Result;
 
 macro_rules! cache(
-    ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal),)+) => (
+    ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (
         cache!(@define $($field, $type),+);
 
         impl<T: Tape> Cache<T> {
@@ -95,16 +95,56 @@ macro_rules! cache(
 );
 
 cache! {
-    (character_mapping -> try_character_mapping(), ::truetype::CharacterMapping, "the character-to-glyph mapping"),
-    (font_header -> try_font_header(), ::truetype::FontHeader, "the font header"),
-    (font_set -> try_font_set(), ::postscript::compact1::FontSet, "the font set"),
-    (glyph_data -> try_glyph_data(try_glyph_mapping), ::truetype::GlyphData, "the glyph data"),
-    (glyph_mapping -> try_glyph_mapping(try_font_header, try_maximum_profile), ::truetype::GlyphMapping, "the glyph-to-location mapping"),
-    (horizontal_header -> try_horizontal_header(), ::truetype::HorizontalHeader, "the horizontal header"),
-    (horizontal_metrics -> try_horizontal_metrics(try_horizontal_header, try_maximum_profile), ::truetype::HorizontalMetrics, "the horizontal metrics"),
-    (maximum_profile -> try_maximum_profile(), ::truetype::MaximumProfile, "the maximum profile"),
-    (naming_table -> try_naming_table(), ::truetype::NamingTable, "the naming table"),
-    (windows_metrics -> try_windows_metrics(), ::truetype::WindowsMetrics, "the OS/2 and Windows metrics"),
+    (
+        character_mapping -> try_character_mapping(),
+        opentype::truetype::CharacterMapping,
+        "the character-to-glyph mapping",
+    ),
+    (
+        font_header -> try_font_header(),
+        opentype::truetype::FontHeader,
+        "the font header",
+    ),
+    (
+        font_set -> try_font_set(),
+        opentype::postscript::compact1::FontSet,
+        "the font set",
+    ),
+    (
+        glyph_data -> try_glyph_data(try_glyph_mapping),
+        opentype::truetype::GlyphData,
+        "the glyph data",
+    ),
+    (
+        glyph_mapping -> try_glyph_mapping(try_font_header, try_maximum_profile),
+        opentype::truetype::GlyphMapping,
+        "the glyph-to-location mapping",
+    ),
+    (
+        horizontal_header -> try_horizontal_header(),
+        opentype::truetype::HorizontalHeader,
+        "the horizontal header",
+    ),
+    (
+        horizontal_metrics -> try_horizontal_metrics(try_horizontal_header, try_maximum_profile),
+        opentype::truetype::HorizontalMetrics,
+        "the horizontal metrics",
+    ),
+    (
+        maximum_profile -> try_maximum_profile(),
+        opentype::truetype::MaximumProfile,
+        "the maximum profile",
+    ),
+    (
+        naming_table -> try_naming_table(),
+        opentype::truetype::NamingTable,
+        "the naming table",
+    ),
+    (
+        windows_metrics -> try_windows_metrics(),
+        opentype::truetype::WindowsMetrics,
+        "the OS/2 and Windows metrics",
+    ),
 }
 
 impl<T: Tape> Cache<T> {

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use truetype::NamingTable;
+use opentype::truetype::{NamingTable, WindowsMetrics};
 use typeface::Tape;
 
 use super::cache::Cache;
@@ -35,7 +35,7 @@ impl<T: Tape> Font<T> {
         macro_rules! get(
             ($($version:ident),+) => (
                 match &*windows_metrics {
-                    $(truetype::WindowsMetrics::$version(ref metrics) => (
+                    $(WindowsMetrics::$version(ref metrics) => (
                         metrics.selection_flags
                     ),)*
                 }
@@ -55,7 +55,7 @@ impl<T: Tape> Font<T> {
         macro_rules! get(
             (@version0 $($version:ident),+) => (
                 match &*windows_metrics {
-                    $(truetype::WindowsMetrics::$version(ref metrics) => (
+                    $(WindowsMetrics::$version(ref metrics) => (
                         metrics.windows_ascender.into(),
                         metrics.typographic_ascender.into(),
                         metrics.typographic_descender.into(),
@@ -66,7 +66,7 @@ impl<T: Tape> Font<T> {
             );
             (@version2 $($version:ident),+) => (
                 match &*windows_metrics {
-                    $(truetype::WindowsMetrics::$version(ref metrics) => (
+                    $(WindowsMetrics::$version(ref metrics) => (
                         metrics.cap_height.into(),
                         metrics.x_height.into(),
                     ),)*

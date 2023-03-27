@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
+use opentype::truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
@@ -47,7 +47,7 @@ impl TrueType {
     }
 
     fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
-        use truetype::glyph_data::Description::*;
+        use opentype::truetype::glyph_data::Description::*;
 
         match &glyph.description {
             Simple(ref description) => draw_simple(builder, description),
@@ -158,7 +158,7 @@ fn draw_composite(
     builder: &mut Builder,
     description: &CompositeDescription,
 ) -> Result<()> {
-    use truetype::glyph_data::{Arguments, Options};
+    use opentype::truetype::glyph_data::{Arguments, Options};
 
     for component in description.components.iter() {
         let glyph_id = component.glyph_id;

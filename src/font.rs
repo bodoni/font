@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use truetype::NamingTable;
+use opentype::truetype::NamingTable;
 use typeface::Tape;
 
 use crate::flags::Flags;

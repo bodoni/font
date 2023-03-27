@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use postscript::compact1::FontSet;
-use postscript::type2::Program;
+use opentype::postscript::compact1::FontSet;
+use opentype::postscript::type2::Program;
 
 use super::mapping::Mapping;
 use super::metrics::Metrics;
@@ -33,8 +33,8 @@ impl PostScript {
     }
 
     pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
-        use postscript::compact1::font_set::Record;
-        use postscript::type2::Operator::*;
+        use opentype::postscript::compact1::font_set::Record;
+        use opentype::postscript::type2::Operator::*;
 
         macro_rules! expect(
             ($condition:expr) => (

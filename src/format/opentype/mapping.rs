@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use truetype::character_mapping::{CharacterMapping, Encoding};
-use truetype::GlyphID;
+use opentype::truetype::character_mapping::{CharacterMapping, Encoding};
+use opentype::truetype::GlyphID;
 
 use crate::Result;
 

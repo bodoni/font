@@ -13,7 +13,5 @@ keywords = ["font", "opentype", "typeface", "typography"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-opentype = "0.24.12"
-postscript = "0"
-truetype = "0"
+opentype = "0.24.13"
 typeface = "0"
