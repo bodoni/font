@@ -138,11 +138,17 @@ pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::propertie
     );
     let machintosh_flags = font_header.macintosh_flags;
     let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    let (mut cubic, mut variable) = (false, false);
+    for record in cache.offset_table.iter() {
+        match &record.tag.0 {
+            b"CFF " | b"CFF2" => cubic = true,
+            b"fvar" => variable = true,
+            _ => {}
+        }
+    }
     Ok(crate::properties::Properties {
+        cubic,
         italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
-        quadratic: cache
-            .offset_table
-            .iter()
-            .any(|record| &record.tag.0 == b"glyf"),
+        variable,
     })
 }
