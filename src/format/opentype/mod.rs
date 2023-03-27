@@ -22,7 +22,7 @@ pub fn read<T: Tape + 'static>(tape: T) -> Result<Vec<Font<T>>> {
     let mut fonts = vec![];
     let file = opentype::File::read(tape.borrow_mut().deref_mut())?;
     for font in file.fonts.into_iter() {
-        fonts.extend(font::read(tape.clone(), font)?);
+        fonts.extend(self::font::read(tape.clone(), font)?);
     }
     Ok(fonts)
 }

@@ -15,4 +15,4 @@ exclude = ["tests/fixtures/*"]
 [dependencies]
 opentype = "0.24.14"
 typeface = "0"
-webtype = "0.1.1"
+webtype = "0.2.0"

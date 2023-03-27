@@ -12,24 +12,24 @@ pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
 }
 
-impl<T: Tape> Font<T> {
+impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
-    pub fn draw(&mut self, _: char) -> Result<Option<crate::glyph::Glyph>> {
+    fn draw(&mut self, _: char) -> Result<Option<crate::glyph::Glyph>> {
         error!("working with glyphs is not supported yet")
     }
 
     #[inline]
-    pub fn flags(&mut self) -> Result<crate::flags::Flags> {
+    fn flags(&mut self) -> Result<crate::flags::Flags> {
         read_flags(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    pub fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
+    fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    pub fn names(&mut self) -> Result<Rc<NamingTable>> {
+    fn names(&mut self) -> Result<Rc<NamingTable>> {
         read_names(&mut self.cache.borrow_mut())
     }
 }

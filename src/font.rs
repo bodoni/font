@@ -9,54 +9,44 @@ use crate::metrics::Metrics;
 use crate::Result;
 
 /// A font.
-pub struct Font<T> {
-    case: Case<T>,
+pub struct Font {
+    case: Box<dyn Case>,
 }
 
-pub enum Case<T> {
-    OpenType(crate::format::opentype::Font<T>),
-    WebType(crate::format::webtype::Font<T>),
+pub trait Case {
+    fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
+    fn flags(&mut self) -> Result<Flags>;
+    fn metrics(&mut self) -> Result<Metrics>;
+    fn names(&mut self) -> Result<Rc<NamingTable>>;
 }
 
-impl<T: Tape> Font<T> {
+impl Font {
     /// Draw a character.
     #[inline]
     pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
-        match &mut self.case {
-            Case::OpenType(ref mut case) => case.draw(character),
-            Case::WebType(ref mut case) => case.draw(character),
-        }
+        self.case.draw(character)
     }
 
     /// Return flags.
     #[inline]
     pub fn flags(&mut self) -> Result<Flags> {
-        match &mut self.case {
-            Case::OpenType(ref mut case) => case.flags(),
-            Case::WebType(ref mut case) => case.flags(),
-        }
+        self.case.flags()
     }
 
     /// Return metrics.
     #[inline]
     pub fn metrics(&mut self) -> Result<Metrics> {
-        match &mut self.case {
-            Case::OpenType(ref mut case) => case.metrics(),
-            Case::WebType(ref mut case) => case.metrics(),
-        }
+        self.case.metrics()
     }
 
     /// Return names.
     #[inline]
     pub fn names(&mut self) -> Result<Rc<NamingTable>> {
-        match &mut self.case {
-            Case::OpenType(ref mut case) => case.names(),
-            Case::WebType(ref mut case) => case.names(),
-        }
+        self.case.names()
     }
 }
 
-pub fn read<T: Tape + 'static>(mut tape: T) -> Result<Vec<Font<T>>> {
+pub fn read<T: Tape + 'static>(mut tape: T) -> Result<Vec<Font>> {
     use opentype::truetype::Tag;
 
     let tag = tape.peek::<Tag>()?;
@@ -64,14 +54,14 @@ pub fn read<T: Tape + 'static>(mut tape: T) -> Result<Vec<Font<T>>> {
         Ok(crate::format::opentype::read(tape)?
             .into_iter()
             .map(|font| Font {
-                case: Case::OpenType(font),
+                case: Box::new(font),
             })
             .collect())
     } else if webtype::accept(&tag) {
         Ok(crate::format::webtype::read(tape)?
             .into_iter()
             .map(|font| Font {
-                case: Case::WebType(font),
+                case: Box::new(font),
             })
             .collect())
     } else {

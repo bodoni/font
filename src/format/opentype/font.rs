@@ -19,9 +19,9 @@ enum Case {
     TrueType(TrueType),
 }
 
-impl<T: Tape> Font<T> {
+impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
-    pub fn draw(&mut self, character: char) -> Result<Option<crate::glyph::Glyph>> {
+    fn draw(&mut self, character: char) -> Result<Option<crate::glyph::Glyph>> {
         match &self.case {
             Case::PostScript(ref case) => case.draw(character),
             Case::TrueType(ref case) => case.draw(character),
@@ -29,17 +29,17 @@ impl<T: Tape> Font<T> {
     }
 
     #[inline]
-    pub fn flags(&mut self) -> Result<crate::flags::Flags> {
+    fn flags(&mut self) -> Result<crate::flags::Flags> {
         read_flags(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    pub fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
+    fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    pub fn names(&mut self) -> Result<Rc<NamingTable>> {
+    fn names(&mut self) -> Result<Rc<NamingTable>> {
         read_names(&mut self.cache.borrow_mut())
     }
 }
@@ -89,8 +89,11 @@ pub fn read_flags<T: Tape>(cache: &mut Cache<T>) -> Result<crate::flags::Flags> 
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
+    println!("Hi");
     let font_header = cache.font_header()?.clone();
+    println!("Hi");
     let windows_metrics = cache.windows_metrics()?.clone();
+    println!("Hi");
     macro_rules! get(
         (@version0 $($version:ident),+) => (
             match &*windows_metrics {

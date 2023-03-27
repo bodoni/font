@@ -3,19 +3,19 @@ mod font;
 pub use self::font::Font;
 
 use std::cell::RefCell;
-use std::ops::DerefMut;
+use std::io::Cursor;
 use std::rc::Rc;
 
 use typeface::Tape;
 
 use crate::Result;
 
-pub fn read<T: Tape + 'static>(tape: T) -> Result<Vec<Font<T>>> {
-    let tape = Rc::new(RefCell::new(tape));
+pub fn read<T: Tape>(mut tape: T) -> Result<Vec<Font<Cursor<Vec<u8>>>>> {
     let mut fonts = vec![];
-    let file = webtype::File::read(tape.borrow_mut().deref_mut())?;
+    let file = webtype::File::read(&mut tape)?;
+    let tape = Rc::new(RefCell::new(file.tape));
     for font in file.fonts.into_iter() {
-        fonts.extend(font::read(tape.clone(), font)?);
+        fonts.extend(self::font::read(tape.clone(), font)?);
     }
     Ok(fonts)
 }

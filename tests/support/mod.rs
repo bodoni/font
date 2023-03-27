@@ -18,7 +18,7 @@ pub enum Fixture {
     ZenLoop,
 }
 
-pub fn setup(fixture: Fixture) -> File<::std::fs::File> {
+pub fn setup(fixture: Fixture) -> File {
     let file_name = match fixture {
         Fixture::AdobeBlank => "AdobeBlank-Regular.ttf",
         Fixture::CrimsonText => "CrimsonText-Regular.ttf",
