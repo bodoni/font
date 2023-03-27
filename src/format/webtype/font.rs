@@ -5,7 +5,7 @@ use opentype::truetype::NamingTable;
 use typeface::Tape;
 
 use crate::format::opentype::cache::Cache;
-use crate::format::opentype::font::{read_flags, read_metrics, read_names};
+use crate::format::opentype::font::{read_metrics, read_names, read_properties};
 use crate::Result;
 
 pub struct Font<T> {
@@ -19,11 +19,6 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn flags(&mut self) -> Result<crate::flags::Flags> {
-        read_flags(&mut self.cache.borrow_mut())
-    }
-
-    #[inline]
     fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
@@ -31,6 +26,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<Rc<NamingTable>> {
         read_names(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn properties(&mut self) -> Result<crate::properties::Properties> {
+        read_properties(&mut self.cache.borrow_mut())
     }
 }
 

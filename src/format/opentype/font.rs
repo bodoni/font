@@ -29,8 +29,8 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn flags(&mut self) -> Result<crate::flags::Flags> {
-        read_flags(&mut self.cache.borrow_mut())
+    fn properties(&mut self) -> Result<crate::properties::Properties> {
+        read_properties(&mut self.cache.borrow_mut())
     }
 
     #[inline]
@@ -67,25 +67,6 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
         });
     }
     Ok(fonts)
-}
-
-pub fn read_flags<T: Tape>(cache: &mut Cache<T>) -> Result<crate::flags::Flags> {
-    let font_header = cache.font_header()?.clone();
-    let windows_metrics = cache.windows_metrics()?.clone();
-    macro_rules! get(
-        ($($version:ident),+) => (
-            match &*windows_metrics {
-                $(WindowsMetrics::$version(ref metrics) => (
-                    metrics.selection_flags
-                ),)*
-            }
-        );
-    );
-    let machintosh_flags = font_header.macintosh_flags;
-    let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
-    Ok(crate::flags::Flags {
-        italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
-    })
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
@@ -141,4 +122,23 @@ pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Met
 
 pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<Rc<NamingTable>> {
     Ok(cache.naming_table()?.clone())
+}
+
+pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::properties::Properties> {
+    let font_header = cache.font_header()?.clone();
+    let windows_metrics = cache.windows_metrics()?.clone();
+    macro_rules! get(
+        ($($version:ident),+) => (
+            match &*windows_metrics {
+                $(WindowsMetrics::$version(ref metrics) => (
+                    metrics.selection_flags
+                ),)*
+            }
+        );
+    );
+    let machintosh_flags = font_header.macintosh_flags;
+    let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    Ok(crate::properties::Properties {
+        italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
+    })
 }

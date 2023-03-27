@@ -16,13 +16,6 @@ mod crimson_text {
     use crate::support::{setup, Fixture};
 
     #[test]
-    fn flags() {
-        let mut file = setup(Fixture::CrimsonText);
-        let flags = ok!(file[0].flags());
-        assert!(!flags.italic);
-    }
-
-    #[test]
     fn metrics() {
         let mut file = setup(Fixture::CrimsonText);
         let metrics = ok!(file[0].metrics());
@@ -35,6 +28,13 @@ mod crimson_text {
         assert_eq!(metrics.descender, -359.0);
         assert_eq!(metrics.clipping_descender, -297.0);
         assert_eq!(metrics.line_gap, 0.0);
+    }
+
+    #[test]
+    fn properties() {
+        let mut file = setup(Fixture::CrimsonText);
+        let properties = ok!(file[0].properties());
+        assert!(!properties.italic);
     }
 }
 

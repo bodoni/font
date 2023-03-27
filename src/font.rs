@@ -3,9 +3,9 @@ use std::rc::Rc;
 use opentype::truetype::NamingTable;
 use typeface::Tape;
 
-use crate::flags::Flags;
 use crate::glyph::Glyph;
 use crate::metrics::Metrics;
+use crate::properties::Properties;
 use crate::Result;
 
 /// A font.
@@ -15,7 +15,7 @@ pub struct Font {
 
 pub trait Case {
     fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
-    fn flags(&mut self) -> Result<Flags>;
+    fn properties(&mut self) -> Result<Properties>;
     fn metrics(&mut self) -> Result<Metrics>;
     fn names(&mut self) -> Result<Rc<NamingTable>>;
 }
@@ -25,12 +25,6 @@ impl Font {
     #[inline]
     pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
         self.case.draw(character)
-    }
-
-    /// Return flags.
-    #[inline]
-    pub fn flags(&mut self) -> Result<Flags> {
-        self.case.flags()
     }
 
     /// Return metrics.
@@ -43,6 +37,12 @@ impl Font {
     #[inline]
     pub fn names(&mut self) -> Result<Rc<NamingTable>> {
         self.case.names()
+    }
+
+    /// Return properties.
+    #[inline]
+    pub fn properties(&mut self) -> Result<Properties> {
+        self.case.properties()
     }
 }
 

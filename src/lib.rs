@@ -29,21 +29,21 @@ pub extern crate webtype;
 extern crate typeface;
 
 mod file;
-mod flags;
 mod font;
 mod format;
 mod glyph;
 mod metrics;
 mod offset;
+mod properties;
 
 pub use typeface::{Error, Result};
 
 pub use self::font::Font;
 pub use file::File;
-pub use flags::Flags;
 pub use glyph::{Contour, Glyph, Segment};
 pub use metrics::Metrics;
 pub use offset::Offset;
+pub use properties::Properties;
 
 /// A number.
 pub type Number = f32;
