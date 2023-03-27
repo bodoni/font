@@ -94,6 +94,8 @@ macro_rules! cache(
     );
 );
 
+dereference! { Cache<T>::backend => opentype::Font }
+
 cache! {
     (
         character_mapping -> try_character_mapping(),

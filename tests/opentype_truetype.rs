@@ -35,6 +35,7 @@ mod crimson_text {
         let mut file = setup(Fixture::CrimsonText);
         let properties = ok!(file[0].properties());
         assert!(!properties.italic);
+        assert!(properties.quadratic);
     }
 }
 

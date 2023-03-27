@@ -3,4 +3,6 @@
 pub struct Properties {
     /// An indicator for the italic.
     pub italic: bool,
+    /// An indicator for quadratic Bézier curves.
+    pub quadratic: bool,
 }
