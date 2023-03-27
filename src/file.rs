@@ -20,11 +20,11 @@ impl<T: Tape + 'static> File<T> {
     }
 }
 
-impl File<::std::fs::File> {
+impl File<std::fs::File> {
     /// Open a file.
     #[inline]
     pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
-        Self::read(::std::fs::File::open(path)?)
+        Self::read(std::fs::File::open(path)?)
     }
 }
 

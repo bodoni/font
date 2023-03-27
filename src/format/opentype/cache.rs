@@ -5,8 +5,8 @@ use std::rc::Rc;
 use opentype;
 use typeface::Tape;
 
-use super::mapping::Mapping;
-use super::metrics::Metrics;
+use crate::format::opentype::mapping::Mapping;
+use crate::format::opentype::metrics::Metrics;
 use crate::Result;
 
 macro_rules! cache(

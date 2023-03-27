@@ -4,9 +4,9 @@ use std::rc::Rc;
 use opentype::truetype::{NamingTable, WindowsMetrics};
 use typeface::Tape;
 
-use super::cache::Cache;
-use super::postscript::PostScript;
-use super::truetype::TrueType;
+use crate::format::opentype::cache::Cache;
+use crate::format::opentype::postscript::PostScript;
+use crate::format::opentype::truetype::TrueType;
 use crate::{Number, Result};
 
 pub struct Font<T> {
@@ -28,85 +28,23 @@ impl<T: Tape> Font<T> {
         }
     }
 
+    #[inline]
     pub fn flags(&mut self) -> Result<crate::flags::Flags> {
-        let mut cache_borrowed = self.cache.borrow_mut();
-        let font_header = cache_borrowed.font_header()?.clone();
-        let windows_metrics = cache_borrowed.windows_metrics()?.clone();
-        macro_rules! get(
-            ($($version:ident),+) => (
-                match &*windows_metrics {
-                    $(WindowsMetrics::$version(ref metrics) => (
-                        metrics.selection_flags
-                    ),)*
-                }
-            );
-        );
-        let machintosh_flags = font_header.macintosh_flags;
-        let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
-        Ok(crate::flags::Flags {
-            italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
-        })
+        read_flags(&mut self.cache.borrow_mut())
     }
 
+    #[inline]
     pub fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
-        let mut cache_borrowed = self.cache.borrow_mut();
-        let font_header = cache_borrowed.font_header()?.clone();
-        let windows_metrics = cache_borrowed.windows_metrics()?.clone();
-        macro_rules! get(
-            (@version0 $($version:ident),+) => (
-                match &*windows_metrics {
-                    $(WindowsMetrics::$version(ref metrics) => (
-                        metrics.windows_ascender.into(),
-                        metrics.typographic_ascender.into(),
-                        metrics.typographic_descender.into(),
-                        -Number::from(metrics.windows_descender),
-                        metrics.typographic_line_gap.into(),
-                    ),)*
-                }
-            );
-            (@version2 $($version:ident),+) => (
-                match &*windows_metrics {
-                    $(WindowsMetrics::$version(ref metrics) => (
-                        metrics.cap_height.into(),
-                        metrics.x_height.into(),
-                    ),)*
-                    _ => (
-                        Number::NAN,
-                        Number::NAN,
-                    ),
-                }
-            );
-        );
-        let (clipping_ascender, ascender, descender, clipping_descender, line_gap) =
-            get!(@version0 Version0, Version1, Version2, Version3, Version4, Version5);
-        let (cap_height, x_height) = get!(@version2 Version2, Version3, Version4, Version5);
-        Ok(crate::metrics::Metrics {
-            units_per_em: font_header.units_per_em.into(),
-            clipping_ascender,
-            ascender,
-            cap_height,
-            x_height,
-            baseline: if font_header.flags.is_baseline_at_0() {
-                0.0
-            } else {
-                Number::NAN
-            },
-            descender,
-            clipping_descender,
-            line_gap,
-        })
+        read_metrics(&mut self.cache.borrow_mut())
     }
 
+    #[inline]
     pub fn names(&mut self) -> Result<Rc<NamingTable>> {
-        let mut cache_borrowed = self.cache.borrow_mut();
-        Ok(cache_borrowed.naming_table()?.clone())
+        read_names(&mut self.cache.borrow_mut())
     }
 }
 
-pub fn read<T>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Vec<Font<T>>>
-where
-    T: Tape,
-{
+pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Vec<Font<T>>> {
     let mut fonts = vec![];
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     let mut cache_borrowed = cache.borrow_mut();
@@ -129,4 +67,75 @@ where
         });
     }
     Ok(fonts)
+}
+
+pub fn read_flags<T: Tape>(cache: &mut Cache<T>) -> Result<crate::flags::Flags> {
+    let font_header = cache.font_header()?.clone();
+    let windows_metrics = cache.windows_metrics()?.clone();
+    macro_rules! get(
+        ($($version:ident),+) => (
+            match &*windows_metrics {
+                $(WindowsMetrics::$version(ref metrics) => (
+                    metrics.selection_flags
+                ),)*
+            }
+        );
+    );
+    let machintosh_flags = font_header.macintosh_flags;
+    let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    Ok(crate::flags::Flags {
+        italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
+    })
+}
+
+pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
+    let font_header = cache.font_header()?.clone();
+    let windows_metrics = cache.windows_metrics()?.clone();
+    macro_rules! get(
+        (@version0 $($version:ident),+) => (
+            match &*windows_metrics {
+                $(WindowsMetrics::$version(ref metrics) => (
+                    metrics.windows_ascender.into(),
+                    metrics.typographic_ascender.into(),
+                    metrics.typographic_descender.into(),
+                    -Number::from(metrics.windows_descender),
+                    metrics.typographic_line_gap.into(),
+                ),)*
+            }
+        );
+        (@version2 $($version:ident),+) => (
+            match &*windows_metrics {
+                $(WindowsMetrics::$version(ref metrics) => (
+                    metrics.cap_height.into(),
+                    metrics.x_height.into(),
+                ),)*
+                _ => (
+                    Number::NAN,
+                    Number::NAN,
+                ),
+            }
+        );
+    );
+    let (clipping_ascender, ascender, descender, clipping_descender, line_gap) =
+        get!(@version0 Version0, Version1, Version2, Version3, Version4, Version5);
+    let (cap_height, x_height) = get!(@version2 Version2, Version3, Version4, Version5);
+    Ok(crate::metrics::Metrics {
+        units_per_em: font_header.units_per_em.into(),
+        clipping_ascender,
+        ascender,
+        cap_height,
+        x_height,
+        baseline: if font_header.flags.is_baseline_at_0() {
+            0.0
+        } else {
+            Number::NAN
+        },
+        descender,
+        clipping_descender,
+        line_gap,
+    })
+}
+
+pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<Rc<NamingTable>> {
+    Ok(cache.naming_table()?.clone())
 }

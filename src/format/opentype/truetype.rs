@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use opentype::truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
-use super::mapping::Mapping;
-use super::metrics::Metrics;
+use crate::format::opentype::mapping::Mapping;
+use crate::format::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
 use crate::Result;

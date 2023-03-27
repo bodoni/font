@@ -3,8 +3,8 @@ use std::rc::Rc;
 use opentype::postscript::compact1::FontSet;
 use opentype::postscript::type2::Program;
 
-use super::mapping::Mapping;
-use super::metrics::Metrics;
+use crate::format::opentype::mapping::Mapping;
+use crate::format::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
 use crate::Result;

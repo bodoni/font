@@ -24,7 +24,7 @@
 
 pub extern crate opentype;
 
-#[macro_use(dereference, raise)]
+#[macro_use(dereference, error, raise)]
 extern crate typeface;
 
 mod file;
