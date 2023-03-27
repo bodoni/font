@@ -9,7 +9,7 @@ documentation = "https://docs.rs/font"
 homepage = "https://github.com/bodoni/font"
 repository = "https://github.com/bodoni/font"
 categories = ["parsing"]
-keywords = ["font", "opentype", "typeface", "typography"]
+keywords = ["font", "opentype", "typeface", "typography", "woff", "woff2"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
