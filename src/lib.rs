@@ -1,4 +1,4 @@
-//! A parser for fonts.
+//! Parser for fonts.
 //!
 //! # Example
 //!
