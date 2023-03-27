@@ -23,6 +23,7 @@
 //! ```
 
 pub extern crate opentype;
+pub extern crate webtype;
 
 #[macro_use(dereference, error, raise)]
 extern crate typeface;
