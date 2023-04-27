@@ -15,9 +15,9 @@ pub struct Font {
 
 pub trait Case {
     fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
-    fn properties(&mut self) -> Result<Properties>;
     fn metrics(&mut self) -> Result<Metrics>;
     fn names(&mut self) -> Result<Rc<NamingTable>>;
+    fn properties(&mut self) -> Result<Properties>;
 }
 
 impl Font {

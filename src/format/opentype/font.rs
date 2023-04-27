@@ -29,11 +29,6 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn properties(&mut self) -> Result<crate::properties::Properties> {
-        read_properties(&mut self.cache.borrow_mut())
-    }
-
-    #[inline]
     fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
@@ -41,6 +36,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<Rc<NamingTable>> {
         read_names(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn properties(&mut self) -> Result<crate::properties::Properties> {
+        read_properties(&mut self.cache.borrow_mut())
     }
 }
 
@@ -131,13 +131,14 @@ pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::propertie
         ($($version:ident),+) => (
             match &*windows_metrics {
                 $(WindowsMetrics::$version(ref metrics) => (
-                    metrics.selection_flags
+                    (metrics.vendor_id, metrics.selection_flags)
                 ),)*
             }
         );
     );
     let machintosh_flags = font_header.macintosh_flags;
-    let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    let (vendor_id, windows_flags) =
+        get!(Version0, Version1, Version2, Version3, Version4, Version5);
     let (mut cubic, mut variable) = (false, false);
     for record in cache.offset_table.iter() {
         match &record.tag.0 {
@@ -150,5 +151,9 @@ pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::propertie
         cubic,
         italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
         variable,
+        vendor_id: match String::from_utf8(vendor_id.to_vec()) {
+            Ok(value) => value,
+            _ => raise!("found a malformed vendor identifier"),
+        },
     })
 }
