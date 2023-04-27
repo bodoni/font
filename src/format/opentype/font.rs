@@ -148,12 +148,13 @@ pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::propertie
         }
     }
     Ok(crate::properties::Properties {
-        cubic,
-        italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
-        variable,
         vendor_id: match String::from_utf8(vendor_id.to_vec()) {
             Ok(value) => value,
             _ => raise!("found a malformed vendor identifier"),
         },
+        bold: machintosh_flags.is_bold() || windows_flags.is_bold(),
+        italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
+        cubic,
+        variable,
     })
 }
