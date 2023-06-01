@@ -7,6 +7,7 @@ use typeface::Tape;
 use crate::format::opentype::cache::Cache;
 use crate::format::opentype::postscript::PostScript;
 use crate::format::opentype::truetype::TrueType;
+use crate::properties::{Outline, Properties, Style, Variations};
 use crate::{Number, Result};
 
 pub struct Font<T> {
@@ -39,7 +40,7 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn properties(&mut self) -> Result<crate::properties::Properties> {
+    fn properties(&mut self) -> Result<Properties> {
         read_properties(&mut self.cache.borrow_mut())
     }
 }
@@ -124,21 +125,18 @@ pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<Rc<NamingTable>> {
     Ok(cache.naming_table()?.clone())
 }
 
-pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::properties::Properties> {
+pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<Properties> {
     let font_header = cache.font_header()?.clone();
     let windows_metrics = cache.windows_metrics()?.clone();
     macro_rules! get(
         ($($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref metrics) => (
-                    (metrics.vendor_id, metrics.selection_flags)
-                ),)*
+                $(WindowsMetrics::$version(ref metrics) => metrics.selection_flags,)*
             }
         );
     );
     let machintosh_flags = font_header.macintosh_flags;
-    let (vendor_id, windows_flags) =
-        get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
     let (mut cubic, mut variable) = (false, false);
     for record in cache.offset_table.iter() {
         match &record.tag.0 {
@@ -147,14 +145,16 @@ pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::propertie
             _ => {}
         }
     }
-    Ok(crate::properties::Properties {
-        vendor_id: match String::from_utf8(vendor_id.to_vec()) {
-            Ok(value) => value,
-            _ => raise!("found a malformed vendor identifier"),
+    Ok(Properties {
+        outline: if cubic {
+            Outline::PostScript
+        } else {
+            Outline::TrueType
         },
-        bold: machintosh_flags.is_bold() || windows_flags.is_bold(),
-        italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
-        cubic,
-        variable,
+        style: Style {
+            bold: machintosh_flags.is_bold() || windows_flags.is_bold(),
+            italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
+        },
+        variations: if variable { Some(Variations) } else { None },
     })
 }

@@ -34,8 +34,8 @@ mod crimson_text {
     fn properties() {
         let mut file = setup(Fixture::CrimsonText);
         let properties = ok!(file[0].properties());
-        assert!(!properties.cubic);
-        assert!(!properties.italic);
+        assert_eq!(properties.outline, font::properties::Outline::TrueType);
+        assert!(!properties.style.italic);
     }
 }
 

@@ -28,13 +28,14 @@ pub extern crate webtype;
 #[macro_use(dereference, error, raise)]
 extern crate typeface;
 
+pub mod properties;
+
 mod file;
 mod font;
 mod format;
 mod glyph;
 mod metrics;
 mod offset;
-mod properties;
 
 pub use typeface::{Error, Result};
 

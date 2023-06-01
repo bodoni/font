@@ -60,6 +60,6 @@ mod source_serif {
     fn properties() {
         let mut file = setup(Fixture::SourceSerif);
         let properties = ok!(file[0].properties());
-        assert!(properties.cubic);
+        assert_eq!(properties.outline, font::properties::Outline::PostScript);
     }
 }
