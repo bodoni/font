@@ -8,7 +8,7 @@ pub struct Properties {
     /// The style.
     pub style: Style,
     /// The variations.
-    pub variations: Option<Variations>,
+    pub variations: Variations,
 }
 
 /// An outline format.
@@ -29,4 +29,7 @@ pub struct Style {
 
 /// Variations.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Variations;
+pub enum Variations {
+    None,
+    Some,
+}

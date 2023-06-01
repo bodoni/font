@@ -15,6 +15,6 @@ mod noto_naskh_arabic {
     fn properties() {
         let mut file = setup(Fixture::NotoNaskhArabic);
         let properties = ok!(file[0].properties());
-        assert!(properties.variations.is_none());
+        assert_eq!(properties.variations, font::properties::Variations::None);
     }
 }
