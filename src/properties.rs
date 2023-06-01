@@ -14,8 +14,8 @@ pub struct Properties {
 /// An outline format.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Outline {
-    TrueType,
     PostScript,
+    TrueType,
 }
 
 /// A style.
