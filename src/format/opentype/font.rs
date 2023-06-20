@@ -155,6 +155,10 @@ pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<Properties> {
             bold: machintosh_flags.is_bold() || windows_flags.is_bold(),
             italic: machintosh_flags.is_italic() || windows_flags.is_italic(),
         },
-        variations: if variable { Variations::Some } else { Variations::None },
+        variations: if variable {
+            Variations::Some
+        } else {
+            Variations::None
+        },
     })
 }
