@@ -71,11 +71,8 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
-    println!("Hi");
     let font_header = cache.font_header()?.clone();
-    println!("Hi");
     let windows_metrics = cache.windows_metrics()?.clone();
-    println!("Hi");
     macro_rules! get(
         (@version0 $($version:ident),+) => (
             match &*windows_metrics {
