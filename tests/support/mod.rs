@@ -8,6 +8,7 @@ use font::{File, Glyph};
 
 pub enum Fixture {
     AdobeBlank,
+    AdobeVFPrototype,
     CrimsonText,
     MonteCarlo,
     NotoNaskhArabic,
@@ -21,6 +22,7 @@ pub enum Fixture {
 pub fn setup(fixture: Fixture) -> File {
     let file_name = match fixture {
         Fixture::AdobeBlank => "AdobeBlank-Regular.ttf",
+        Fixture::AdobeVFPrototype => "AdobeVFPrototype.ttf",
         Fixture::CrimsonText => "CrimsonText-Regular.ttf",
         Fixture::MonteCarlo => "MonteCarlo-Regular.ttf",
         Fixture::NotoNaskhArabic => "NotoNaskhArabic-Regular.woff2",

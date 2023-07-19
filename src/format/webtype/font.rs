@@ -5,7 +5,7 @@ use opentype::truetype::NamingTable;
 use typeface::Tape;
 
 use crate::format::opentype::cache::Cache;
-use crate::format::opentype::font::{read_metrics, read_names, read_properties};
+use crate::format::opentype::font::{read_axes, read_metrics, read_names, read_properties};
 use crate::Result;
 
 pub struct Font<T> {
@@ -16,6 +16,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn draw(&mut self, _: char) -> Result<Option<crate::glyph::Glyph>> {
         error!("working with glyphs is not supported yet")
+    }
+
+    #[inline]
+    fn axes(&mut self) -> Result<crate::axes::Axes> {
+        read_axes(&mut self.cache.borrow_mut())
     }
 
     #[inline]

@@ -12,8 +12,32 @@ mod adobe_blank {
     }
 }
 
-mod crimson_text {
+mod adobe_vf_prototype {
+    use font::axes::Type;
+
     use crate::support::{setup, Fixture};
+
+    #[test]
+    fn axes() {
+        let mut file = setup(Fixture::AdobeVFPrototype);
+        let axes = ok!(file[0].axes());
+        assert_eq!(axes.len(), 2);
+        assert!(ok!(axes.get(&Type::Italic)).range.is_none());
+        assert_eq!(ok!(ok!(axes.get(&Type::Weight)).range), (200.0, 900.0));
+    }
+}
+
+mod crimson_text {
+    use font::axes::Type;
+
+    use crate::support::{setup, Fixture};
+
+    #[test]
+    fn axes() {
+        let mut file = setup(Fixture::CrimsonText);
+        let axes = ok!(file[0].axes());
+        assert_eq!(ok!(axes.get(&Type::Italic)).default, 0.0);
+    }
 
     #[test]
     fn metrics() {
@@ -35,7 +59,6 @@ mod crimson_text {
         let mut file = setup(Fixture::CrimsonText);
         let properties = ok!(file[0].properties());
         assert_eq!(properties.outline, font::properties::Outline::TrueType);
-        assert!(!properties.style.italic);
     }
 }
 

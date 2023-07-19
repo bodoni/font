@@ -28,6 +28,7 @@ pub extern crate webtype;
 #[macro_use(dereference, error, raise)]
 extern crate typeface;
 
+pub mod axes;
 pub mod properties;
 
 mod file;
@@ -40,6 +41,7 @@ mod offset;
 pub use typeface::{Error, Result};
 
 pub use self::font::Font;
+pub use axes::Axes;
 pub use file::File;
 pub use glyph::{Contour, Glyph, Segment};
 pub use metrics::Metrics;

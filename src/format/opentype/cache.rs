@@ -113,6 +113,11 @@ cache! {
         "the font set",
     ),
     (
+        font_variations -> try_font_variations(),
+        opentype::font_variations::FontVariations,
+        "the font variations",
+    ),
+    (
         glyph_data -> try_glyph_data(try_glyph_mapping),
         opentype::truetype::GlyphData,
         "the glyph data",
