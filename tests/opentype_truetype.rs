@@ -21,9 +21,10 @@ mod adobe_vf_prototype {
     fn axes() {
         let mut file = setup(Fixture::AdobeVFPrototype);
         let axes = ok!(file[0].axes());
-        assert_eq!(axes.len(), 2);
+        assert_eq!(axes.len(), 3);
         assert!(ok!(axes.get(&Type::Italic)).range.is_none());
         assert_eq!(ok!(ok!(axes.get(&Type::Weight)).range), (200.0, 900.0));
+        assert!(ok!(axes.get(&Type::Width)).range.is_none());
     }
 }
 

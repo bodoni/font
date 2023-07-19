@@ -83,16 +83,23 @@ pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
     macro_rules! get(
         ($($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref metrics) => metrics.selection_flags,)*
+                $(WindowsMetrics::$version(ref metrics) => (
+                    metrics.width_class,
+                    metrics.weight_class,
+                    metrics.selection_flags,
+                ),)*
             }
         );
     );
     let machintosh_flags = font_header.macintosh_flags;
-    let windows_flags = get!(Version0, Version1, Version2, Version3, Version4, Version5);
-    let italic = Value::from_italic(machintosh_flags.is_italic() || windows_flags.is_italic());
-    let weight = Value::from_bold(machintosh_flags.is_bold() || windows_flags.is_bold());
-    axes.insert(Type::Italic, italic);
-    axes.insert(Type::Weight, weight);
+    let (weight_class, width_class, windows_flags) =
+        get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    axes.insert(
+        Type::Italic,
+        Value::from_italic_flag(machintosh_flags.is_italic() || windows_flags.is_italic()),
+    );
+    axes.insert(Type::Weight, Value::from_weight_class(weight_class));
+    axes.insert(Type::Width, Value::from_width_class(width_class));
     if let Some(table) = cache.try_font_variations()? {
         for record in table.axis_records.iter() {
             let r#type = match &*record.tag {

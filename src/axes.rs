@@ -27,17 +27,20 @@ pub struct Value {
 }
 
 impl Value {
-    /// Create an instance from a flag for bold.
-    pub fn from_bold(value: bool) -> Self {
-        if value {
-            700.0.into()
-        } else {
-            400.0.into()
-        }
+    /// Create an instance from a weight class.
+    #[inline]
+    pub fn from_weight_class(value: u16) -> Self {
+        (value as Number).into()
+    }
+
+    /// Create an instance from a width class.
+    #[inline]
+    pub fn from_width_class(value: u16) -> Self {
+        (value as Number).into()
     }
 
     /// Create an instance from a flag for italic.
-    pub fn from_italic(value: bool) -> Self {
+    pub fn from_italic_flag(value: bool) -> Self {
         if value {
             1.0.into()
         } else {
