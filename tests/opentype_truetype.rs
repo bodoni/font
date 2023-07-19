@@ -24,7 +24,9 @@ mod adobe_vf_prototype {
         assert_eq!(axes.len(), 3);
         assert!(ok!(axes.get(&Type::Italic)).range.is_none());
         assert_eq!(ok!(ok!(axes.get(&Type::Weight)).range), (200.0, 900.0));
+        assert_eq!(ok!(axes.get(&Type::Weight)).default.round(), 389.0);
         assert!(ok!(axes.get(&Type::Width)).range.is_none());
+        assert_eq!(ok!(axes.get(&Type::Width)).default, 400.0);
     }
 }
 
