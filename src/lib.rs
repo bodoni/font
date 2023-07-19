@@ -31,22 +31,26 @@ extern crate typeface;
 pub mod axes;
 pub mod properties;
 
+mod characters;
 mod file;
 mod font;
 mod formats;
 mod glyph;
 mod metrics;
+mod names;
 mod offset;
 
 pub use typeface::{Error, Result};
 
+pub use self::axes::Axes;
+pub use self::characters::Characters;
+pub use self::file::File;
 pub use self::font::Font;
-pub use axes::Axes;
-pub use file::File;
-pub use glyph::{Contour, Glyph, Segment};
-pub use metrics::Metrics;
-pub use offset::Offset;
-pub use properties::Properties;
+pub use self::glyph::{Contour, Glyph, Segment};
+pub use self::metrics::Metrics;
+pub use self::names::Names;
+pub use self::offset::Offset;
+pub use self::properties::Properties;
 
 /// A number.
 pub type Number = f32;

@@ -5,7 +5,7 @@ use opentype::truetype::GlyphID;
 
 use crate::Result;
 
-pub struct Mapping(HashMap<u32, GlyphID>);
+pub struct Characters(HashMap<u32, GlyphID>);
 
 macro_rules! remap(
     ($source:expr) => ({
@@ -18,12 +18,12 @@ macro_rules! remap(
     })
 );
 
-impl Mapping {
+impl Characters {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
         if character_mapping.encodings.is_empty() {
             raise!("found no character-to-glyph encoding");
         }
-        Ok(Mapping(match &character_mapping.encodings[0] {
+        Ok(Self(match &character_mapping.encodings[0] {
             Encoding::Format0(encoding) => remap!(encoding.mapping()),
             Encoding::Format4(encoding) => remap!(encoding.mapping()),
             Encoding::Format6(encoding) => remap!(encoding.mapping()),

@@ -5,7 +5,7 @@ use std::rc::Rc;
 use opentype;
 use typeface::Tape;
 
-use crate::formats::opentype::mapping::Mapping;
+use crate::formats::opentype::characters::Characters;
 use crate::formats::opentype::metrics::Metrics;
 use crate::Result;
 
@@ -20,7 +20,7 @@ macro_rules! cache(
                     tape,
                     backend,
 
-                    mapping: Default::default(),
+                    characters: Default::default(),
                     metrics: Default::default(),
 
                     $($field: Default::default(),)+
@@ -35,7 +35,7 @@ macro_rules! cache(
             tape: Rc<RefCell<T>>,
             backend: opentype::Font,
 
-            mapping: Option<Rc<Mapping>>,
+            characters: Option<Rc<Characters>>,
             metrics: Option<Rc<Metrics>>,
 
             $($field: Option<Rc<$type>>,)+
@@ -155,11 +155,11 @@ cache! {
 }
 
 impl<T: Tape> Cache<T> {
-    pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
-        if self.mapping.is_none() {
-            self.mapping = Some(Rc::new(Mapping::new(self.character_mapping()?)?));
+    pub fn characters(&mut self) -> Result<&Rc<Characters>> {
+        if self.characters.is_none() {
+            self.characters = Some(Rc::new(Characters::new(self.character_mapping()?)?));
         }
-        Ok(self.mapping.as_ref().unwrap())
+        Ok(self.characters.as_ref().unwrap())
     }
 
     pub fn metrics(&mut self) -> Result<&Rc<Metrics>> {

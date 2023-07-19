@@ -1,11 +1,10 @@
-use std::rc::Rc;
-
-use opentype::truetype::NamingTable;
 use typeface::Tape;
 
 use crate::axes::Axes;
+use crate::characters::Characters;
 use crate::glyph::Glyph;
 use crate::metrics::Metrics;
+use crate::names::Names;
 use crate::properties::Properties;
 use crate::Result;
 
@@ -18,8 +17,9 @@ pub trait Case {
     fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
 
     fn axes(&mut self) -> Result<Axes>;
+    fn characters(&mut self) -> Result<Characters>;
     fn metrics(&mut self) -> Result<Metrics>;
-    fn names(&mut self) -> Result<Rc<NamingTable>>;
+    fn names(&mut self) -> Result<Names>;
     fn properties(&mut self) -> Result<Properties>;
 }
 
@@ -36,6 +36,12 @@ impl Font {
         self.case.axes()
     }
 
+    /// Return the characters.
+    #[inline]
+    pub fn characters(&mut self) -> Result<Characters> {
+        self.case.characters()
+    }
+
     /// Return the metrics.
     #[inline]
     pub fn metrics(&mut self) -> Result<Metrics> {
@@ -44,7 +50,7 @@ impl Font {
 
     /// Return the names.
     #[inline]
-    pub fn names(&mut self) -> Result<Rc<NamingTable>> {
+    pub fn names(&mut self) -> Result<Names> {
         self.case.names()
     }
 

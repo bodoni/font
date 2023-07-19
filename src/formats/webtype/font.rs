@@ -1,11 +1,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use opentype::truetype::NamingTable;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::font::{read_axes, read_metrics, read_names, read_properties};
+use crate::formats::opentype::font::{
+    read_axes, read_characters, read_metrics, read_names, read_properties,
+};
 use crate::Result;
 
 pub struct Font<T> {
@@ -24,12 +25,17 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
+    fn characters(&mut self) -> Result<crate::characters::Characters> {
+        read_characters(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
     fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    fn names(&mut self) -> Result<Rc<NamingTable>> {
+    fn names(&mut self) -> Result<crate::names::Names> {
         read_names(&mut self.cache.borrow_mut())
     }
 

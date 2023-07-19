@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use opentype::truetype::{NamingTable, WindowsMetrics};
+use opentype::truetype::WindowsMetrics;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
@@ -34,12 +34,17 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
+    fn characters(&mut self) -> Result<crate::characters::Characters> {
+        read_characters(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
     fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    fn names(&mut self) -> Result<Rc<NamingTable>> {
+    fn names(&mut self) -> Result<crate::names::Names> {
         read_names(&mut self.cache.borrow_mut())
     }
 
@@ -53,11 +58,11 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
     let mut fonts = vec![];
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     let mut cache_borrowed = cache.borrow_mut();
+    let characters = cache_borrowed.characters()?.clone();
     let metrics = cache_borrowed.metrics()?.clone();
-    let mapping = cache_borrowed.mapping()?.clone();
     if let Some(table) = cache_borrowed.try_font_set()? {
         for id in 0..table.character_strings.len() {
-            let case = PostScript::new(id, table.clone(), metrics.clone(), mapping.clone());
+            let case = PostScript::new(id, table.clone(), characters.clone(), metrics.clone());
             fonts.push(Font {
                 cache: cache.clone(),
                 case: Case::PostScript(case),
@@ -65,7 +70,7 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
         }
     }
     if let Some(table) = cache_borrowed.try_glyph_data()? {
-        let case = TrueType::new(table.clone(), metrics, mapping);
+        let case = TrueType::new(table.clone(), characters, metrics);
         fonts.push(Font {
             cache: cache.clone(),
             case: Case::TrueType(case),
@@ -122,6 +127,10 @@ pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
     Ok(axes)
 }
 
+pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::characters::Characters> {
+    cache.character_mapping().cloned()
+}
+
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
     let font_header = cache.font_header()?.clone();
     let windows_metrics = cache.windows_metrics()?.clone();
@@ -170,7 +179,7 @@ pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Met
     })
 }
 
-pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<Rc<NamingTable>> {
+pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<crate::names::Names> {
     Ok(cache.naming_table()?.clone())
 }
 

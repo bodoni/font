@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use opentype::truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
-use crate::formats::opentype::mapping::Mapping;
+use crate::formats::opentype::characters::Characters;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
@@ -10,23 +10,27 @@ use crate::Result;
 
 pub struct TrueType {
     glyph_data: Rc<GlyphData>,
+    characters: Rc<Characters>,
     metrics: Rc<Metrics>,
-    mapping: Rc<Mapping>,
 }
 
 impl TrueType {
     #[inline]
-    pub fn new(glyph_data: Rc<GlyphData>, metrics: Rc<Metrics>, mapping: Rc<Mapping>) -> Self {
+    pub fn new(
+        glyph_data: Rc<GlyphData>,
+        characters: Rc<Characters>,
+        metrics: Rc<Metrics>,
+    ) -> Self {
         TrueType {
             glyph_data,
+            characters,
             metrics,
-            mapping,
         }
     }
 
     pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::default();
-        let glyph_id = match self.mapping.find(character) {
+        let glyph_id = match self.characters.find(character) {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };

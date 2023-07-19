@@ -1,7 +1,7 @@
 pub mod cache;
 pub mod font;
 
-mod mapping;
+mod characters;
 mod metrics;
 mod postscript;
 mod truetype;
