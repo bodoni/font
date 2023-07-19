@@ -4,9 +4,9 @@ use std::rc::Rc;
 use opentype::truetype::{NamingTable, WindowsMetrics};
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
-use crate::format::opentype::postscript::PostScript;
-use crate::format::opentype::truetype::TrueType;
+use crate::formats::opentype::cache::Cache;
+use crate::formats::opentype::postscript::PostScript;
+use crate::formats::opentype::truetype::TrueType;
 use crate::{Number, Result};
 
 pub struct Font<T> {

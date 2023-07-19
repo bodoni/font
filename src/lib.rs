@@ -33,7 +33,7 @@ pub mod properties;
 
 mod file;
 mod font;
-mod format;
+mod formats;
 mod glyph;
 mod metrics;
 mod offset;

@@ -60,14 +60,14 @@ pub fn read<T: Tape + 'static>(mut tape: T) -> Result<Vec<Font>> {
 
     let tag = tape.peek::<Tag>()?;
     if opentype::accept(&tag) {
-        Ok(crate::format::opentype::read(tape)?
+        Ok(crate::formats::opentype::read(tape)?
             .into_iter()
             .map(|font| Font {
                 case: Box::new(font),
             })
             .collect())
     } else if webtype::accept(&tag) {
-        Ok(crate::format::webtype::read(tape)?
+        Ok(crate::formats::webtype::read(tape)?
             .into_iter()
             .map(|font| Font {
                 case: Box::new(font),

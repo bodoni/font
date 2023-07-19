@@ -4,8 +4,8 @@ use std::rc::Rc;
 use opentype::truetype::NamingTable;
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
-use crate::format::opentype::font::{read_axes, read_metrics, read_names, read_properties};
+use crate::formats::opentype::cache::Cache;
+use crate::formats::opentype::font::{read_axes, read_metrics, read_names, read_properties};
 use crate::Result;
 
 pub struct Font<T> {
