@@ -47,11 +47,6 @@ impl<T: Tape> crate::font::Case for Font<T> {
     fn names(&mut self) -> Result<crate::names::Names> {
         read_names(&mut self.cache.borrow_mut())
     }
-
-    #[inline]
-    fn properties(&mut self) -> Result<crate::properties::Properties> {
-        read_properties(&mut self.cache.borrow_mut())
-    }
 }
 
 pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Vec<Font<T>>> {
@@ -181,20 +176,4 @@ pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Met
 
 pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<crate::names::Names> {
     Ok(cache.naming_table()?.clone())
-}
-
-pub fn read_properties<T: Tape>(cache: &mut Cache<T>) -> Result<crate::properties::Properties> {
-    use crate::properties::Outline;
-
-    let cubic = cache
-        .offset_table
-        .iter()
-        .any(|record| matches!(&record.tag.0, b"CFF " | b"CFF2"));
-    Ok(crate::properties::Properties {
-        outline: if cubic {
-            Outline::PostScript
-        } else {
-            Outline::TrueType
-        },
-    })
 }

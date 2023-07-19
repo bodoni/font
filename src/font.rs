@@ -5,7 +5,6 @@ use crate::characters::Characters;
 use crate::glyph::Glyph;
 use crate::metrics::Metrics;
 use crate::names::Names;
-use crate::properties::Properties;
 use crate::Result;
 
 /// A font.
@@ -20,7 +19,6 @@ pub trait Case {
     fn characters(&mut self) -> Result<Characters>;
     fn metrics(&mut self) -> Result<Metrics>;
     fn names(&mut self) -> Result<Names>;
-    fn properties(&mut self) -> Result<Properties>;
 }
 
 impl Font {
@@ -52,12 +50,6 @@ impl Font {
     #[inline]
     pub fn names(&mut self) -> Result<Names> {
         self.case.names()
-    }
-
-    /// Return the properties.
-    #[inline]
-    pub fn properties(&mut self) -> Result<Properties> {
-        self.case.properties()
     }
 }
 

@@ -29,7 +29,6 @@ pub extern crate webtype;
 extern crate typeface;
 
 pub mod axes;
-pub mod properties;
 
 mod characters;
 mod file;
@@ -50,7 +49,6 @@ pub use self::glyph::{Contour, Glyph, Segment};
 pub use self::metrics::Metrics;
 pub use self::names::Names;
 pub use self::offset::Offset;
-pub use self::properties::Properties;
 
 /// A number.
 pub type Number = f32;

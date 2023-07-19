@@ -56,13 +56,6 @@ mod crimson_text {
         assert_eq!(metrics.clipping_descender, -297.0);
         assert_eq!(metrics.line_gap, 0.0);
     }
-
-    #[test]
-    fn properties() {
-        let mut file = setup(Fixture::CrimsonText);
-        let properties = ok!(file[0].properties());
-        assert_eq!(properties.outline, font::properties::Outline::TrueType);
-    }
 }
 
 mod monte_carlo {

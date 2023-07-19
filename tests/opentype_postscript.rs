@@ -55,11 +55,4 @@ mod source_serif {
         assert_eq!(metrics.clipping_descender, -335.0);
         assert_eq!(metrics.line_gap, 0.0);
     }
-
-    #[test]
-    fn properties() {
-        let mut file = setup(Fixture::SourceSerif);
-        let properties = ok!(file[0].properties());
-        assert_eq!(properties.outline, font::properties::Outline::PostScript);
-    }
 }

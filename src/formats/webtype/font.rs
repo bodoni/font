@@ -4,9 +4,7 @@ use std::rc::Rc;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::font::{
-    read_axes, read_characters, read_metrics, read_names, read_properties,
-};
+use crate::formats::opentype::font::{read_axes, read_characters, read_metrics, read_names};
 use crate::Result;
 
 pub struct Font<T> {
@@ -37,11 +35,6 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<crate::names::Names> {
         read_names(&mut self.cache.borrow_mut())
-    }
-
-    #[inline]
-    fn properties(&mut self) -> Result<crate::properties::Properties> {
-        read_properties(&mut self.cache.borrow_mut())
     }
 }
 
