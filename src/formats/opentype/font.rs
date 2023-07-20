@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use opentype::truetype::WindowsMetrics;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
@@ -75,29 +74,41 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
 }
 
 pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
+    use opentype::truetype::{PostScript, WindowsMetrics};
+
     use crate::axes::{Type, Value};
 
-    let mut axes = crate::axes::Axes::new();
     let font_header = cache.font_header()?.clone();
+    let machintosh_flags = font_header.macintosh_flags;
     let windows_metrics = cache.windows_metrics()?.clone();
     macro_rules! get(
         ($($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref metrics) => (
-                    metrics.width_class,
-                    metrics.weight_class,
-                    metrics.selection_flags,
+                $(WindowsMetrics::$version(ref table) => (
+                    table.width_class,
+                    table.weight_class,
+                    table.selection_flags,
                 ),)*
             }
         );
     );
-    let machintosh_flags = font_header.macintosh_flags;
     let (weight_class, width_class, windows_flags) =
         get!(Version0, Version1, Version2, Version3, Version4, Version5);
-    axes.insert(
-        Type::Italic,
-        Value::from_italic_flag(machintosh_flags.is_italic() || windows_flags.is_italic()),
+    let italic_flag = machintosh_flags.is_italic() || windows_flags.is_italic();
+
+    let postscript = cache.postscript()?.clone();
+    macro_rules! get(
+        ($($version:ident),+) => (
+            match &*postscript {
+                $(PostScript::$version(ref table) => table.italic_angle,)*
+            }
+        );
     );
+    let italic_angle = get!(Version1, Version2, Version3);
+
+    let mut axes = crate::axes::Axes::new();
+    axes.insert(Type::Italic, Value::from_italic_flag(italic_flag));
+    axes.insert(Type::Slant, Value::from_italic_angle(italic_angle));
     axes.insert(Type::Weight, Value::from_weight_class(weight_class));
     axes.insert(Type::Width, Value::from_width_class(width_class));
     if let Some(table) = cache.try_font_variations()? {
@@ -127,6 +138,8 @@ pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::character
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
+    use opentype::truetype::WindowsMetrics;
+
     let font_header = cache.font_header()?.clone();
     let windows_metrics = cache.windows_metrics()?.clone();
     macro_rules! get(

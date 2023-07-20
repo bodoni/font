@@ -21,8 +21,9 @@ mod adobe_vf_prototype {
     fn axes() {
         let mut file = setup(Fixture::AdobeVFPrototype);
         let axes = ok!(file[0].axes());
-        assert_eq!(axes.len(), 3);
+        assert_eq!(axes.len(), 4);
         assert!(ok!(axes.get(&Type::Italic)).range.is_none());
+        assert!(ok!(axes.get(&Type::Slant)).range.is_none());
         assert_eq!(ok!(ok!(axes.get(&Type::Weight)).range), (200.0, 900.0));
         assert_eq!(ok!(axes.get(&Type::Weight)).default.round(), 389.0);
         assert!(ok!(axes.get(&Type::Width)).range.is_none());
@@ -164,7 +165,16 @@ mod numans {
 }
 
 mod open_sans {
+    use font::axes::Type;
+
     use crate::support::{setup, trace, Fixture};
+
+    #[test]
+    fn axes() {
+        let mut file = setup(Fixture::OpenSans);
+        let axes = ok!(file[0].axes());
+        assert_eq!(ok!(axes.get(&Type::Slant)).default, -12.0);
+    }
 
     #[test]
     fn draw_a_ring() {

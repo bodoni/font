@@ -148,6 +148,11 @@ cache! {
         "the naming table",
     ),
     (
+        postscript -> try_postscript(),
+        opentype::truetype::PostScript,
+        "the PostScript information",
+    ),
+    (
         windows_metrics -> try_windows_metrics(),
         opentype::truetype::WindowsMetrics,
         "the OS/2 and Windows metrics",

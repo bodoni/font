@@ -2,6 +2,8 @@
 
 use std::collections::HashMap;
 
+use opentype::truetype::q32;
+
 use crate::Number;
 
 /// Axes.
@@ -37,6 +39,11 @@ impl Value {
     #[inline]
     pub fn from_width_class(value: u16) -> Self {
         (value as Number).into()
+    }
+
+    /// Create an instance from an italic angle.
+    pub fn from_italic_angle(value: q32) -> Self {
+        Number::from(value).into()
     }
 
     /// Create an instance from a flag for italic.
