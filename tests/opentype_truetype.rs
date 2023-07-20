@@ -46,7 +46,7 @@ mod crimson_text {
     fn metrics() {
         let mut file = setup(Fixture::CrimsonText);
         let metrics = ok!(file[0].metrics());
-        assert_eq!(metrics.units_per_em, 1024.0);
+        assert_eq!(metrics.granularity, 1024.0);
         assert_eq!(metrics.clipping_ascender, 1106.0);
         assert_eq!(metrics.ascender, 972.0);
         assert_eq!(metrics.cap_height, 656.0);
@@ -290,7 +290,7 @@ mod open_sans {
     fn open() {
         let mut file = setup(Fixture::OpenSans);
         let metrics = ok!(file[0].metrics());
-        assert_eq!(metrics.units_per_em, 2048.0);
+        assert_eq!(metrics.granularity, 2048.0);
         assert_eq!(metrics.clipping_ascender, 2189.0);
         assert_eq!(metrics.ascender, 1567.0);
         assert_eq!(metrics.cap_height, 1462.0);

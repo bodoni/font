@@ -158,7 +158,7 @@ pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Met
         get!(@version0 Version0, Version1, Version2, Version3, Version4, Version5);
     let (cap_height, x_height) = get!(@version2 Version2, Version3, Version4, Version5);
     Ok(crate::metrics::Metrics {
-        units_per_em: font_header.units_per_em.into(),
+        granularity: font_header.units_per_em.into(),
         clipping_ascender,
         ascender,
         cap_height,

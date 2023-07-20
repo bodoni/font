@@ -15,6 +15,6 @@ mod noto_naskh_arabic {
     fn metrics() {
         let mut file = setup(Fixture::NotoNaskhArabic);
         let metrics = ok!(file[0].metrics());
-        assert_eq!(metrics.units_per_em, 2048.0);
+        assert_eq!(metrics.granularity, 2048.0);
     }
 }

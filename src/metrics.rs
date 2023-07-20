@@ -4,7 +4,7 @@ use crate::Number;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Metrics {
     /// The granularity of the coordinate grid.
-    pub units_per_em: Number,
+    pub granularity: Number,
     /// The point above which clipping can safely occur.
     pub clipping_ascender: Number,
     /// The typographical ascender relative to the baseline.
