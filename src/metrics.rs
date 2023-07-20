@@ -1,7 +1,7 @@
 use crate::Number;
 
 /// Metrics.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Metrics {
     /// The granularity of the coordinate grid.
     pub granularity: Number,
