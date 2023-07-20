@@ -49,7 +49,8 @@ impl Value {
             8 => 150.0,
             9 => 200.0,
             _ => Number::NAN,
-        }.into()
+        }
+        .into()
     }
 
     /// Create an instance from an italic angle.
