@@ -38,7 +38,18 @@ impl Value {
     /// Create an instance from a width class.
     #[inline]
     pub fn from_width_class(value: u16) -> Self {
-        (value as Number).into()
+        match value {
+            1 => 50.0,
+            2 => 62.5,
+            3 => 75.0,
+            4 => 87.5,
+            5 => 100.0,
+            6 => 112.5,
+            7 => 125.0,
+            8 => 150.0,
+            9 => 200.0,
+            _ => Number::NAN,
+        }.into()
     }
 
     /// Create an instance from an italic angle.

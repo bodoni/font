@@ -85,8 +85,8 @@ pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
         ($($version:ident),+) => (
             match &*windows_metrics {
                 $(WindowsMetrics::$version(ref table) => (
-                    table.width_class,
                     table.weight_class,
+                    table.width_class,
                     table.selection_flags,
                 ),)*
             }
