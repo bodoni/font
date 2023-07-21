@@ -145,20 +145,20 @@ pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Met
     macro_rules! get(
         (@version0 $($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref metrics) => (
-                    metrics.windows_ascender.into(),
-                    metrics.typographic_ascender.into(),
-                    metrics.typographic_descender.into(),
-                    -Number::from(metrics.windows_descender),
-                    metrics.typographic_line_gap.into(),
+                $(WindowsMetrics::$version(ref table) => (
+                    table.windows_ascender.into(),
+                    table.typographic_ascender.into(),
+                    table.typographic_descender.into(),
+                    -Number::from(table.windows_descender),
+                    table.typographic_line_gap.into(),
                 ),)*
             }
         );
         (@version2 $($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref metrics) => (
-                    metrics.cap_height.into(),
-                    metrics.x_height.into(),
+                $(WindowsMetrics::$version(ref table) => (
+                    table.cap_height.into(),
+                    table.x_height.into(),
                 ),)*
                 _ => (
                     Number::NAN,
