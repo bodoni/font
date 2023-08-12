@@ -1,10 +1,8 @@
 use typeface::Tape;
 
-use crate::axes::Axes;
 use crate::glyph::Glyph;
 use crate::metrics::Metrics;
-use crate::names::Names;
-use crate::{Characters, Result};
+use crate::{Axes, Characters, Names, Result};
 
 /// A font.
 pub struct Font {

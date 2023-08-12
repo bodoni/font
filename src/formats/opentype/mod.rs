@@ -1,8 +1,10 @@
+pub mod axes;
 pub mod cache;
 pub mod font;
 
 mod characters;
 mod metrics;
+mod names;
 mod postscript;
 mod truetype;
 
@@ -11,6 +13,7 @@ use std::ops::DerefMut;
 use std::rc::Rc;
 
 pub use self::font::Font;
+pub use names::Names;
 
 use opentype;
 use typeface::Tape;

@@ -13,12 +13,12 @@ pub struct Font<T> {
 
 impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
-    fn draw(&mut self, _: char) -> Result<Option<crate::glyph::Glyph>> {
+    fn draw(&mut self, _: char) -> Result<Option<crate::Glyph>> {
         error!("working with glyphs is not supported yet")
     }
 
     #[inline]
-    fn axes(&mut self) -> Result<crate::axes::Axes> {
+    fn axes(&mut self) -> Result<crate::Axes> {
         read_axes(&mut self.cache.borrow_mut())
     }
 
@@ -28,12 +28,12 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
+    fn metrics(&mut self) -> Result<crate::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    fn names(&mut self) -> Result<crate::names::Names> {
+    fn names(&mut self) -> Result<crate::Names> {
         read_names(&mut self.cache.borrow_mut())
     }
 }

@@ -28,25 +28,22 @@ pub extern crate webtype;
 #[macro_use(dereference, error, raise)]
 extern crate typeface;
 
-pub mod axes;
-
 mod file;
 mod font;
 mod formats;
 mod glyph;
 mod metrics;
-mod names;
 mod offset;
 
 pub use typeface::{Error, Result};
 
-pub use self::axes::Axes;
-pub use self::file::File;
 pub use self::font::Font;
-pub use self::glyph::{Contour, Glyph, Segment};
-pub use self::metrics::Metrics;
-pub use self::names::Names;
-pub use self::offset::Offset;
+pub use file::File;
+pub use formats::opentype::axes::{self, Axes};
+pub use formats::opentype::Names;
+pub use glyph::{Contour, Glyph, Segment};
+pub use metrics::Metrics;
+pub use offset::Offset;
 
 /// Characters.
 pub type Characters = Vec<std::ops::RangeInclusive<u32>>;

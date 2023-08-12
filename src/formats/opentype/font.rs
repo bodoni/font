@@ -20,7 +20,7 @@ enum Case {
 
 impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
-    fn draw(&mut self, character: char) -> Result<Option<crate::glyph::Glyph>> {
+    fn draw(&mut self, character: char) -> Result<Option<crate::Glyph>> {
         match &self.case {
             Case::PostScript(ref case) => case.draw(character),
             Case::TrueType(ref case) => case.draw(character),
@@ -28,7 +28,7 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn axes(&mut self) -> Result<crate::axes::Axes> {
+    fn axes(&mut self) -> Result<crate::Axes> {
         read_axes(&mut self.cache.borrow_mut())
     }
 
@@ -38,12 +38,12 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn metrics(&mut self) -> Result<crate::metrics::Metrics> {
+    fn metrics(&mut self) -> Result<crate::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
 
     #[inline]
-    fn names(&mut self) -> Result<crate::names::Names> {
+    fn names(&mut self) -> Result<crate::Names> {
         read_names(&mut self.cache.borrow_mut())
     }
 }
@@ -73,7 +73,7 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
     Ok(fonts)
 }
 
-pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
+pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Axes> {
     use opentype::truetype::{PostScript, WindowsMetrics};
 
     use crate::axes::{Type, Value};
@@ -137,7 +137,7 @@ pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Character
         .collect())
 }
 
-pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {
+pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
     use opentype::truetype::WindowsMetrics;
 
     let font_header = cache.font_header()?.clone();
@@ -187,6 +187,6 @@ pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Met
     })
 }
 
-pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<crate::names::Names> {
+pub fn read_names<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Names> {
     Ok(cache.naming_table()?.clone())
 }
