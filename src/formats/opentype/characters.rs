@@ -5,7 +5,31 @@ use opentype::truetype::GlyphID;
 
 use crate::Result;
 
+pub struct Characters(pub Vec<(u32, u32)>);
+
 pub struct Mapping(HashMap<u32, GlyphID>);
+
+impl Characters {
+    pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
+        for encoding in character_mapping.encodings.iter() {
+            match encoding {
+                Encoding::Format0(encoding) => return Ok(Self(encoding.characters())),
+                Encoding::Format4(encoding) => return Ok(Self(encoding.characters())),
+                Encoding::Format6(encoding) => return Ok(Self(encoding.characters())),
+                Encoding::Format12(encoding) => return Ok(Self(encoding.characters())),
+                _ => {}
+            }
+        }
+        raise!("found no known character-to-glyph encoding")
+    }
+}
+
+impl From<Characters> for Vec<(u32, u32)> {
+    #[inline]
+    fn from(characters: Characters) -> Self {
+        characters.0
+    }
+}
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {

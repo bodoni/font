@@ -23,7 +23,7 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn characters(&mut self) -> Result<crate::characters::Characters> {
+    fn characters(&mut self) -> Result<crate::Characters> {
         read_characters(&mut self.cache.borrow_mut())
     }
 

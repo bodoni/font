@@ -33,7 +33,7 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn characters(&mut self) -> Result<crate::characters::Characters> {
+    fn characters(&mut self) -> Result<crate::Characters> {
         read_characters(&mut self.cache.borrow_mut())
     }
 
@@ -127,8 +127,14 @@ pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
     Ok(axes)
 }
 
-pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::characters::Characters> {
-    cache.character_mapping().cloned()
+pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Characters> {
+    use crate::formats::opentype::characters::Characters;
+
+    Ok(Characters::new(cache.character_mapping()?)?
+        .0
+        .into_iter()
+        .map(|(lower, upper)| lower..=upper)
+        .collect())
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::metrics::Metrics> {

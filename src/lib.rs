@@ -30,7 +30,6 @@ extern crate typeface;
 
 pub mod axes;
 
-mod characters;
 mod file;
 mod font;
 mod formats;
@@ -42,13 +41,15 @@ mod offset;
 pub use typeface::{Error, Result};
 
 pub use self::axes::Axes;
-pub use self::characters::Characters;
 pub use self::file::File;
 pub use self::font::Font;
 pub use self::glyph::{Contour, Glyph, Segment};
 pub use self::metrics::Metrics;
 pub use self::names::Names;
 pub use self::offset::Offset;
+
+/// Characters.
+pub type Characters = Vec<std::ops::RangeInclusive<u32>>;
 
 /// A number.
 pub type Number = f32;
