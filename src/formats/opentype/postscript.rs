@@ -3,7 +3,7 @@ use std::rc::Rc;
 use opentype::postscript::compact1::FontSet;
 use opentype::postscript::type2::Program;
 
-use crate::formats::opentype::characters::Characters;
+use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
@@ -12,7 +12,7 @@ use crate::Result;
 pub struct PostScript {
     id: usize,
     font_set: Rc<FontSet>,
-    characters: Rc<Characters>,
+    mapping: Rc<Mapping>,
     metrics: Rc<Metrics>,
 }
 
@@ -21,13 +21,13 @@ impl PostScript {
     pub fn new(
         id: usize,
         font_set: Rc<FontSet>,
-        characters: Rc<Characters>,
+        mapping: Rc<Mapping>,
         metrics: Rc<Metrics>,
     ) -> Self {
         PostScript {
             id,
             font_set,
-            characters,
+            mapping,
             metrics,
         }
     }
@@ -44,7 +44,7 @@ impl PostScript {
             )
         );
 
-        let glyph_id = match self.characters.find(character) {
+        let glyph_id = match self.mapping.find(character) {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };

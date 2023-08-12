@@ -52,11 +52,11 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
     let mut fonts = vec![];
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     let mut cache_borrowed = cache.borrow_mut();
-    let characters = cache_borrowed.characters()?.clone();
+    let mapping = cache_borrowed.mapping()?.clone();
     let metrics = cache_borrowed.metrics()?.clone();
     if let Some(table) = cache_borrowed.try_font_set()? {
         for id in 0..table.character_strings.len() {
-            let case = PostScript::new(id, table.clone(), characters.clone(), metrics.clone());
+            let case = PostScript::new(id, table.clone(), mapping.clone(), metrics.clone());
             fonts.push(Font {
                 cache: cache.clone(),
                 case: Case::PostScript(case),
@@ -64,7 +64,7 @@ pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Ve
         }
     }
     if let Some(table) = cache_borrowed.try_glyph_data()? {
-        let case = TrueType::new(table.clone(), characters, metrics);
+        let case = TrueType::new(table.clone(), mapping, metrics);
         fonts.push(Font {
             cache: cache.clone(),
             case: Case::TrueType(case),

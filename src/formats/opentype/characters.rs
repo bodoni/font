@@ -5,9 +5,9 @@ use opentype::truetype::GlyphID;
 
 use crate::Result;
 
-pub struct Characters(HashMap<u32, GlyphID>);
+pub struct Mapping(HashMap<u32, GlyphID>);
 
-impl Characters {
+impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
         for encoding in character_mapping.encodings.iter() {
             match encoding {
