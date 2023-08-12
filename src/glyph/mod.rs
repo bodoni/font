@@ -1,3 +1,5 @@
+//! Glyph.
+
 mod builder;
 
 pub use builder::Builder;

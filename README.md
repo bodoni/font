@@ -5,7 +5,8 @@ The package provides a parser for fonts.
 ## [Example]
 
 ```rust
-use font::{File, Segment};
+use font::glyph::Segment;
+use font::File;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 

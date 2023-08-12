@@ -4,21 +4,22 @@ pub mod font;
 
 mod characters;
 mod metrics;
-mod names;
 mod postscript;
 mod truetype;
+
+pub use self::font::Font;
 
 use std::cell::RefCell;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
-pub use self::font::Font;
-pub use names::Names;
-
-use opentype;
+use opentype::truetype::NamingTable;
 use typeface::Tape;
 
 use crate::Result;
+
+/// Names.
+pub type Names = Rc<NamingTable>;
 
 pub fn read<T: Tape + 'static>(tape: T) -> Result<Vec<Font<T>>> {
     let tape = Rc::new(RefCell::new(tape));

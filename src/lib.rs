@@ -3,7 +3,8 @@
 //! # Example
 //!
 //! ```
-//! use font::{File, Segment};
+//! use font::glyph::Segment;
+//! use font::File;
 //!
 //! macro_rules! ok(($result:expr) => ($result.unwrap()));
 //!
@@ -28,10 +29,11 @@ pub extern crate webtype;
 #[macro_use(dereference, error, raise)]
 extern crate typeface;
 
+pub mod glyph;
+
 mod file;
 mod font;
 mod formats;
-mod glyph;
 mod metrics;
 mod offset;
 
@@ -41,7 +43,7 @@ pub use self::font::Font;
 pub use file::File;
 pub use formats::opentype::axes::{self, Axes};
 pub use formats::opentype::Names;
-pub use glyph::{Contour, Glyph, Segment};
+pub use glyph::Glyph;
 pub use metrics::Metrics;
 pub use offset::Offset;
 
