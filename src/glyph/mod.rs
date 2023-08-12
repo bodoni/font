@@ -2,7 +2,7 @@
 
 mod builder;
 
-pub use builder::Builder;
+pub(crate) use builder::Builder;
 
 use crate::{Number, Offset};
 
