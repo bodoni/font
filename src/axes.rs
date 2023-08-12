@@ -2,22 +2,44 @@
 
 use std::collections::HashMap;
 
-use opentype::truetype::q32;
+use opentype::truetype::{q32, Tag};
 
 use crate::Number;
 
 /// Axes.
 pub type Axes = HashMap<Type, Value>;
 
-/// A type.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum Type {
-    Italic,
-    OpticalSize,
-    Slant,
-    Weight,
-    Width,
-}
+macro_rules! implement(
+    ($($tag:literal => $variant:ident,)*) => (
+        /// A type.
+        ///
+        /// The list is based on [OpenType][1].
+        ///
+        /// [1]: https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+        pub enum Type {
+            $($variant,)*
+        }
+
+        impl Type {
+            /// Create an instance from a tag.
+            pub fn from_tag(tag: &Tag) -> Option<Self> {
+                match &**tag {
+                    $($tag => Some(Self::$variant),)*
+                    _ => None,
+                }
+            }
+        }
+    );
+);
+
+implement!(
+    b"ital" => Italic,
+    b"opsz" => OpticalSize,
+    b"slnt" => Slant,
+    b"wdth" => Width,
+    b"wght" => Weight,
+);
 
 /// A value.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

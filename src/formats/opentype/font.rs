@@ -113,21 +113,15 @@ pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::axes::Axes> {
     axes.insert(Type::Width, Value::from_width_class(width_class));
     if let Some(table) = cache.try_font_variations()? {
         for record in table.axis_records.iter() {
-            let r#type = match &*record.tag {
-                b"ital" => Type::Italic,
-                b"opsz" => Type::OpticalSize,
-                b"slnt" => Type::Slant,
-                b"wdth" => Type::Width,
-                b"wght" => Type::Weight,
-                _ => continue,
-            };
-            axes.insert(
-                r#type,
-                Value {
-                    default: record.default_value.into(),
-                    range: Some((record.min_value.into(), record.max_value.into())),
-                },
-            );
+            if let Some(r#type) = crate::axes::Type::from_tag(&record.tag) {
+                axes.insert(
+                    r#type,
+                    Value {
+                        default: record.default_value.into(),
+                        range: Some((record.min_value.into(), record.max_value.into())),
+                    },
+                );
+            }
         }
     }
     Ok(axes)
