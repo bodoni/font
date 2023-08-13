@@ -1,5 +1,6 @@
 pub mod axes;
 pub mod cache;
+pub mod features;
 pub mod font;
 
 mod characters;

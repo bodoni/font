@@ -11,9 +11,7 @@ pub type Axes = HashMap<Type, Value>;
 
 macro_rules! implement(
     ($($tag:literal => $variant:ident,)*) => (
-        /// A type.
-        ///
-        /// The list is based on [OpenType][1].
+        /// A [type][1].
         ///
         /// [1]: https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

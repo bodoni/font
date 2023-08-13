@@ -42,6 +42,7 @@ pub use typeface::{Error, Result};
 pub use self::font::Font;
 pub use file::File;
 pub use formats::opentype::axes::{self, Axes};
+pub use formats::opentype::features::{self, Features};
 pub use formats::opentype::Names;
 pub use glyph::Glyph;
 pub use metrics::Metrics;
