@@ -181,7 +181,7 @@ implement!(
     b"med2" => MedialForms2,
     b"mgrk" => MathematicalGreek,
     b"mkmk" => MarktoMarkPositioning,
-    b"mset" => MarkPositioningviaSubstitution,
+    b"mset" => MarkPositioningViaSubstitution,
     b"nalt" => AlternateAnnotationForms,
     b"nlck" => NLCKanjiForms,
     b"nukt" => NuktaForms,

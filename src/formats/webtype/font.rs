@@ -4,7 +4,9 @@ use std::rc::Rc;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::font::{read_axes, read_characters, read_metrics, read_names};
+use crate::formats::opentype::font::{
+    read_axes, read_characters, read_features, read_metrics, read_names,
+};
 use crate::Result;
 
 pub struct Font<T> {
@@ -12,11 +14,6 @@ pub struct Font<T> {
 }
 
 impl<T: Tape> crate::font::Case for Font<T> {
-    #[inline]
-    fn draw(&mut self, _: char) -> Result<Option<crate::Glyph>> {
-        error!("working with glyphs is not supported yet")
-    }
-
     #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
         read_axes(&mut self.cache.borrow_mut())
@@ -28,6 +25,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
+    fn features(&mut self) -> Result<crate::Features> {
+        read_features(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
     fn metrics(&mut self) -> Result<crate::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
@@ -35,6 +37,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<crate::Names> {
         read_names(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn draw(&mut self, _: char) -> Result<Option<crate::Glyph>> {
+        error!("working with glyphs is not supported yet")
     }
 }
 

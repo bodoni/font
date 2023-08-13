@@ -128,6 +128,16 @@ cache! {
         "the glyph-to-location mapping",
     ),
     (
+        glyph_positioning -> try_glyph_positioning(),
+        opentype::glyph_positioning::GlyphPositioning,
+        "the glyph positioning",
+    ),
+    (
+        glyph_substitution -> try_glyph_substitution(),
+        opentype::glyph_substitution::GlyphSubstitution,
+        "the glyph substitution",
+    ),
+    (
         horizontal_header -> try_horizontal_header(),
         opentype::truetype::HorizontalHeader,
         "the horizontal header",

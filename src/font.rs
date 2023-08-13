@@ -1,7 +1,7 @@
 use typeface::Tape;
 
 use crate::metrics::Metrics;
-use crate::{Axes, Characters, Glyph, Names, Result};
+use crate::{Axes, Characters, Features, Glyph, Names, Result};
 
 /// A font.
 pub struct Font {
@@ -9,21 +9,16 @@ pub struct Font {
 }
 
 pub trait Case {
-    fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
-
     fn axes(&mut self) -> Result<Axes>;
     fn characters(&mut self) -> Result<Characters>;
+    fn features(&mut self) -> Result<Features>;
     fn metrics(&mut self) -> Result<Metrics>;
     fn names(&mut self) -> Result<Names>;
+
+    fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
 }
 
 impl Font {
-    /// Draw a character.
-    #[inline]
-    pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
-        self.case.draw(character)
-    }
-
     /// Return the axes.
     #[inline]
     pub fn axes(&mut self) -> Result<Axes> {
@@ -36,6 +31,12 @@ impl Font {
         self.case.characters()
     }
 
+    /// Return the features.
+    #[inline]
+    pub fn features(&mut self) -> Result<Features> {
+        self.case.features()
+    }
+
     /// Return the metrics.
     #[inline]
     pub fn metrics(&mut self) -> Result<Metrics> {
@@ -46,6 +47,12 @@ impl Font {
     #[inline]
     pub fn names(&mut self) -> Result<Names> {
         self.case.names()
+    }
+
+    /// Draw a character.
+    #[inline]
+    pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
+        self.case.draw(character)
     }
 }
 

@@ -20,14 +20,6 @@ enum Case {
 
 impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
-    fn draw(&mut self, character: char) -> Result<Option<crate::Glyph>> {
-        match &self.case {
-            Case::PostScript(ref case) => case.draw(character),
-            Case::TrueType(ref case) => case.draw(character),
-        }
-    }
-
-    #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
         read_axes(&mut self.cache.borrow_mut())
     }
@@ -38,6 +30,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 
     #[inline]
+    fn features(&mut self) -> Result<crate::Features> {
+        read_features(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
     fn metrics(&mut self) -> Result<crate::Metrics> {
         read_metrics(&mut self.cache.borrow_mut())
     }
@@ -45,6 +42,14 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<crate::Names> {
         read_names(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn draw(&mut self, character: char) -> Result<Option<crate::Glyph>> {
+        match &self.case {
+            Case::PostScript(ref case) => case.draw(character),
+            Case::TrueType(ref case) => case.draw(character),
+        }
     }
 }
 
@@ -135,6 +140,10 @@ pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Character
         .into_iter()
         .map(|(lower, upper)| lower..=upper)
         .collect())
+}
+
+pub fn read_features<T: Tape>(_: &mut Cache<T>) -> Result<crate::Features> {
+    unimplemented!()
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
