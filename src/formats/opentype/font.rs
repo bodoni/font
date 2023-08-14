@@ -142,8 +142,11 @@ pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Character
         .collect())
 }
 
-pub fn read_features<T: Tape>(_: &mut Cache<T>) -> Result<crate::Features> {
-    unimplemented!()
+pub fn read_features<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Features> {
+    let features = Default::default();
+    if let Some(_) = cache.try_glyph_positioning()? {}
+    if let Some(_) = cache.try_glyph_substitution()? {}
+    Ok(features)
 }
 
 pub fn read_metrics<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Metrics> {

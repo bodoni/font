@@ -5,6 +5,21 @@ mod source_serif {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
+    fn metrics() {
+        let mut file = setup(Fixture::SourceSerif);
+        let values = ok!(file[0].metrics());
+        assert_eq!(values.granularity, 1000.0);
+        assert_eq!(values.clipping_ascender, 918.0);
+        assert_eq!(values.ascender, 730.0);
+        assert_eq!(values.cap_height, 670.0);
+        assert_eq!(values.x_height, 475.0);
+        assert_eq!(values.baseline, 0.0);
+        assert_eq!(values.descender, -270.0);
+        assert_eq!(values.clipping_descender, -335.0);
+        assert_eq!(values.line_gap, 0.0);
+    }
+
+    #[test]
     fn draw_from_a_to_z() {
         let font = &mut setup(Fixture::SourceSerif)[0];
         for code in b'a'..=b'z' {
@@ -39,20 +54,5 @@ mod source_serif {
         let glyph = ok!(ok!(font.draw('r')));
         assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
         assert_eq!(glyph.side_bearings, (34.0, 11.0));
-    }
-
-    #[test]
-    fn metrics() {
-        let mut file = setup(Fixture::SourceSerif);
-        let metrics = ok!(file[0].metrics());
-        assert_eq!(metrics.granularity, 1000.0);
-        assert_eq!(metrics.clipping_ascender, 918.0);
-        assert_eq!(metrics.ascender, 730.0);
-        assert_eq!(metrics.cap_height, 670.0);
-        assert_eq!(metrics.x_height, 475.0);
-        assert_eq!(metrics.baseline, 0.0);
-        assert_eq!(metrics.descender, -270.0);
-        assert_eq!(metrics.clipping_descender, -335.0);
-        assert_eq!(metrics.line_gap, 0.0);
     }
 }

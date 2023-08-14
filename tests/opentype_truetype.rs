@@ -20,14 +20,14 @@ mod adobe_vf_prototype {
     #[test]
     fn axes() {
         let mut file = setup(Fixture::AdobeVFPrototype);
-        let axes = ok!(file[0].axes());
-        assert_eq!(axes.len(), 4);
-        assert!(ok!(axes.get(&Type::Italic)).range.is_none());
-        assert!(ok!(axes.get(&Type::Slant)).range.is_none());
-        assert_eq!(ok!(ok!(axes.get(&Type::Weight)).range), (200.0, 900.0));
-        assert_eq!(ok!(axes.get(&Type::Weight)).default.round(), 389.0);
-        assert!(ok!(axes.get(&Type::Width)).range.is_none());
-        assert_eq!(ok!(axes.get(&Type::Width)).default, 100.0);
+        let values = ok!(file[0].axes());
+        assert_eq!(values.len(), 4);
+        assert!(ok!(values.get(&Type::Italic)).range.is_none());
+        assert!(ok!(values.get(&Type::Slant)).range.is_none());
+        assert_eq!(ok!(ok!(values.get(&Type::Weight)).range), (200.0, 900.0));
+        assert_eq!(ok!(values.get(&Type::Weight)).default.round(), 389.0);
+        assert!(ok!(values.get(&Type::Width)).range.is_none());
+        assert_eq!(ok!(values.get(&Type::Width)).default, 100.0);
     }
 }
 
@@ -39,8 +39,14 @@ mod crimson_text {
     #[test]
     fn axes() {
         let mut file = setup(Fixture::CrimsonText);
-        let axes = ok!(file[0].axes());
-        assert_eq!(ok!(axes.get(&Type::Italic)).default, 0.0);
+        let values = ok!(file[0].axes());
+        assert_eq!(ok!(values.get(&Type::Italic)).default, 0.0);
+    }
+
+    #[test]
+    fn features() {
+        let mut file = setup(Fixture::CrimsonText);
+        let _ = ok!(file[0].features());
     }
 
     #[test]
@@ -172,8 +178,23 @@ mod open_sans {
     #[test]
     fn axes() {
         let mut file = setup(Fixture::OpenSans);
-        let axes = ok!(file[0].axes());
-        assert_eq!(ok!(axes.get(&Type::Slant)).default, -12.0);
+        let values = ok!(file[0].axes());
+        assert_eq!(ok!(values.get(&Type::Slant)).default, -12.0);
+    }
+
+    #[test]
+    fn metrics() {
+        let mut file = setup(Fixture::OpenSans);
+        let values = ok!(file[0].metrics());
+        assert_eq!(values.granularity, 2048.0);
+        assert_eq!(values.clipping_ascender, 2189.0);
+        assert_eq!(values.ascender, 1567.0);
+        assert_eq!(values.cap_height, 1462.0);
+        assert_eq!(values.x_height, 1096.0);
+        assert_eq!(values.baseline, 0.0);
+        assert_eq!(values.descender, -492.0);
+        assert_eq!(values.clipping_descender, -600.0);
+        assert_eq!(values.line_gap, 132.0);
     }
 
     #[test]
@@ -294,21 +315,6 @@ mod open_sans {
             (719.0, 1462.0),
             (893.0, 1462.0),
         ]);
-    }
-
-    #[test]
-    fn open() {
-        let mut file = setup(Fixture::OpenSans);
-        let metrics = ok!(file[0].metrics());
-        assert_eq!(metrics.granularity, 2048.0);
-        assert_eq!(metrics.clipping_ascender, 2189.0);
-        assert_eq!(metrics.ascender, 1567.0);
-        assert_eq!(metrics.cap_height, 1462.0);
-        assert_eq!(metrics.x_height, 1096.0);
-        assert_eq!(metrics.baseline, 0.0);
-        assert_eq!(metrics.descender, -492.0);
-        assert_eq!(metrics.clipping_descender, -600.0);
-        assert_eq!(metrics.line_gap, 132.0);
     }
 }
 
