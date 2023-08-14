@@ -143,9 +143,23 @@ pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Character
 }
 
 pub fn read_features<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Features> {
-    let features = Default::default();
-    if let Some(_) = cache.try_glyph_positioning()? {}
-    if let Some(_) = cache.try_glyph_substitution()? {}
+    use crate::formats::opentype::features::Type;
+
+    let mut features = crate::Features::default();
+    if let Some(table) = cache.try_glyph_positioning()? {
+        for header in table.features.headers.iter() {
+            if let Some(r#type) = Type::from_tag(&header.tag) {
+                features.insert(r#type);
+            }
+        }
+    }
+    if let Some(table) = cache.try_glyph_substitution()? {
+        for header in table.features.headers.iter() {
+            if let Some(r#type) = Type::from_tag(&header.tag) {
+                features.insert(r#type);
+            }
+        }
+    }
     Ok(features)
 }
 

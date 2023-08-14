@@ -1,18 +1,38 @@
 //! Features.
 
-use std::collections::HashMap;
+use std::collections::HashSet;
+
+use opentype::truetype::Tag;
 
 /// Features.
-pub type Features = HashMap<Type, Vec<u32>>;
+pub type Features = HashSet<Type>;
 
 macro_rules! implement(
     ($($tag:literal => $variant:ident,)*) => (
         /// A [type][1].
         ///
         /// [1]: https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub enum Type {
             $($variant,)*
+        }
+
+        impl Type {
+            /// Create an instance from a tag.
+            pub fn from_tag(tag: &Tag) -> Option<Self> {
+                match &**tag {
+                    $($tag => Some(Self::$variant),)*
+                    _ => None,
+                }
+            }
+        }
+
+        impl From<Type> for Tag {
+            fn from(value: Type) -> Self {
+                match value {
+                    $(Type::$variant => Tag(*$tag),)*
+                }
+            }
         }
     );
 );
@@ -180,7 +200,7 @@ implement!(
     b"medi" => MedialForms1,
     b"med2" => MedialForms2,
     b"mgrk" => MathematicalGreek,
-    b"mkmk" => MarktoMarkPositioning,
+    b"mkmk" => MarkToMarkPositioning,
     b"mset" => MarkPositioningViaSubstitution,
     b"nalt" => AlternateAnnotationForms,
     b"nlck" => NLCKanjiForms,

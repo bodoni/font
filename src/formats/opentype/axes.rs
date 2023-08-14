@@ -14,7 +14,7 @@ macro_rules! implement(
         /// A [type][1].
         ///
         /// [1]: https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub enum Type {
             $($variant,)*
         }
@@ -25,6 +25,14 @@ macro_rules! implement(
                 match &**tag {
                     $($tag => Some(Self::$variant),)*
                     _ => None,
+                }
+            }
+        }
+
+        impl From<Type> for Tag {
+            fn from(value: Type) -> Self {
+                match value {
+                    $(Type::$variant => Tag(*$tag),)*
                 }
             }
         }

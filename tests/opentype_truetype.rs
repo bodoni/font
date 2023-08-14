@@ -45,8 +45,31 @@ mod crimson_text {
 
     #[test]
     fn features() {
+        use font::features::Type::*;
+
         let mut file = setup(Fixture::CrimsonText);
-        let _ = ok!(file[0].features());
+        let mut values = ok!(file[0].features()).into_iter().collect::<Vec<_>>();
+        values.sort();
+        assert_eq!(
+            values,
+            [
+                CaseSensitiveForms,
+                GlyphComposition,
+                DiscretionaryLigatures,
+                Denominators,
+                Fractions,
+                Kerning,
+                StandardLigatures,
+                LocalizedForms,
+                MarkPositioning,
+                MarkToMarkPositioning,
+                Numerators,
+                ScientificInferiors,
+                Subscript,
+                Superscript,
+                SlashedZero,
+            ]
+        );
     }
 
     #[test]
