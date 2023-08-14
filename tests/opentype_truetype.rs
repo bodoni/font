@@ -22,12 +22,12 @@ mod adobe_vf_prototype {
         let mut file = setup(Fixture::AdobeVFPrototype);
         let values = ok!(file[0].axes());
         assert_eq!(values.len(), 4);
-        assert!(ok!(values.get(&Type::Italic)).range.is_none());
-        assert!(ok!(values.get(&Type::Slant)).range.is_none());
-        assert_eq!(ok!(ok!(values.get(&Type::Weight)).range), (200.0, 900.0));
-        assert_eq!(ok!(values.get(&Type::Weight)).default.round(), 389.0);
-        assert!(ok!(values.get(&Type::Width)).range.is_none());
-        assert_eq!(ok!(values.get(&Type::Width)).default, 100.0);
+        assert!(values[&Type::Italic].range.is_none());
+        assert!(values[&Type::Slant].range.is_none());
+        assert_eq!(ok!(values[&Type::Weight].range), (200.0, 900.0));
+        assert_eq!(values[&Type::Weight].default.round(), 389.0);
+        assert!(values[&Type::Width].range.is_none());
+        assert_eq!(values[&Type::Width].default, 100.0);
     }
 }
 
@@ -40,7 +40,7 @@ mod crimson_text {
     fn axes() {
         let mut file = setup(Fixture::CrimsonText);
         let values = ok!(file[0].axes());
-        assert_eq!(ok!(values.get(&Type::Italic)).default, 0.0);
+        assert_eq!(values[&Type::Italic].default, 0.0);
     }
 
     #[test]
@@ -202,7 +202,7 @@ mod open_sans {
     fn axes() {
         let mut file = setup(Fixture::OpenSans);
         let values = ok!(file[0].axes());
-        assert_eq!(ok!(values.get(&Type::Slant)).default, -12.0);
+        assert_eq!(values[&Type::Slant].default, -12.0);
     }
 
     #[test]
