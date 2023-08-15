@@ -52,7 +52,7 @@ impl Mapping {
     }
 }
 
-fn compress(ranges: Vec<(u32, u32)>) -> Vec<(u32, u32)>{
+fn compress(ranges: Vec<(u32, u32)>) -> Vec<(u32, u32)> {
     let mut result: Vec<(u32, u32)> = Vec::with_capacity(ranges.len());
     for range in ranges {
         if let Some(last) = result.last_mut() {
