@@ -1,6 +1,6 @@
 //! Axes.
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::io::Result;
 
 use opentype::truetype::{q32, Tag};
@@ -10,7 +10,7 @@ use crate::formats::opentype::cache::Cache;
 use crate::Number;
 
 /// Axes.
-pub type Axes = HashMap<Axis, Value>;
+pub type Axes = BTreeMap<Axis, Value>;
 
 macro_rules! implement(
     ($($tag:literal => $variant:ident,)*) => (

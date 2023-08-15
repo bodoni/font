@@ -124,209 +124,149 @@ mod crimson_text {
         use font::features::{Feature, Language, Script};
 
         let mut file = setup(Fixture::CrimsonText);
-        let mut values = ok!(file[0].features()).into_iter().collect::<Vec<_>>();
+        let mut values = ok!(file[0].features())
+            .into_iter()
+            .map(move |(script, languages)| {
+                languages
+                    .into_iter()
+                    .map(move |(language, features)| {
+                        features
+                            .into_iter()
+                            .map(move |(feature, _)| (script, language, feature))
+                    })
+                    .flatten()
+            })
+            .flatten()
+            .collect::<Vec<_>>();
         values.sort();
+        #[rustfmt::skip]
         assert_eq!(
             values,
             [
-                (
-                    Script::Default,
-                    vec![(
-                        None,
-                        vec![
-                            (Feature::CaseSensitiveForms, vec![]),
-                            (Feature::GlyphCompositionDecomposition, vec![]),
-                            (Feature::DiscretionaryLigatures, vec![]),
-                            (Feature::Denominators, vec![]),
-                            (Feature::Fractions, vec![]),
-                            (Feature::StandardLigatures, vec![]),
-                            (Feature::Numerators, vec![]),
-                            (Feature::ScientificInferiors, vec![]),
-                            (Feature::Subscript, vec![]),
-                            (Feature::Superscript, vec![]),
-                            (Feature::SlashedZero, vec![])
-                        ]
-                    ),]
-                ),
-                (
-                    Script::Default,
-                    vec![(
-                        None,
-                        vec![
-                            (Feature::Kerning, vec![]),
-                            (Feature::MarkPositioning, vec![]),
-                            (Feature::MarkToMarkPositioning, vec![])
-                        ]
-                    ),]
-                ),
-                (
-                    Script::Latin,
-                    vec![
-                        (
-                            None,
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Azerbaijani),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Catalan),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::CrimeanTatar),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Kazakh),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Moldavian),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Romanian),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Tatar),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        ),
-                        (
-                            Some(Language::Turkish),
-                            vec![
-                                (Feature::CaseSensitiveForms, vec![]),
-                                (Feature::GlyphCompositionDecomposition, vec![]),
-                                (Feature::DiscretionaryLigatures, vec![]),
-                                (Feature::Denominators, vec![]),
-                                (Feature::Fractions, vec![]),
-                                (Feature::StandardLigatures, vec![]),
-                                (Feature::LocalizedForms, vec![]),
-                                (Feature::Numerators, vec![]),
-                                (Feature::ScientificInferiors, vec![]),
-                                (Feature::Subscript, vec![]),
-                                (Feature::Superscript, vec![]),
-                                (Feature::SlashedZero, vec![])
-                            ]
-                        )
-                    ]
-                ),
-                (
-                    Script::Latin,
-                    vec![(
-                        None,
-                        vec![
-                            (Feature::Kerning, vec![]),
-                            (Feature::MarkPositioning, vec![]),
-                            (Feature::MarkToMarkPositioning, vec![])
-                        ]
-                    )]
-                )
+                (Script::Default, None, Feature::CaseSensitiveForms),
+                (Script::Default, None, Feature::GlyphCompositionDecomposition),
+                (Script::Default, None, Feature::DiscretionaryLigatures),
+                (Script::Default, None, Feature::Denominators),
+                (Script::Default, None, Feature::Fractions),
+                (Script::Default, None, Feature::Kerning),
+                (Script::Default, None, Feature::StandardLigatures),
+                (Script::Default, None, Feature::MarkPositioning),
+                (Script::Default, None, Feature::MarkToMarkPositioning),
+                (Script::Default, None, Feature::Numerators),
+                (Script::Default, None, Feature::ScientificInferiors),
+                (Script::Default, None, Feature::Subscript),
+                (Script::Default, None, Feature::Superscript),
+                (Script::Default, None, Feature::SlashedZero),
+                (Script::Latin, None, Feature::CaseSensitiveForms),
+                (Script::Latin, None, Feature::GlyphCompositionDecomposition),
+                (Script::Latin, None, Feature::DiscretionaryLigatures),
+                (Script::Latin, None, Feature::Denominators),
+                (Script::Latin, None, Feature::Fractions),
+                (Script::Latin, None, Feature::Kerning),
+                (Script::Latin, None, Feature::StandardLigatures),
+                (Script::Latin, None, Feature::MarkPositioning),
+                (Script::Latin, None, Feature::MarkToMarkPositioning),
+                (Script::Latin, None, Feature::Numerators),
+                (Script::Latin, None, Feature::ScientificInferiors),
+                (Script::Latin, None, Feature::Subscript),
+                (Script::Latin, None, Feature::Superscript),
+                (Script::Latin, None, Feature::SlashedZero),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::Denominators),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::Fractions),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::Numerators),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::Subscript),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::Superscript),
+                (Script::Latin, Some(Language::Azerbaijani), Feature::SlashedZero),
+                (Script::Latin, Some(Language::Catalan), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Catalan), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Catalan), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Catalan), Feature::Denominators),
+                (Script::Latin, Some(Language::Catalan), Feature::Fractions),
+                (Script::Latin, Some(Language::Catalan), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Catalan), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Catalan), Feature::Numerators),
+                (Script::Latin, Some(Language::Catalan), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Catalan), Feature::Subscript),
+                (Script::Latin, Some(Language::Catalan), Feature::Superscript),
+                (Script::Latin, Some(Language::Catalan), Feature::SlashedZero),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::Denominators),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::Fractions),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::Numerators),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::Subscript),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::Superscript),
+                (Script::Latin, Some(Language::CrimeanTatar), Feature::SlashedZero),
+                (Script::Latin, Some(Language::Kazakh), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Kazakh), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Kazakh), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Kazakh), Feature::Denominators),
+                (Script::Latin, Some(Language::Kazakh), Feature::Fractions),
+                (Script::Latin, Some(Language::Kazakh), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Kazakh), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Kazakh), Feature::Numerators),
+                (Script::Latin, Some(Language::Kazakh), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Kazakh), Feature::Subscript),
+                (Script::Latin, Some(Language::Kazakh), Feature::Superscript),
+                (Script::Latin, Some(Language::Kazakh), Feature::SlashedZero),
+                (Script::Latin, Some(Language::Moldavian), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Moldavian), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Moldavian), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Moldavian), Feature::Denominators),
+                (Script::Latin, Some(Language::Moldavian), Feature::Fractions),
+                (Script::Latin, Some(Language::Moldavian), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Moldavian), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Moldavian), Feature::Numerators),
+                (Script::Latin, Some(Language::Moldavian), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Moldavian), Feature::Subscript),
+                (Script::Latin, Some(Language::Moldavian), Feature::Superscript),
+                (Script::Latin, Some(Language::Moldavian), Feature::SlashedZero),
+                (Script::Latin, Some(Language::Romanian), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Romanian), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Romanian), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Romanian), Feature::Denominators),
+                (Script::Latin, Some(Language::Romanian), Feature::Fractions),
+                (Script::Latin, Some(Language::Romanian), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Romanian), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Romanian), Feature::Numerators),
+                (Script::Latin, Some(Language::Romanian), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Romanian), Feature::Subscript),
+                (Script::Latin, Some(Language::Romanian), Feature::Superscript),
+                (Script::Latin, Some(Language::Romanian), Feature::SlashedZero),
+                (Script::Latin, Some(Language::Tatar), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Tatar), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Tatar), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Tatar), Feature::Denominators),
+                (Script::Latin, Some(Language::Tatar), Feature::Fractions),
+                (Script::Latin, Some(Language::Tatar), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Tatar), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Tatar), Feature::Numerators),
+                (Script::Latin, Some(Language::Tatar), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Tatar), Feature::Subscript),
+                (Script::Latin, Some(Language::Tatar), Feature::Superscript),
+                (Script::Latin, Some(Language::Tatar), Feature::SlashedZero),
+                (Script::Latin, Some(Language::Turkish), Feature::CaseSensitiveForms),
+                (Script::Latin, Some(Language::Turkish), Feature::GlyphCompositionDecomposition),
+                (Script::Latin, Some(Language::Turkish), Feature::DiscretionaryLigatures),
+                (Script::Latin, Some(Language::Turkish), Feature::Denominators),
+                (Script::Latin, Some(Language::Turkish), Feature::Fractions),
+                (Script::Latin, Some(Language::Turkish), Feature::StandardLigatures),
+                (Script::Latin, Some(Language::Turkish), Feature::LocalizedForms),
+                (Script::Latin, Some(Language::Turkish), Feature::Numerators),
+                (Script::Latin, Some(Language::Turkish), Feature::ScientificInferiors),
+                (Script::Latin, Some(Language::Turkish), Feature::Subscript),
+                (Script::Latin, Some(Language::Turkish), Feature::Superscript),
+                (Script::Latin, Some(Language::Turkish), Feature::SlashedZero),
             ]
         );
     }
