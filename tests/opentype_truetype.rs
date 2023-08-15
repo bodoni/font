@@ -121,7 +121,7 @@ mod crimson_text {
 
     #[test]
     fn features() {
-        use font::features::Type::*;
+        use font::features::{Feature, Language, Script};
 
         let mut file = setup(Fixture::CrimsonText);
         let mut values = ok!(file[0].features()).into_iter().collect::<Vec<_>>();
@@ -129,21 +129,204 @@ mod crimson_text {
         assert_eq!(
             values,
             [
-                CaseSensitiveForms,
-                GlyphCompositionDecomposition,
-                DiscretionaryLigatures,
-                Denominators,
-                Fractions,
-                Kerning,
-                StandardLigatures,
-                LocalizedForms,
-                MarkPositioning,
-                MarkToMarkPositioning,
-                Numerators,
-                ScientificInferiors,
-                Subscript,
-                Superscript,
-                SlashedZero,
+                (
+                    Script::Default,
+                    vec![(
+                        None,
+                        vec![
+                            (Feature::CaseSensitiveForms, vec![]),
+                            (Feature::GlyphCompositionDecomposition, vec![]),
+                            (Feature::DiscretionaryLigatures, vec![]),
+                            (Feature::Denominators, vec![]),
+                            (Feature::Fractions, vec![]),
+                            (Feature::StandardLigatures, vec![]),
+                            (Feature::Numerators, vec![]),
+                            (Feature::ScientificInferiors, vec![]),
+                            (Feature::Subscript, vec![]),
+                            (Feature::Superscript, vec![]),
+                            (Feature::SlashedZero, vec![])
+                        ]
+                    ),]
+                ),
+                (
+                    Script::Default,
+                    vec![(
+                        None,
+                        vec![
+                            (Feature::Kerning, vec![]),
+                            (Feature::MarkPositioning, vec![]),
+                            (Feature::MarkToMarkPositioning, vec![])
+                        ]
+                    ),]
+                ),
+                (
+                    Script::Latin,
+                    vec![
+                        (
+                            None,
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Azerbaijani),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Catalan),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::CrimeanTatar),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Kazakh),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Moldavian),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Romanian),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Tatar),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        ),
+                        (
+                            Some(Language::Turkish),
+                            vec![
+                                (Feature::CaseSensitiveForms, vec![]),
+                                (Feature::GlyphCompositionDecomposition, vec![]),
+                                (Feature::DiscretionaryLigatures, vec![]),
+                                (Feature::Denominators, vec![]),
+                                (Feature::Fractions, vec![]),
+                                (Feature::StandardLigatures, vec![]),
+                                (Feature::LocalizedForms, vec![]),
+                                (Feature::Numerators, vec![]),
+                                (Feature::ScientificInferiors, vec![]),
+                                (Feature::Subscript, vec![]),
+                                (Feature::Superscript, vec![]),
+                                (Feature::SlashedZero, vec![])
+                            ]
+                        )
+                    ]
+                ),
+                (
+                    Script::Latin,
+                    vec![(
+                        None,
+                        vec![
+                            (Feature::Kerning, vec![]),
+                            (Feature::MarkPositioning, vec![]),
+                            (Feature::MarkToMarkPositioning, vec![])
+                        ]
+                    )]
+                )
             ]
         );
     }

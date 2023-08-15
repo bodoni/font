@@ -40,14 +40,12 @@ mod offset;
 pub use self::font::Font;
 pub use file::File;
 pub use formats::opentype::axes::{self, Axes};
+pub use formats::opentype::characters::Characters;
 pub use formats::opentype::features::{self, Features};
 pub use formats::opentype::names::Names;
 pub use glyph::Glyph;
 pub use metrics::Metrics;
 pub use offset::Offset;
-
-/// Characters.
-pub type Characters = Vec<std::ops::RangeInclusive<u32>>;
 
 /// A number.
 pub type Number = f32;

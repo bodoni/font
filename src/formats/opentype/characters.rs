@@ -8,32 +8,10 @@ use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
 
-pub struct Characters(pub Vec<RangeInclusive<u32>>);
+/// Characters.
+pub type Characters = Vec<RangeInclusive<u32>>;
 
 pub struct Mapping(HashMap<u32, GlyphID>);
-
-impl Characters {
-    pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
-        for encoding in character_mapping.encodings.iter() {
-            let ranges = match encoding {
-                Encoding::Format0(encoding) => encoding.characters(),
-                Encoding::Format4(encoding) => encoding.characters(),
-                Encoding::Format6(encoding) => encoding.characters(),
-                Encoding::Format12(encoding) => encoding.characters(),
-                _ => continue,
-            };
-            return Ok(Self(compress(ranges)));
-        }
-        raise!("found no known character-to-glyph encoding")
-    }
-}
-
-impl From<Characters> for Vec<RangeInclusive<u32>> {
-    #[inline]
-    fn from(characters: Characters) -> Self {
-        characters.0
-    }
-}
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
@@ -55,8 +33,18 @@ impl Mapping {
     }
 }
 
-pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Characters> {
-    Ok(Characters::new(cache.character_mapping()?)?.into())
+pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Characters> {
+    for encoding in cache.character_mapping()?.encodings.iter() {
+        let ranges = match encoding {
+            Encoding::Format0(encoding) => encoding.characters(),
+            Encoding::Format4(encoding) => encoding.characters(),
+            Encoding::Format6(encoding) => encoding.characters(),
+            Encoding::Format12(encoding) => encoding.characters(),
+            _ => continue,
+        };
+        return Ok(compress(ranges));
+    }
+    raise!("found no known character-to-glyph encoding")
 }
 
 fn compress(ranges: Vec<(u32, u32)>) -> Vec<RangeInclusive<u32>> {
