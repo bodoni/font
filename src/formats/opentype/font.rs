@@ -135,11 +135,7 @@ pub fn read_axes<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Axes> {
 pub fn read_characters<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Characters> {
     use crate::formats::opentype::characters::Characters;
 
-    Ok(Characters::new(cache.character_mapping()?)?
-        .0
-        .into_iter()
-        .map(|(lower, upper)| lower..=upper)
-        .collect())
+    Ok(Characters::new(cache.character_mapping()?)?.into())
 }
 
 pub fn read_features<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Features> {

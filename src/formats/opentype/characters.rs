@@ -1,11 +1,12 @@
 use std::collections::HashMap;
+use std::ops::RangeInclusive;
 
 use opentype::truetype::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
 
 use crate::Result;
 
-pub struct Characters(pub Vec<(u32, u32)>);
+pub struct Characters(pub Vec<RangeInclusive<u32>>);
 
 pub struct Mapping(HashMap<u32, GlyphID>);
 
@@ -25,7 +26,7 @@ impl Characters {
     }
 }
 
-impl From<Characters> for Vec<(u32, u32)> {
+impl From<Characters> for Vec<RangeInclusive<u32>> {
     #[inline]
     fn from(characters: Characters) -> Self {
         characters.0
@@ -52,16 +53,16 @@ impl Mapping {
     }
 }
 
-fn compress(ranges: Vec<(u32, u32)>) -> Vec<(u32, u32)> {
-    let mut result: Vec<(u32, u32)> = Vec::with_capacity(ranges.len());
+fn compress(ranges: Vec<(u32, u32)>) -> Vec<RangeInclusive<u32>> {
+    let mut result: Vec<RangeInclusive<u32>> = Vec::with_capacity(ranges.len());
     for range in ranges {
         if let Some(last) = result.last_mut() {
-            if last.1 + 1 == range.0 {
-                last.1 = range.1;
+            if last.end() + 1 == range.0 {
+                *last = *last.start()..=range.1;
                 continue;
             }
         }
-        result.push(range);
+        result.push(range.0..=range.1);
     }
     result
 }
