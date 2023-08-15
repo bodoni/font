@@ -44,7 +44,7 @@ impl PostScript {
             )
         );
 
-        let glyph_id = match self.mapping.find(character) {
+        let glyph_id = match self.mapping.get(character) {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };

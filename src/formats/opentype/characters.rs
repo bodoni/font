@@ -47,7 +47,7 @@ impl Mapping {
     }
 
     #[inline]
-    pub fn find(&self, character: char) -> Option<GlyphID> {
+    pub fn get(&self, character: char) -> Option<GlyphID> {
         self.0.get(&(character as u32)).copied()
     }
 }

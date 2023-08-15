@@ -26,7 +26,7 @@ impl TrueType {
 
     pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
         let mut builder = Builder::default();
-        let glyph_id = match self.mapping.find(character) {
+        let glyph_id = match self.mapping.get(character) {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };
