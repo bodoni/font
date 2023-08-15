@@ -121,7 +121,7 @@ mod crimson_text {
 
     #[test]
     fn features() {
-        use font::features::{Feature, Language, Script};
+        use font::features::{Language, Script, Type as Feature};
 
         let mut file = setup(Fixture::CrimsonText);
         let mut values = ok!(file[0].features())
@@ -133,11 +133,8 @@ mod crimson_text {
                         .scripts
                         .into_iter()
                         .map(move |(script, languages)| {
-                            languages
-                                .into_iter()
-                                .map(move |language| (script, language))
+                            (script, languages.into_iter().collect::<Vec<_>>())
                         })
-                        .flatten()
                         .collect::<Vec<_>>(),
                 )
             })
@@ -149,191 +146,249 @@ mod crimson_text {
                 (
                     Feature::CaseSensitiveForms,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::GlyphCompositionDecomposition,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::DiscretionaryLigatures,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::Denominators,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::Fractions,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::Kerning,
-                    vec![(Script::Default, None), (Script::Latin, None)]
+                    vec![(Script::Default, vec![None]), (Script::Latin, vec![None])]
                 ),
                 (
                     Feature::StandardLigatures,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::LocalizedForms,
-                    vec![
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
-                    ]
+                    vec![(
+                        Script::Latin,
+                        vec![
+                            Some(Language::Azerbaijani),
+                            Some(Language::Catalan),
+                            Some(Language::CrimeanTatar),
+                            Some(Language::Kazakh),
+                            Some(Language::Moldavian),
+                            Some(Language::Romanian),
+                            Some(Language::Tatar),
+                            Some(Language::Turkish)
+                        ]
+                    )]
                 ),
                 (
                     Feature::MarkPositioning,
-                    vec![(Script::Default, None), (Script::Latin, None)]
+                    vec![(Script::Default, vec![None]), (Script::Latin, vec![None])]
                 ),
                 (
                     Feature::MarkToMarkPositioning,
-                    vec![(Script::Default, None), (Script::Latin, None)]
+                    vec![(Script::Default, vec![None]), (Script::Latin, vec![None])]
                 ),
                 (
                     Feature::Numerators,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::ScientificInferiors,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::Subscript,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::Superscript,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 ),
                 (
                     Feature::SlashedZero,
                     vec![
-                        (Script::Default, None),
-                        (Script::Latin, None),
-                        (Script::Latin, Some(Language::Azerbaijani)),
-                        (Script::Latin, Some(Language::Catalan)),
-                        (Script::Latin, Some(Language::CrimeanTatar)),
-                        (Script::Latin, Some(Language::Kazakh)),
-                        (Script::Latin, Some(Language::Moldavian)),
-                        (Script::Latin, Some(Language::Romanian)),
-                        (Script::Latin, Some(Language::Tatar)),
-                        (Script::Latin, Some(Language::Turkish))
+                        (Script::Default, vec![None]),
+                        (
+                            Script::Latin,
+                            vec![
+                                None,
+                                Some(Language::Azerbaijani),
+                                Some(Language::Catalan),
+                                Some(Language::CrimeanTatar),
+                                Some(Language::Kazakh),
+                                Some(Language::Moldavian),
+                                Some(Language::Romanian),
+                                Some(Language::Tatar),
+                                Some(Language::Turkish)
+                            ]
+                        )
                     ]
                 )
             ]

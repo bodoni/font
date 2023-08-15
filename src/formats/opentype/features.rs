@@ -1,11 +1,11 @@
 //! Features.
 
-pub use opentype::layout::{Feature, Language, Script};
+pub use opentype::layout::{Language, Script};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;
 
-use opentype::layout::Directory;
+use opentype::layout::{Directory, Feature};
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
