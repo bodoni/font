@@ -89,7 +89,7 @@ mod adobe_blank {
 }
 
 mod adobe_vf_prototype {
-    use font::axes::Type;
+    use font::axes::Axis;
 
     use crate::support::{setup, Fixture};
 
@@ -98,17 +98,17 @@ mod adobe_vf_prototype {
         let mut file = setup(Fixture::AdobeVFPrototype);
         let values = ok!(file[0].axes());
         assert_eq!(values.len(), 4);
-        assert!(values[&Type::Italic].range.is_none());
-        assert!(values[&Type::Slant].range.is_none());
-        assert_eq!(ok!(values[&Type::Weight].range), (200.0, 900.0));
-        assert_eq!(values[&Type::Weight].default.round(), 389.0);
-        assert!(values[&Type::Width].range.is_none());
-        assert_eq!(values[&Type::Width].default, 100.0);
+        assert!(values[&Axis::Italic].range.is_none());
+        assert!(values[&Axis::Slant].range.is_none());
+        assert_eq!(ok!(values[&Axis::Weight].range), (200.0, 900.0));
+        assert_eq!(values[&Axis::Weight].default.round(), 389.0);
+        assert!(values[&Axis::Width].range.is_none());
+        assert_eq!(values[&Axis::Width].default, 100.0);
     }
 }
 
 mod crimson_text {
-    use font::axes::Type;
+    use font::axes::Axis;
 
     use crate::support::{setup, Fixture};
 
@@ -116,7 +116,7 @@ mod crimson_text {
     fn axes() {
         let mut file = setup(Fixture::CrimsonText);
         let values = ok!(file[0].axes());
-        assert_eq!(values[&Type::Italic].default, 0.0);
+        assert_eq!(values[&Axis::Italic].default, 0.0);
     }
 
     #[test]
@@ -453,7 +453,7 @@ mod numans {
 }
 
 mod open_sans {
-    use font::axes::Type;
+    use font::axes::Axis;
 
     use crate::support::{setup, trace, Fixture};
 
@@ -461,7 +461,7 @@ mod open_sans {
     fn axes() {
         let mut file = setup(Fixture::OpenSans);
         let values = ok!(file[0].axes());
-        assert_eq!(values[&Type::Slant].default, -12.0);
+        assert_eq!(values[&Axis::Slant].default, -12.0);
     }
 
     #[test]
