@@ -130,7 +130,7 @@ mod crimson_text {
             values,
             [
                 CaseSensitiveForms,
-                GlyphComposition,
+                GlyphCompositionDecomposition,
                 DiscretionaryLigatures,
                 Denominators,
                 Fractions,
