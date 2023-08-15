@@ -2,7 +2,7 @@
 
 pub use opentype::layout::{Feature, Language, Script};
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;
 
 use opentype::layout::Directory;
@@ -11,7 +11,17 @@ use typeface::Tape;
 use crate::formats::opentype::cache::Cache;
 
 /// Features.
-pub type Features = BTreeMap<Script, BTreeMap<Option<Language>, BTreeMap<Feature, Vec<char>>>>;
+pub type Features = BTreeMap<Type, Value>;
+
+/// A type.
+pub type Type = Feature;
+
+/// A value.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct Value {
+    /// The scripts and languages.
+    pub scripts: BTreeMap<Script, BTreeSet<Option<Language>>>,
+}
 
 pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Features::default();
@@ -34,13 +44,8 @@ fn populate<T>(values: &mut Features, table: &Directory<T>) {
             for index in record.feature_indices.iter() {
                 if let Some(header) = table.features.headers.get(*index as usize) {
                     if let Some(feature) = Feature::from_tag(&header.tag) {
-                        let _ = values
-                            .entry(script)
-                            .or_default()
-                            .entry(None)
-                            .or_default()
-                            .entry(feature)
-                            .or_default();
+                        let value = values.entry(feature).or_default();
+                        value.scripts.entry(script).or_default().insert(None);
                     }
                 }
             }
@@ -54,13 +59,12 @@ fn populate<T>(values: &mut Features, table: &Directory<T>) {
             for index in record.feature_indices.iter() {
                 if let Some(header) = table.features.headers.get(*index as usize) {
                     if let Some(feature) = Feature::from_tag(&header.tag) {
-                        let _ = values
+                        let value = values.entry(feature).or_default();
+                        value
+                            .scripts
                             .entry(script)
                             .or_default()
-                            .entry(Some(language))
-                            .or_default()
-                            .entry(feature)
-                            .or_default();
+                            .insert(Some(language));
                     }
                 }
             }

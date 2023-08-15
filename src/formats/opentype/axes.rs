@@ -10,17 +10,17 @@ use crate::formats::opentype::cache::Cache;
 use crate::Number;
 
 /// Axes.
-pub type Axes = BTreeMap<Axis, Value>;
+pub type Axes = BTreeMap<Type, Value>;
 
 macro_rules! implement(
     ($($tag:literal => $variant:ident,)*) => (
-        /// An axis.
+        /// A type.
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        pub enum Axis {
+        pub enum Type {
             $($variant,)*
         }
 
-        impl Axis {
+        impl Type {
             /// Create an instance from a tag.
             pub fn from_tag(tag: &Tag) -> Option<Self> {
                 match &**tag {
@@ -30,10 +30,10 @@ macro_rules! implement(
             }
         }
 
-        impl From<Axis> for Tag {
-            fn from(value: Axis) -> Self {
+        impl From<Type> for Tag {
+            fn from(value: Type) -> Self {
                 match value {
-                    $(Axis::$variant => Tag(*$tag),)*
+                    $(Type::$variant => Tag(*$tag),)*
                 }
             }
         }
@@ -139,13 +139,13 @@ pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Axes> {
     let italic_angle = get!(Version1, Version2, Version3);
 
     let mut axes = Axes::new();
-    axes.insert(Axis::Italic, Value::from_italic_flag(italic_flag));
-    axes.insert(Axis::Slant, Value::from_italic_angle(italic_angle));
-    axes.insert(Axis::Weight, Value::from_weight_class(weight_class));
-    axes.insert(Axis::Width, Value::from_width_class(width_class));
+    axes.insert(Type::Italic, Value::from_italic_flag(italic_flag));
+    axes.insert(Type::Slant, Value::from_italic_angle(italic_angle));
+    axes.insert(Type::Weight, Value::from_weight_class(weight_class));
+    axes.insert(Type::Width, Value::from_width_class(width_class));
     if let Some(table) = cache.try_font_variations()? {
         for record in table.axis_records.iter() {
-            if let Some(r#type) = Axis::from_tag(&record.tag) {
+            if let Some(r#type) = Type::from_tag(&record.tag) {
                 axes.insert(
                     r#type,
                     Value {
