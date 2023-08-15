@@ -1,10 +1,12 @@
 use std::collections::HashMap;
+use std::io::Result;
 use std::ops::RangeInclusive;
 
 use opentype::truetype::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
+use typeface::Tape;
 
-use crate::Result;
+use crate::formats::opentype::cache::Cache;
 
 pub struct Characters(pub Vec<RangeInclusive<u32>>);
 
@@ -51,6 +53,10 @@ impl Mapping {
     pub fn get(&self, character: char) -> Option<GlyphID> {
         self.0.get(&(character as u32)).copied()
     }
+}
+
+pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Characters> {
+    Ok(Characters::new(cache.character_mapping()?)?.into())
 }
 
 fn compress(ranges: Vec<(u32, u32)>) -> Vec<RangeInclusive<u32>> {

@@ -3,12 +3,10 @@ mod font;
 pub use self::font::Font;
 
 use std::cell::RefCell;
-use std::io::Cursor;
+use std::io::{Cursor, Result};
 use std::rc::Rc;
 
 use typeface::Tape;
-
-use crate::Result;
 
 pub fn read<T: Tape>(mut tape: T) -> Result<Vec<Font<Cursor<Vec<u8>>>>> {
     let mut fonts = vec![];

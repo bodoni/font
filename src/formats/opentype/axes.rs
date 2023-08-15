@@ -1,9 +1,12 @@
 //! Axes.
 
 use std::collections::HashMap;
+use std::io::Result;
 
 use opentype::truetype::{q32, Tag};
+use typeface::Tape;
 
+use crate::formats::opentype::cache::Cache;
 use crate::Number;
 
 /// Axes.
@@ -104,4 +107,56 @@ impl From<Number> for Value {
             ..Default::default()
         }
     }
+}
+
+pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Axes> {
+    use opentype::truetype::{PostScript, WindowsMetrics};
+
+    let font_header = cache.font_header()?.clone();
+    let machintosh_flags = font_header.macintosh_flags;
+    let windows_metrics = cache.windows_metrics()?.clone();
+    macro_rules! get(
+        ($($version:ident),+) => (
+            match &*windows_metrics {
+                $(WindowsMetrics::$version(ref table) => (
+                    table.weight_class,
+                    table.width_class,
+                    table.selection_flags,
+                ),)*
+            }
+        );
+    );
+    let (weight_class, width_class, windows_flags) =
+        get!(Version0, Version1, Version2, Version3, Version4, Version5);
+    let italic_flag = machintosh_flags.is_italic() || windows_flags.is_italic();
+
+    let postscript = cache.postscript()?.clone();
+    macro_rules! get(
+        ($($version:ident),+) => (
+            match &*postscript {
+                $(PostScript::$version(ref table) => table.italic_angle,)*
+            }
+        );
+    );
+    let italic_angle = get!(Version1, Version2, Version3);
+
+    let mut axes = Axes::new();
+    axes.insert(Type::Italic, Value::from_italic_flag(italic_flag));
+    axes.insert(Type::Slant, Value::from_italic_angle(italic_angle));
+    axes.insert(Type::Weight, Value::from_weight_class(weight_class));
+    axes.insert(Type::Width, Value::from_width_class(width_class));
+    if let Some(table) = cache.try_font_variations()? {
+        for record in table.axis_records.iter() {
+            if let Some(r#type) = Type::from_tag(&record.tag) {
+                axes.insert(
+                    r#type,
+                    Value {
+                        default: record.default_value.into(),
+                        range: Some((record.min_value.into(), record.max_value.into())),
+                    },
+                );
+            }
+        }
+    }
+    Ok(axes)
 }

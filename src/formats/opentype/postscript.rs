@@ -1,3 +1,4 @@
+use std::io::Result;
 use std::rc::Rc;
 
 use opentype::postscript::compact1::FontSet;
@@ -7,7 +8,6 @@ use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
-use crate::Result;
 
 pub struct PostScript {
     id: usize,

@@ -1,3 +1,4 @@
+use std::io::Result;
 use std::rc::Rc;
 
 use opentype::truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
@@ -6,7 +7,6 @@ use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
-use crate::Result;
 
 pub struct TrueType {
     glyph_data: Rc<GlyphData>,

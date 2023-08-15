@@ -1,7 +1,9 @@
+use std::io::Result;
+
 use typeface::Tape;
 
 use crate::metrics::Metrics;
-use crate::{Axes, Characters, Features, Glyph, Names, Result};
+use crate::{Axes, Characters, Features, Glyph, Names};
 
 /// A font.
 pub struct Font {

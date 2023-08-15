@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::io::Result;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
@@ -7,7 +8,6 @@ use typeface::Tape;
 
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
-use crate::Result;
 
 macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (

@@ -1,8 +1,7 @@
+use std::io::Result;
 use std::path::Path;
 
 use typeface::Tape;
-
-use crate::Result;
 
 /// A file.
 pub struct File {
