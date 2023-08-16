@@ -1,4 +1,4 @@
-//! Axes.
+//! Design axes.
 
 use std::collections::BTreeMap;
 use std::io::Result;
@@ -6,10 +6,10 @@ use std::io::Result;
 use opentype::truetype::{q32, Tag};
 use typeface::Tape;
 
-use crate::formats::opentype::cache::Cache;
+use crate::format::opentype::cache::Cache;
 use crate::Number;
 
-/// Axes.
+/// Design axes.
 pub type Axes = BTreeMap<Type, Value>;
 
 macro_rules! implement(

@@ -4,9 +4,9 @@ use std::rc::Rc;
 use opentype::truetype::NamingTable;
 use typeface::Tape;
 
-use crate::formats::opentype::cache::Cache;
+use crate::format::opentype::cache::Cache;
 
-/// Names.
+/// Multilingual strings.
 pub type Names = Rc<NamingTable>;
 
 pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Names> {

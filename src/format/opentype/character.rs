@@ -6,9 +6,9 @@ use opentype::truetype::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
 use typeface::Tape;
 
-use crate::formats::opentype::cache::Cache;
+use crate::format::opentype::cache::Cache;
 
-/// Characters.
+/// Unicode code points.
 pub type Characters = Vec<RangeInclusive<u32>>;
 
 pub struct Mapping(HashMap<u32, GlyphID>);

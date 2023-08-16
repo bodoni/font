@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use typeface::Tape;
 
-use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::{axes, characters, features, metrics, names};
+use crate::format::opentype::cache::Cache;
+use crate::format::opentype::{axis, character, feature, metric, name};
 
 pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
@@ -14,27 +14,27 @@ pub struct Font<T> {
 impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
-        axes::read(&mut self.cache.borrow_mut())
+        axis::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]
     fn characters(&mut self) -> Result<crate::Characters> {
-        characters::read(&mut self.cache.borrow_mut())
+        character::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]
     fn features(&mut self) -> Result<crate::Features> {
-        features::read(&mut self.cache.borrow_mut())
+        feature::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]
     fn metrics(&mut self) -> Result<crate::Metrics> {
-        metrics::read(&mut self.cache.borrow_mut())
+        metric::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]
     fn names(&mut self) -> Result<crate::Names> {
-        names::read(&mut self.cache.borrow_mut())
+        name::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]

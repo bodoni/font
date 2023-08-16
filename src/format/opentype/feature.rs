@@ -1,4 +1,4 @@
-//! Features.
+//! Layout features.
 
 pub use opentype::layout::{Language, Script};
 pub use opentype::truetype::Tag;
@@ -9,9 +9,9 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 use typeface::Tape;
 
-use crate::formats::opentype::cache::Cache;
+use crate::format::opentype::cache::Cache;
 
-/// Features.
+/// Layout features.
 pub type Features = BTreeMap<Type, Value>;
 
 /// A type.

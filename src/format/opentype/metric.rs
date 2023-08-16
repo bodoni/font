@@ -4,7 +4,7 @@ use std::rc::Rc;
 use opentype::truetype::{GlyphID, HorizontalMetrics};
 use typeface::Tape;
 
-use crate::formats::opentype::cache::Cache;
+use crate::format::opentype::cache::Cache;
 use crate::Number;
 
 pub struct Metrics {

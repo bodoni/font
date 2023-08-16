@@ -6,8 +6,8 @@ use std::rc::Rc;
 use opentype;
 use typeface::Tape;
 
-use crate::formats::opentype::characters::Mapping;
-use crate::formats::opentype::metrics::Metrics;
+use crate::format::opentype::character::Mapping;
+use crate::format::opentype::metric::Metrics;
 
 macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (

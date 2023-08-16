@@ -1,4 +1,4 @@
-//! Glyph.
+//! Glyphs.
 
 mod builder;
 

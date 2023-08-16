@@ -2,7 +2,7 @@ use std::io::Result;
 
 use typeface::Tape;
 
-use crate::metrics::Metrics;
+use crate::metric::Metrics;
 use crate::{Axes, Characters, Features, Glyph, Names};
 
 /// A font.
@@ -63,14 +63,14 @@ pub fn read<T: Tape + 'static>(mut tape: T) -> Result<Vec<Font>> {
 
     let tag = tape.peek::<Tag>()?;
     if opentype::accept(&tag) {
-        Ok(crate::formats::opentype::read(tape)?
+        Ok(crate::format::opentype::read(tape)?
             .into_iter()
             .map(|font| Font {
                 case: Box::new(font),
             })
             .collect())
     } else if webtype::accept(&tag) {
-        Ok(crate::formats::webtype::read(tape)?
+        Ok(crate::format::webtype::read(tape)?
             .into_iter()
             .map(|font| Font {
                 case: Box::new(font),
