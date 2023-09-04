@@ -5,7 +5,7 @@ use typeface::Tape;
 
 use crate::format::opentype::cache::Cache;
 
-/// Table tags.
+/// Tables.
 pub type Tables = Vec<Tag>;
 
 pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Tables> {
