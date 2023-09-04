@@ -14,6 +14,6 @@ pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Tables> {
         .offset_table
         .records
         .iter()
-        .map(|record| record.tag.clone())
+        .map(|record| record.tag)
         .collect())
 }
