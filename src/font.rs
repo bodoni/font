@@ -3,7 +3,7 @@ use std::io::Result;
 use typeface::Tape;
 
 use crate::metric::Metrics;
-use crate::{Axes, Characters, Features, Glyph, Names};
+use crate::{Axes, Characters, Features, Glyph, Names, Tables};
 
 /// A font.
 pub struct Font {
@@ -16,6 +16,7 @@ pub trait Case {
     fn features(&mut self) -> Result<Features>;
     fn metrics(&mut self) -> Result<Metrics>;
     fn names(&mut self) -> Result<Names>;
+    fn tables(&mut self) -> Result<Tables>;
 
     fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
 }
@@ -49,6 +50,12 @@ impl Font {
     #[inline]
     pub fn names(&mut self) -> Result<Names> {
         self.case.names()
+    }
+
+    /// Return the tables.
+    #[inline]
+    pub fn tables(&mut self) -> Result<Tables> {
+        self.case.tables()
     }
 
     /// Draw a character.

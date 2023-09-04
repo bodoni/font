@@ -5,6 +5,7 @@ pub mod feature;
 pub mod font;
 pub mod metric;
 pub mod name;
+pub mod table;
 
 mod postscript;
 mod truetype;

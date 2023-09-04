@@ -43,6 +43,7 @@ pub use format::opentype::axis::{self, Axes};
 pub use format::opentype::character::Characters;
 pub use format::opentype::feature::{self, Features};
 pub use format::opentype::name::Names;
+pub use format::opentype::table::Tables;
 pub use glyph::Glyph;
 pub use metric::Metrics;
 pub use offset::Offset;

@@ -32,8 +32,8 @@ macro_rules! cache(
     );
     (@define $($field:ident, $type:ty),+) => (
         pub struct Cache<T> {
-            tape: Rc<RefCell<T>>,
-            backend: opentype::Font,
+            pub tape: Rc<RefCell<T>>,
+            pub backend: opentype::Font,
 
             mapping: Option<Rc<Mapping>>,
             metrics: Option<Rc<Metrics>>,

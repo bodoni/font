@@ -1,7 +1,6 @@
 //! Layout features.
 
 pub use opentype::layout::{Language, Script};
-pub use opentype::truetype::Tag;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;

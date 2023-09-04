@@ -7,7 +7,7 @@ use typeface::Tape;
 use crate::format::opentype::cache::Cache;
 use crate::format::opentype::postscript::PostScript;
 use crate::format::opentype::truetype::TrueType;
-use crate::format::opentype::{axis, character, feature, metric, name};
+use crate::format::opentype::{axis, character, feature, metric, name, table};
 
 pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
@@ -43,6 +43,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<crate::Names> {
         name::read(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn tables(&mut self) -> Result<crate::Tables> {
+        table::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]
