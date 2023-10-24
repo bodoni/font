@@ -15,17 +15,18 @@ pub type Axes = BTreeMap<Type, Value>;
 macro_rules! implement(
     ($($tag:literal => $variant:ident,)*) => (
         /// A type.
-        #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub enum Type {
             $($variant,)*
+            Custom(Tag),
         }
 
         impl Type {
             /// Create an instance from a tag.
-            pub fn from_tag(tag: &Tag) -> Option<Self> {
+            pub fn from_tag(tag: &Tag) -> Self {
                 match &**tag {
-                    $($tag => Some(Self::$variant),)*
-                    _ => None,
+                    $($tag => Self::$variant,)*
+                    _ => Self::Custom(tag.clone()),
                 }
             }
         }
@@ -34,6 +35,7 @@ macro_rules! implement(
             fn from(value: Type) -> Self {
                 match value {
                     $(Type::$variant => Tag(*$tag),)*
+                    Type::Custom(tag) => tag,
                 }
             }
         }
@@ -145,15 +147,16 @@ pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Axes> {
     axes.insert(Type::Width, Value::from_width_class(width_class));
     if let Some(table) = cache.try_font_variations()? {
         for record in table.axis_records.iter() {
-            if let Some(r#type) = Type::from_tag(&record.tag) {
-                axes.insert(
-                    r#type,
-                    Value {
-                        default: record.default_value.into(),
-                        range: Some((record.min_value.into(), record.max_value.into())),
-                    },
-                );
+            if record.flags.is_hidden() {
+                continue;
             }
+            axes.insert(
+                Type::from_tag(&record.tag),
+                Value {
+                    default: record.default_value.into(),
+                    range: Some((record.min_value.into(), record.max_value.into())),
+                },
+            );
         }
     }
     Ok(axes)

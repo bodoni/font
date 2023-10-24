@@ -90,6 +90,7 @@ mod adobe_blank {
 
 mod adobe_vf_prototype {
     use font::axes::Type;
+    use font::opentype::truetype::Tag;
 
     use crate::support::{setup, Fixture};
 
@@ -97,13 +98,14 @@ mod adobe_vf_prototype {
     fn axes() {
         let mut file = setup(Fixture::AdobeVFPrototype);
         let values = ok!(file[0].axes());
-        assert_eq!(values.len(), 4);
+        assert_eq!(values.len(), 5);
         assert!(values[&Type::Italic].range.is_none());
         assert!(values[&Type::Slant].range.is_none());
         assert_eq!(ok!(values[&Type::Weight].range), (200.0, 900.0));
         assert_eq!(values[&Type::Weight].default.round(), 389.0);
         assert!(values[&Type::Width].range.is_none());
         assert_eq!(values[&Type::Width].default, 100.0);
+        assert_eq!(values[&Type::Custom(Tag(*b"CNTR"))].default, 0.0);
     }
 }
 
