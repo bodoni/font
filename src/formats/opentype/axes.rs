@@ -3,6 +3,7 @@
 use std::collections::BTreeMap;
 use std::io::Result;
 
+use opentype::truetype::naming_table::NameID;
 use opentype::truetype::{q32, Tag};
 use typeface::Tape;
 
@@ -18,7 +19,7 @@ macro_rules! implement(
         #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub enum Type {
             $($variant,)*
-            Custom(Tag),
+            Other(Tag),
         }
 
         impl Type {
@@ -26,7 +27,7 @@ macro_rules! implement(
             pub fn from_tag(tag: &Tag) -> Self {
                 match &**tag {
                     $($tag => Self::$variant,)*
-                    _ => Self::Custom(tag.clone()),
+                    _ => Self::Other(tag.clone()),
                 }
             }
         }
@@ -35,7 +36,7 @@ macro_rules! implement(
             fn from(value: Type) -> Self {
                 match value {
                     $(Type::$variant => Tag(*$tag),)*
-                    Type::Custom(tag) => tag,
+                    Type::Other(tag) => tag,
                 }
             }
         }
@@ -53,6 +54,8 @@ implement!(
 /// A value.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Value {
+    /// The name ID.
+    pub name_id: NameID,
     /// The default value.
     pub default: Number,
     /// The value range.
@@ -153,6 +156,7 @@ pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Axes> {
             axes.insert(
                 Type::from_tag(&record.tag),
                 Value {
+                    name_id: record.name_id,
                     default: record.default_value.into(),
                     range: Some((record.min_value.into(), record.max_value.into())),
                 },
