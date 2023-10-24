@@ -89,7 +89,7 @@ mod adobe_blank {
 }
 
 mod adobe_vf_prototype {
-    use font::axis::Type;
+    use font::axes::Type;
 
     use crate::support::{setup, Fixture};
 
@@ -110,7 +110,7 @@ mod adobe_vf_prototype {
 mod crimson_text {
     use std::collections::{BTreeMap, BTreeSet};
 
-    use font::axis::Type;
+    use font::axes::Type;
 
     use crate::support::{setup, Fixture};
 
@@ -123,7 +123,7 @@ mod crimson_text {
 
     #[test]
     fn features() {
-        use font::feature::{Language, Script, Type as Feature};
+        use font::features::{Language, Script, Type as Feature};
 
         let mut file = setup(Fixture::CrimsonText);
         let mut values: BTreeMap<_, BTreeSet<Feature>> = Default::default();
@@ -329,7 +329,7 @@ mod numans {
 }
 
 mod open_sans {
-    use font::axis::Type;
+    use font::axes::Type;
 
     use crate::support::{setup, trace, Fixture};
 

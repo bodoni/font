@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use opentype::truetype::glyph_data::{self, CompositeDescription, GlyphData, SimpleDescription};
 
-use crate::format::opentype::character::Mapping;
-use crate::format::opentype::metric::Metrics;
+use crate::formats::opentype::characters::Mapping;
+use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
 

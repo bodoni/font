@@ -3,7 +3,7 @@ use std::io::Result;
 use opentype::truetype::Tag;
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
+use crate::formats::opentype::cache::Cache;
 
 /// Tables.
 pub type Tables = Vec<Tag>;

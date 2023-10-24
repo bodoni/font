@@ -4,8 +4,8 @@ use std::rc::Rc;
 use opentype::postscript::compact1::FontSet;
 use opentype::postscript::type2::Program;
 
-use crate::format::opentype::character::Mapping;
-use crate::format::opentype::metric::Metrics;
+use crate::formats::opentype::characters::Mapping;
+use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
 

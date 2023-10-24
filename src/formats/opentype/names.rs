@@ -4,7 +4,7 @@ use std::rc::Rc;
 use opentype::truetype::NamingTable;
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
+use crate::formats::opentype::cache::Cache;
 
 /// Multilingual strings.
 pub type Names = Rc<NamingTable>;

@@ -6,7 +6,7 @@ use opentype::truetype::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
+use crate::formats::opentype::cache::Cache;
 
 /// Unicode code points.
 pub type Characters = Vec<RangeInclusive<u32>>;

@@ -6,7 +6,7 @@ use std::io::Result;
 use opentype::truetype::{q32, Tag};
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
+use crate::formats::opentype::cache::Cache;
 use crate::Number;
 
 /// Design axes.

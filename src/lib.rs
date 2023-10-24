@@ -33,19 +33,19 @@ pub mod glyph;
 
 mod file;
 mod font;
-mod format;
-mod metric;
+mod formats;
+mod metrics;
 mod offset;
 
 pub use self::font::Font;
 pub use file::File;
-pub use format::opentype::axis::{self, Axes};
-pub use format::opentype::character::Characters;
-pub use format::opentype::feature::{self, Features};
-pub use format::opentype::name::Names;
-pub use format::opentype::table::Tables;
+pub use formats::opentype::axes::{self, Axes};
+pub use formats::opentype::characters::Characters;
+pub use formats::opentype::features::{self, Features};
+pub use formats::opentype::names::Names;
+pub use formats::opentype::tables::Tables;
 pub use glyph::Glyph;
-pub use metric::Metrics;
+pub use metrics::Metrics;
 pub use offset::Offset;
 
 /// A number.

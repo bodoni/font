@@ -8,7 +8,7 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 use typeface::Tape;
 
-use crate::format::opentype::cache::Cache;
+use crate::formats::opentype::cache::Cache;
 
 /// Layout features.
 pub type Features = BTreeMap<Type, Value>;

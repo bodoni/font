@@ -1,11 +1,11 @@
-pub mod axis;
+pub mod axes;
 pub mod cache;
-pub mod character;
-pub mod feature;
+pub mod characters;
+pub mod features;
 pub mod font;
-pub mod metric;
-pub mod name;
-pub mod table;
+pub mod metrics;
+pub mod names;
+pub mod tables;
 
 mod postscript;
 mod truetype;
