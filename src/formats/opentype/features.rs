@@ -36,36 +36,28 @@ pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Features> {
 
 fn populate<T>(values: &mut Features, table: &Directory<T>) {
     for (i, header) in table.scripts.headers.iter().enumerate() {
-        let script = match Script::from_tag(&header.tag) {
-            Some(value) => value,
-            _ => continue,
-        };
+        let script = Script::from_tag(&header.tag);
         if let Some(record) = table.scripts.records[i].default_language.as_ref() {
             for index in record.feature_indices.iter() {
                 if let Some(header) = table.features.headers.get(*index as usize) {
-                    if let Some(feature) = Feature::from_tag(&header.tag) {
-                        let value = values.entry(feature).or_default();
-                        value.scripts.entry(script).or_default().insert(None);
-                    }
+                    let feature = Feature::from_tag(&header.tag);
+                    let value = values.entry(feature).or_default();
+                    value.scripts.entry(script).or_default().insert(None);
                 }
             }
         }
         for (j, header) in table.scripts.records[i].language_headers.iter().enumerate() {
-            let language = match Language::from_tag(&header.tag) {
-                Some(value) => value,
-                _ => continue,
-            };
+            let language = Language::from_tag(&header.tag);
             let record = &table.scripts.records[i].language_records[j];
             for index in record.feature_indices.iter() {
                 if let Some(header) = table.features.headers.get(*index as usize) {
-                    if let Some(feature) = Feature::from_tag(&header.tag) {
-                        let value = values.entry(feature).or_default();
-                        value
-                            .scripts
-                            .entry(script)
-                            .or_default()
-                            .insert(Some(language));
-                    }
+                    let feature = Feature::from_tag(&header.tag);
+                    let value = values.entry(feature).or_default();
+                    value
+                        .scripts
+                        .entry(script)
+                        .or_default()
+                        .insert(Some(language));
                 }
             }
         }
