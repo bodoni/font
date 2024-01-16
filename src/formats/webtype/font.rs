@@ -5,7 +5,7 @@ use std::rc::Rc;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::{axes, characters, features, metrics, names, tables};
+use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
 pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
@@ -35,6 +35,11 @@ impl<T: Tape> crate::font::Case for Font<T> {
     #[inline]
     fn names(&mut self) -> Result<crate::Names> {
         names::read(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn palettes(&mut self) -> Result<crate::Palettes> {
+        palettes::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]

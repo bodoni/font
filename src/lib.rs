@@ -43,6 +43,7 @@ pub use formats::opentype::axes::{self, Axes};
 pub use formats::opentype::characters::Characters;
 pub use formats::opentype::features::{self, Features};
 pub use formats::opentype::names::Names;
+pub use formats::opentype::palettes::Palettes;
 pub use formats::opentype::tables::Tables;
 pub use glyph::Glyph;
 pub use metrics::Metrics;

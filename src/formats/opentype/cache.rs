@@ -103,6 +103,11 @@ cache! {
         "the character-to-glyph mapping",
     ),
     (
+        color_palettes -> try_color_palettes(),
+        opentype::tables::ColorPalettes,
+        "the color-palette table",
+    ),
+    (
         font_header -> try_font_header(),
         opentype::truetype::tables::FontHeader,
         "the font header",
@@ -160,7 +165,7 @@ cache! {
     (
         postscript -> try_postscript(),
         opentype::truetype::tables::PostScript,
-        "the PostScript information",
+        "the PostScript table",
     ),
     (
         windows_metrics -> try_windows_metrics(),

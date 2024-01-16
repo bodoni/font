@@ -5,6 +5,7 @@ pub mod features;
 pub mod font;
 pub mod metrics;
 pub mod names;
+pub mod palettes;
 pub mod tables;
 
 mod postscript;
