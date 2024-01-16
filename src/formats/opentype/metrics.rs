@@ -1,7 +1,8 @@
 use std::io::Result;
 use std::rc::Rc;
 
-use opentype::truetype::{GlyphID, HorizontalMetrics};
+use opentype::truetype::tables::HorizontalMetrics;
+use opentype::truetype::GlyphID;
 use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
@@ -25,7 +26,7 @@ impl Metrics {
 }
 
 pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
-    use opentype::truetype::WindowsMetrics;
+    use opentype::truetype::tables::WindowsMetrics;
 
     let font_header = cache.font_header()?.clone();
     let windows_metrics = cache.windows_metrics()?.clone();

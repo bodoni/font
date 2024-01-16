@@ -99,12 +99,12 @@ dereference! { Cache<T>::backend => opentype::Font }
 cache! {
     (
         character_mapping -> try_character_mapping(),
-        opentype::truetype::CharacterMapping,
+        opentype::truetype::tables::CharacterMapping,
         "the character-to-glyph mapping",
     ),
     (
         font_header -> try_font_header(),
-        opentype::truetype::FontHeader,
+        opentype::truetype::tables::FontHeader,
         "the font header",
     ),
     (
@@ -114,57 +114,57 @@ cache! {
     ),
     (
         font_variations -> try_font_variations(),
-        opentype::font_variations::FontVariations,
+        opentype::tables::font_variations::FontVariations,
         "the font variations",
     ),
     (
         glyph_data -> try_glyph_data(try_glyph_mapping),
-        opentype::truetype::GlyphData,
+        opentype::truetype::tables::GlyphData,
         "the glyph data",
     ),
     (
         glyph_mapping -> try_glyph_mapping(try_font_header, try_maximum_profile),
-        opentype::truetype::GlyphMapping,
+        opentype::truetype::tables::GlyphMapping,
         "the glyph-to-location mapping",
     ),
     (
         glyph_positioning -> try_glyph_positioning(),
-        opentype::glyph_positioning::GlyphPositioning,
+        opentype::tables::glyph_positioning::GlyphPositioning,
         "the glyph positioning",
     ),
     (
         glyph_substitution -> try_glyph_substitution(),
-        opentype::glyph_substitution::GlyphSubstitution,
+        opentype::tables::glyph_substitution::GlyphSubstitution,
         "the glyph substitution",
     ),
     (
         horizontal_header -> try_horizontal_header(),
-        opentype::truetype::HorizontalHeader,
+        opentype::truetype::tables::HorizontalHeader,
         "the horizontal header",
     ),
     (
         horizontal_metrics -> try_horizontal_metrics(try_horizontal_header, try_maximum_profile),
-        opentype::truetype::HorizontalMetrics,
+        opentype::truetype::tables::HorizontalMetrics,
         "the horizontal metrics",
     ),
     (
         maximum_profile -> try_maximum_profile(),
-        opentype::truetype::MaximumProfile,
+        opentype::truetype::tables::MaximumProfile,
         "the maximum profile",
     ),
     (
         naming_table -> try_naming_table(),
-        opentype::truetype::NamingTable,
+        opentype::truetype::tables::Names,
         "the naming table",
     ),
     (
         postscript -> try_postscript(),
-        opentype::truetype::PostScript,
+        opentype::truetype::tables::PostScript,
         "the PostScript information",
     ),
     (
         windows_metrics -> try_windows_metrics(),
-        opentype::truetype::WindowsMetrics,
+        opentype::truetype::tables::WindowsMetrics,
         "the OS/2 and Windows metrics",
     ),
 }

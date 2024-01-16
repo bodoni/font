@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::io::Result;
 use std::ops::RangeInclusive;
 
-use opentype::truetype::character_mapping::{CharacterMapping, Encoding};
+use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
 use typeface::Tape;
 

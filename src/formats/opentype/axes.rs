@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::io::Result;
 
-use opentype::truetype::naming_table::NameID;
+use opentype::truetype::tables::names::NameID;
 use opentype::truetype::{q32, Tag};
 use typeface::Tape;
 
@@ -113,7 +113,7 @@ impl From<Number> for Value {
 }
 
 pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Axes> {
-    use opentype::truetype::{PostScript, WindowsMetrics};
+    use opentype::truetype::tables::{PostScript, WindowsMetrics};
 
     let font_header = cache.font_header()?.clone();
     let machintosh_flags = font_header.macintosh_flags;

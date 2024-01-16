@@ -11,7 +11,7 @@ pub type Tables = Vec<Tag>;
 pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Tables> {
     Ok(cache
         .backend
-        .offset_table
+        .offsets
         .records
         .iter()
         .map(|record| record.tag)
