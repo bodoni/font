@@ -18,9 +18,7 @@ use std::io::Result;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
-use typeface::Tape;
-
-pub fn read<T: Tape + 'static>(tape: T) -> Result<Vec<Font<T>>> {
+pub fn read<T: typeface::tape::Read + 'static>(tape: T) -> Result<Vec<Font<T>>> {
     let tape = Rc::new(RefCell::new(tape));
     let mut fonts = vec![];
     let file = opentype::File::read(tape.borrow_mut().deref_mut())?;

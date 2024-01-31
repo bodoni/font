@@ -4,7 +4,6 @@ use std::ops::RangeInclusive;
 
 use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
-use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
 
@@ -33,7 +32,7 @@ impl Mapping {
     }
 }
 
-pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Characters> {
+pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Characters> {
     for encoding in cache.character_mapping()?.encodings.iter() {
         let ranges = match encoding {
             Encoding::Format0(encoding) => encoding.characters(),

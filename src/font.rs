@@ -1,7 +1,5 @@
 use std::io::Result;
 
-use typeface::Tape;
-
 use crate::metrics::Metrics;
 use crate::{Axes, Characters, Features, Glyph, Names, Palettes, Tables};
 
@@ -72,7 +70,7 @@ impl Font {
     }
 }
 
-pub fn read<T: Tape + 'static>(mut tape: T) -> Result<Vec<Font>> {
+pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>> {
     use opentype::truetype::Tag;
 
     let tag = tape.peek::<Tag>()?;

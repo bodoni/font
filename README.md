@@ -1,6 +1,6 @@
 # Font [![Package][package-img]][package-url] [![Documentation][documentation-img]][documentation-url] [![Build][build-img]][build-url]
 
-The package provides a parser for fonts.
+The package provides a builder and parser for fonts.
 
 ## [Example]
 

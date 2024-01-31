@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 use opentype::truetype::tables::HorizontalMetrics;
 use opentype::truetype::GlyphID;
-use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
 use crate::Number;
@@ -25,7 +24,7 @@ impl Metrics {
     }
 }
 
-pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
+pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
     use opentype::truetype::tables::WindowsMetrics;
 
     let font_header = cache.font_header()?.clone();

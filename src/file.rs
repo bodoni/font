@@ -1,8 +1,6 @@
 use std::io::Result;
 use std::path::Path;
 
-use typeface::Tape;
-
 /// A file.
 pub struct File {
     /// The fonts.
@@ -18,7 +16,7 @@ impl File {
 
     /// Read a file.
     #[inline]
-    pub fn read<T: Tape + 'static>(tape: T) -> Result<Self> {
+    pub fn read<T: typeface::tape::Read + 'static>(tape: T) -> Result<Self> {
         Ok(Self {
             fonts: crate::font::read(tape)?,
         })

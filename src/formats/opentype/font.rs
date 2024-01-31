@@ -2,8 +2,6 @@ use std::cell::RefCell;
 use std::io::Result;
 use std::rc::Rc;
 
-use typeface::Tape;
-
 use crate::formats::opentype::cache::Cache;
 use crate::formats::opentype::postscript::PostScript;
 use crate::formats::opentype::truetype::TrueType;
@@ -19,7 +17,7 @@ enum Case {
     TrueType(TrueType),
 }
 
-impl<T: Tape> crate::font::Case for Font<T> {
+impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
         axes::read(&mut self.cache.borrow_mut())
@@ -64,7 +62,10 @@ impl<T: Tape> crate::font::Case for Font<T> {
     }
 }
 
-pub fn read<T: Tape>(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Result<Vec<Font<T>>> {
+pub fn read<T: typeface::tape::Read>(
+    tape: Rc<RefCell<T>>,
+    backend: opentype::Font,
+) -> Result<Vec<Font<T>>> {
     let mut fonts = vec![];
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     let mut cache_borrowed = cache.borrow_mut();

@@ -5,7 +5,6 @@ use std::io::Result;
 
 use opentype::truetype::tables::names::NameID;
 use opentype::truetype::{q32, Tag};
-use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
 use crate::Number;
@@ -112,7 +111,7 @@ impl From<Number> for Value {
     }
 }
 
-pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Axes> {
+pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Axes> {
     use opentype::truetype::tables::{PostScript, WindowsMetrics};
 
     let font_header = cache.font_header()?.clone();

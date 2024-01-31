@@ -6,7 +6,6 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;
 
 use opentype::layout::{Directory, Feature};
-use typeface::Tape;
 
 use crate::formats::opentype::cache::Cache;
 
@@ -23,7 +22,7 @@ pub struct Value {
     pub scripts: BTreeMap<Script, BTreeSet<Option<Language>>>,
 }
 
-pub(crate) fn read<T: Tape>(cache: &mut Cache<T>) -> Result<Features> {
+pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Features::default();
     if let Some(table) = cache.try_glyph_positioning()? {
         populate(&mut values, table);

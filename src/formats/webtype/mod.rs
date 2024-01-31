@@ -6,9 +6,7 @@ use std::cell::RefCell;
 use std::io::{Cursor, Result};
 use std::rc::Rc;
 
-use typeface::Tape;
-
-pub fn read<T: Tape>(mut tape: T) -> Result<Vec<Font<Cursor<Vec<u8>>>>> {
+pub fn read<T: typeface::tape::Read>(mut tape: T) -> Result<Vec<Font<Cursor<Vec<u8>>>>> {
     let mut fonts = vec![];
     let file = webtype::File::read(&mut tape)?;
     let tape = Rc::new(RefCell::new(file.tape));

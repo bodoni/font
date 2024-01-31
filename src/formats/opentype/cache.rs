@@ -4,7 +4,6 @@ use std::ops::DerefMut;
 use std::rc::Rc;
 
 use opentype;
-use typeface::Tape;
 
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
@@ -13,7 +12,7 @@ macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (
         cache!(@define $($field, $type),+);
 
-        impl<T: Tape> Cache<T> {
+        impl<T: typeface::tape::Read> Cache<T> {
             #[inline]
             pub fn new(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Self {
                 Self {
@@ -174,7 +173,7 @@ cache! {
     ),
 }
 
-impl<T: Tape> Cache<T> {
+impl<T: typeface::tape::Read> Cache<T> {
     pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
         if self.mapping.is_none() {
             self.mapping = Some(Rc::new(Mapping::new(self.character_mapping()?)?));

@@ -1,10 +1,10 @@
 [package]
 name = "font"
-version = "0.27.0"
+version = "0.28.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
-description = "The package provides a parser for fonts."
+description = "The package provides a builder and parser of fonts."
 documentation = "https://docs.rs/font"
 homepage = "https://github.com/bodoni/font"
 repository = "https://github.com/bodoni/font"
@@ -13,6 +13,6 @@ keywords = ["font", "opentype", "typeface", "typography", "woff"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-opentype = "0.31.0"
+opentype = "0.32.0"
 typeface = "0"
-webtype = "0.9.0"
+webtype = "0.10.0"

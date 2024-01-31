@@ -2,8 +2,6 @@ use std::cell::RefCell;
 use std::io::Result;
 use std::rc::Rc;
 
-use typeface::Tape;
-
 use crate::formats::opentype::cache::Cache;
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
@@ -11,7 +9,7 @@ pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
 }
 
-impl<T: Tape> crate::font::Case for Font<T> {
+impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
         axes::read(&mut self.cache.borrow_mut())
@@ -55,7 +53,7 @@ impl<T: Tape> crate::font::Case for Font<T> {
 
 pub fn read<T>(tape: Rc<RefCell<T>>, backend: webtype::Font) -> Result<Vec<Font<T>>>
 where
-    T: Tape,
+    T: typeface::tape::Read,
 {
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     Ok(vec![Font { cache }])
