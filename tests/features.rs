@@ -21,9 +21,7 @@ fn crimson_text() {
                 features.into_iter().collect::<Vec<_>>(),
                 scripts
                     .into_iter()
-                    .map(|(script, languages)| {
-                        (script, languages.into_iter().collect::<Vec<_>>())
-                    })
+                    .map(|(script, languages)| (script, languages.into_iter().collect::<Vec<_>>()))
                     .collect::<Vec<_>>(),
             )
         })
