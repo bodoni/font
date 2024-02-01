@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.28.1"
+version = "0.29.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -13,6 +13,6 @@ keywords = ["font", "opentype", "typeface", "typography", "woff"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-opentype = "0.32.0"
-typeface = "0.4.0"
-webtype = "0.10.0"
+opentype = "0.33.0"
+typeface = "0.4.1"
+webtype = "0.11.0"
