@@ -5,232 +5,10 @@ mod adobe_blank {
     use crate::support::{setup, Fixture};
 
     #[test]
-    fn characters() {
-        let mut file = setup(Fixture::CrimsonText);
-        let values = ok!(file[0].characters());
-        assert_eq!(
-            values,
-            [
-                13..=13,
-                32..=126,
-                160..=172,
-                174..=328,
-                330..=382,
-                393..=393,
-                416..=417,
-                431..=432,
-                461..=468,
-                470..=476,
-                482..=483,
-                507..=511,
-                536..=539,
-                562..=563,
-                567..=567,
-                598..=598,
-                700..=700,
-                710..=711,
-                728..=733,
-                768..=780,
-                786..=786,
-                803..=803,
-                806..=808,
-                956..=956,
-                7680..=7699,
-                7704..=7707,
-                7710..=7723,
-                7725..=7755,
-                7757..=7759,
-                7764..=7771,
-                7773..=7780,
-                7782..=7782,
-                7784..=7799,
-                7801..=7801,
-                7803..=7833,
-                7840..=7929,
-                8208..=8213,
-                8216..=8218,
-                8220..=8222,
-                8224..=8226,
-                8228..=8228,
-                8230..=8230,
-                8240..=8240,
-                8242..=8243,
-                8248..=8250,
-                8254..=8254,
-                8260..=8260,
-                8304..=8304,
-                8308..=8308,
-                8320..=8324,
-                8364..=8364,
-                8482..=8482,
-                8592..=8595,
-                8706..=8706,
-                8721..=8723,
-                8725..=8725,
-                8730..=8730,
-                8733..=8734,
-                8800..=8800,
-                8804..=8805,
-                9753..=9753,
-                10087..=10087,
-                63632..=63640,
-                63642..=63647,
-                64257..=64258,
-            ]
-        );
-    }
-
-    #[test]
-    fn draw_a() {
+    fn a() {
         let font = &mut setup(Fixture::AdobeBlank)[0];
         let glyph = ok!(ok!(font.draw('a')));
         assert_eq!(glyph.len(), 0);
-    }
-}
-
-mod adobe_vf_prototype {
-    use std::collections::HashMap;
-
-    use font::axes::Type;
-    use font::opentype::truetype::Tag;
-
-    use crate::support::{setup, Fixture};
-
-    #[test]
-    fn axes() {
-        let mut file = setup(Fixture::AdobeVFPrototype);
-
-        let values = ok!(file[0].axes());
-        assert_eq!(values.len(), 5);
-        assert!(values[&Type::Italic].range.is_none());
-        assert!(values[&Type::Slant].range.is_none());
-        assert_eq!(ok!(values[&Type::Weight].range), (200.0, 900.0));
-        assert_eq!(values[&Type::Weight].default.round(), 389.0);
-        assert!(values[&Type::Width].range.is_none());
-        assert_eq!(values[&Type::Width].default, 100.0);
-
-        let value = values[&Type::Other(Tag(*b"CNTR"))];
-        let values: HashMap<_, _> = ok!(file[0].names())
-            .iter()
-            .map(|((name_id, _), value)| (name_id, value.unwrap()))
-            .collect();
-        assert_eq!(values[&value.name_id], "Contrast");
-    }
-}
-
-mod crimson_text {
-    use std::collections::{BTreeMap, BTreeSet};
-
-    use font::axes::Type;
-
-    use crate::support::{setup, Fixture};
-
-    #[test]
-    fn axes() {
-        let mut file = setup(Fixture::CrimsonText);
-        let values = ok!(file[0].axes());
-        assert_eq!(values[&Type::Italic].default, 0.0);
-    }
-
-    #[test]
-    fn features() {
-        use font::features::{Language, Script, Type as Feature};
-
-        let mut file = setup(Fixture::CrimsonText);
-        let mut values: BTreeMap<_, BTreeSet<Feature>> = Default::default();
-        for (feature, value) in ok!(file[0].features()).into_iter() {
-            values.entry(value.scripts).or_default().insert(feature);
-        }
-        let values = values
-            .into_iter()
-            .map(|(scripts, features)| {
-                (
-                    features.into_iter().collect::<Vec<_>>(),
-                    scripts
-                        .into_iter()
-                        .map(|(script, languages)| {
-                            (script, languages.into_iter().collect::<Vec<_>>())
-                        })
-                        .collect::<Vec<_>>(),
-                )
-            })
-            .collect::<Vec<_>>();
-        assert_eq!(
-            values,
-            [
-                (
-                    vec![
-                        Feature::Kerning,
-                        Feature::MarkPositioning,
-                        Feature::MarkToMarkPositioning
-                    ],
-                    vec![(Script::Default, vec![None]), (Script::Latin, vec![None])],
-                ),
-                (
-                    vec![
-                        Feature::CaseSensitiveForms,
-                        Feature::GlyphCompositionDecomposition,
-                        Feature::DiscretionaryLigatures,
-                        Feature::Denominators,
-                        Feature::Fractions,
-                        Feature::StandardLigatures,
-                        Feature::Numerators,
-                        Feature::ScientificInferiors,
-                        Feature::Subscript,
-                        Feature::Superscript,
-                        Feature::SlashedZero
-                    ],
-                    vec![
-                        (Script::Default, vec![None]),
-                        (
-                            Script::Latin,
-                            vec![
-                                None,
-                                Some(Language::Azerbaijani),
-                                Some(Language::Catalan),
-                                Some(Language::CrimeanTatar),
-                                Some(Language::Kazakh),
-                                Some(Language::Moldavian),
-                                Some(Language::Romanian),
-                                Some(Language::Tatar),
-                                Some(Language::Turkish)
-                            ]
-                        )
-                    ],
-                ),
-                (
-                    vec![Feature::LocalizedForms],
-                    vec![(
-                        Script::Latin,
-                        vec![
-                            Some(Language::Azerbaijani),
-                            Some(Language::Catalan),
-                            Some(Language::CrimeanTatar),
-                            Some(Language::Kazakh),
-                            Some(Language::Moldavian),
-                            Some(Language::Romanian),
-                            Some(Language::Tatar),
-                            Some(Language::Turkish)
-                        ]
-                    )],
-                )
-            ]
-        );
-    }
-
-    #[test]
-    fn metrics() {
-        let mut file = setup(Fixture::CrimsonText);
-        let metrics = ok!(file[0].metrics());
-        assert_eq!(metrics.granularity, 1024.0);
-        assert_eq!(metrics.clipping_ascender, 1106.0);
-        assert_eq!(metrics.ascender, 972.0);
-        assert_eq!(metrics.cap_height, 656.0);
-        assert_eq!(metrics.x_height, 430.0);
-        assert_eq!(metrics.baseline, 0.0);
-        assert_eq!(metrics.descender, -359.0);
-        assert_eq!(metrics.clipping_descender, -297.0);
-        assert_eq!(metrics.line_gap, 0.0);
     }
 }
 
@@ -238,7 +16,7 @@ mod monte_carlo {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
-    fn draw_i() {
+    fn i() {
         let font = &mut setup(Fixture::MonteCarlo)[0];
         let glyph = ok!(ok!(font.draw('i')));
         assert_eq!(glyph.len(), 2);
@@ -288,51 +66,11 @@ mod monte_carlo {
     }
 }
 
-mod noto_color_emoji {
-    use crate::support::{setup, Fixture};
-
-    #[test]
-    fn palettes() {
-        let font = &mut setup(Fixture::NotoColorEmoji)[0];
-        let table = ok!(ok!(font.palettes()));
-        let values = table
-            .iter()
-            .map(|palette| {
-                palette
-                    .map(|color| {
-                        format!(
-                            "#{:02x}{:02x}{:02x}{:02x}",
-                            color.red, color.green, color.blue, color.alpha,
-                        )
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-        assert_eq!(values.len(), 1);
-        assert_eq!(values[0].len(), 5895);
-        assert_eq!(
-            &values[0][..10],
-            &[
-                "#000000ff",
-                "#00000dff",
-                "#000066ff",
-                "#000088ff",
-                "#00008bff",
-                "#000095ff",
-                "#0000ffff",
-                "#000101ff",
-                "#000200ff",
-                "#000202ff",
-            ],
-        );
-    }
-}
-
 mod numans {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
-    fn draw_a() {
+    fn a() {
         let font = &mut setup(Fixture::Numans)[0];
         let glyph = ok!(ok!(font.draw('a')));
         assert_eq!(glyph.len(), 2);
@@ -379,35 +117,52 @@ mod numans {
     }
 }
 
-mod open_sans {
-    use font::axes::Type;
-
+mod source_serif {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
-    fn axes() {
-        let mut file = setup(Fixture::OpenSans);
-        let values = ok!(file[0].axes());
-        assert_eq!(values[&Type::Slant].default, -12.0);
+    fn from_a_to_z() {
+        let font = &mut setup(Fixture::SourceSerif)[0];
+        for code in b'a'..=b'z' {
+            ok!(ok!(font.draw(code as char)));
+        }
     }
 
     #[test]
-    fn metrics() {
-        let mut file = setup(Fixture::OpenSans);
-        let values = ok!(file[0].metrics());
-        assert_eq!(values.granularity, 2048.0);
-        assert_eq!(values.clipping_ascender, 2189.0);
-        assert_eq!(values.ascender, 1567.0);
-        assert_eq!(values.cap_height, 1462.0);
-        assert_eq!(values.x_height, 1096.0);
-        assert_eq!(values.baseline, 0.0);
-        assert_eq!(values.descender, -492.0);
-        assert_eq!(values.clipping_descender, -600.0);
-        assert_eq!(values.line_gap, 132.0);
+    fn o() {
+        let font = &mut setup(Fixture::SourceSerif)[0];
+        let glyph = ok!(ok!(font.draw('o')));
+        assert_eq!(glyph.len(), 2);
+        #[rustfmt::skip]
+        assert_eq!(&trace(&glyph), &vec![
+            (274.0, 445.0),
+            (409.0, 236.0),
+            (274.0,  30.0),
+            (140.0, 236.0),
+            (274.0, 445.0),
+
+            (274.0, 491.0),
+            ( 45.0, 237.0),
+            (274.0, -15.0),
+            (504.0, 237.0),
+            (274.0, 491.0),
+        ]);
     }
 
     #[test]
-    fn draw_a_ring() {
+    fn r() {
+        let font = &mut setup(Fixture::SourceSerif)[0];
+        let glyph = ok!(ok!(font.draw('r')));
+        assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
+        assert_eq!(glyph.side_bearings, (34.0, 11.0));
+    }
+}
+
+mod open_sans {
+    use crate::support::{setup, trace, Fixture};
+
+    #[test]
+    fn a_ring() {
         let font = &mut setup(Fixture::OpenSans)[0];
         let glyph = ok!(ok!(font.draw('å')));
         assert_eq!(glyph.len(), 4);
@@ -463,7 +218,7 @@ mod open_sans {
     }
 
     #[test]
-    fn draw_copyright() {
+    fn copyright() {
         let font = &mut setup(Fixture::OpenSans)[0];
         let glyph = ok!(ok!(font.draw('©')));
         assert_eq!(glyph.bounding_box, (139.0, -20.0, 1642.0, 1483.0));
@@ -471,7 +226,7 @@ mod open_sans {
     }
 
     #[test]
-    fn draw_from_a_to_z() {
+    fn from_a_to_z() {
         let font = &mut setup(Fixture::OpenSans)[0];
         for code in b'a'..(b'z' + 1) {
             ok!(ok!(font.draw(code as char)));
@@ -479,7 +234,7 @@ mod open_sans {
     }
 
     #[test]
-    fn draw_o() {
+    fn o() {
         let font = &mut setup(Fixture::OpenSans)[0];
         let glyph = ok!(ok!(font.draw('o')));
         assert_eq!(glyph.len(), 2);
@@ -512,7 +267,7 @@ mod open_sans {
     }
 
     #[test]
-    fn draw_slash() {
+    fn slash() {
         let font = &mut setup(Fixture::OpenSans)[0];
         let glyph = ok!(ok!(font.draw('/')));
         assert_eq!(glyph.len(), 1);
@@ -531,7 +286,7 @@ mod vesper_libre {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
-    fn draw_a() {
+    fn a() {
         let font = &mut setup(Fixture::VesperLibre)[0];
         let glyph = ok!(ok!(font.draw('a')));
         assert_eq!(glyph.len(), 2);
@@ -591,7 +346,7 @@ mod vesper_libre {
     }
 
     #[test]
-    fn draw_ellipsis() {
+    fn ellipsis() {
         let font = &mut setup(Fixture::VesperLibre)[0];
         let glyph = ok!(ok!(font.draw('…')));
         assert_eq!(glyph.len(), 3);
@@ -646,7 +401,7 @@ mod zen_loop {
     use crate::support::{setup, trace, Fixture};
 
     #[test]
-    fn draw_d() {
+    fn d() {
         let font = &mut setup(Fixture::ZenLoop)[0];
         let glyph = ok!(ok!(font.draw('d')));
         assert_eq!(glyph.len(), 2);
