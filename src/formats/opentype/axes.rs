@@ -115,8 +115,9 @@ pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Axes
     use opentype::truetype::tables::{PostScript, WindowsMetrics};
 
     let font_header = cache.font_header()?.clone();
-    let machintosh_flags = font_header.macintosh_flags;
+    let machintosh_flags = font_header.borrow().macintosh_flags;
     let windows_metrics = cache.windows_metrics()?.clone();
+    let windows_metrics = windows_metrics.borrow();
     macro_rules! get(
         ($($version:ident),+) => (
             match &*windows_metrics {
@@ -133,6 +134,7 @@ pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Axes
     let italic_flag = machintosh_flags.is_italic() || windows_flags.is_italic();
 
     let postscript = cache.postscript()?.clone();
+    let postscript = postscript.borrow();
     macro_rules! get(
         ($($version:ident),+) => (
             match &*postscript {
@@ -148,7 +150,7 @@ pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Axes
     axes.insert(Type::Weight, Value::from_weight_class(weight_class));
     axes.insert(Type::Width, Value::from_width_class(width_class));
     if let Some(table) = cache.try_font_variations()? {
-        for record in table.axis_records.iter() {
+        for record in table.borrow().axis_records.iter() {
             if record.flags.is_hidden() {
                 continue;
             }

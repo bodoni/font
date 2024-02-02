@@ -4,6 +4,7 @@ use std::rc::Rc;
 use opentype::postscript::compact1::FontSet;
 use opentype::postscript::type2::Program;
 
+use crate::formats::opentype::cache::Reference;
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
@@ -11,7 +12,7 @@ use crate::offset::Offset;
 
 pub struct PostScript {
     id: usize,
-    font_set: Rc<FontSet>,
+    font_set: Reference<FontSet>,
     mapping: Rc<Mapping>,
     metrics: Rc<Metrics>,
 }
@@ -20,7 +21,7 @@ impl PostScript {
     #[inline]
     pub fn new(
         id: usize,
-        font_set: Rc<FontSet>,
+        font_set: Reference<FontSet>,
         mapping: Rc<Mapping>,
         metrics: Rc<Metrics>,
     ) -> Self {
@@ -44,15 +45,16 @@ impl PostScript {
             )
         );
 
+        let font_set = self.font_set.borrow();
         let glyph_id = match self.mapping.get(character) {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };
-        let mut program = match self.font_set.character_strings[self.id].get(glyph_id as usize) {
+        let mut program = match font_set.character_strings[self.id].get(glyph_id as usize) {
             Some(character_string) => Program::new(
                 character_string,
-                &self.font_set.subroutines,
-                match &self.font_set.records[self.id] {
+                &font_set.subroutines,
+                match &font_set.records[self.id] {
                     Record::CharacterNameKeyed(ref record) => &record.subroutines,
                     _ => raise!("found a character-ID-keyed font, which is not supported yet"),
                 },

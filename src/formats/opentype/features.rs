@@ -25,10 +25,10 @@ pub struct Value {
 pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Features::default();
     if let Some(table) = cache.try_glyph_positioning()? {
-        populate(&mut values, table);
+        populate(&mut values, &table.borrow());
     }
     if let Some(table) = cache.try_glyph_substitution()? {
-        populate(&mut values, table);
+        populate(&mut values, &table.borrow());
     }
     Ok(values)
 }

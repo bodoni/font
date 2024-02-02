@@ -35,7 +35,7 @@ impl Mapping {
 }
 
 pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Characters> {
-    for encoding in cache.character_mapping()?.encodings.iter() {
+    for encoding in cache.character_mapping()?.borrow().encodings.iter() {
         let ranges = match encoding {
             Encoding::Format0(encoding) => encoding.characters(),
             Encoding::Format4(encoding) => encoding.characters(),

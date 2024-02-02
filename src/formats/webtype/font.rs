@@ -2,12 +2,12 @@ use std::cell::RefCell;
 use std::io::Result;
 use std::rc::Rc;
 
-use crate::formats::opentype::cache::Cache;
+use crate::formats::opentype::cache::{Cache, Reference};
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
 /// A font.
 pub struct Font<T> {
-    cache: Rc<RefCell<Cache<T>>>,
+    cache: Reference<Cache<T>>,
 }
 
 impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
@@ -52,7 +52,7 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     }
 }
 
-pub fn read<T>(tape: Rc<RefCell<T>>, backend: webtype::Font) -> Result<Vec<Font<T>>>
+pub fn read<T>(tape: Reference<T>, backend: webtype::Font) -> Result<Vec<Font<T>>>
 where
     T: typeface::tape::Read,
 {

@@ -2,14 +2,14 @@ use std::cell::RefCell;
 use std::io::Result;
 use std::rc::Rc;
 
-use crate::formats::opentype::cache::Cache;
+use crate::formats::opentype::cache::{Cache, Reference};
 use crate::formats::opentype::postscript::PostScript;
 use crate::formats::opentype::truetype::TrueType;
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
 /// A font.
 pub struct Font<T> {
-    cache: Rc<RefCell<Cache<T>>>,
+    cache: Reference<Cache<T>>,
     case: Case,
 }
 
@@ -64,7 +64,7 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
 }
 
 pub fn read<T: typeface::tape::Read>(
-    tape: Rc<RefCell<T>>,
+    tape: Reference<T>,
     backend: opentype::Font,
 ) -> Result<Vec<Font<T>>> {
     let mut fonts = vec![];
@@ -73,7 +73,7 @@ pub fn read<T: typeface::tape::Read>(
     let mapping = cache_borrowed.mapping()?.clone();
     let metrics = cache_borrowed.metrics()?.clone();
     if let Some(table) = cache_borrowed.try_font_set()? {
-        for id in 0..table.character_strings.len() {
+        for id in 0..table.borrow().character_strings.len() {
             let case = PostScript::new(id, table.clone(), mapping.clone(), metrics.clone());
             fonts.push(Font {
                 cache: cache.clone(),

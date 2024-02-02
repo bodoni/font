@@ -8,6 +8,7 @@ fn noto_color_emoji() {
     let font = &mut setup(Fixture::NotoColorEmoji)[0];
     let table = ok!(ok!(font.palettes()));
     let values = table
+        .borrow()
         .iter()
         .map(|palette| {
             palette

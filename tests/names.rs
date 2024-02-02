@@ -7,7 +7,7 @@ use crate::support::{setup, Fixture};
 fn noto_color_emoji() {
     let font = &mut setup(Fixture::NotoColorEmoji)[0];
     let table = ok!(font.names());
-    let names = table.iter().collect::<Vec<_>>();
+    let names = table.borrow().iter().collect::<Vec<_>>();
     let values = names
         .iter()
         .map(|(_, value)| ok!(value.as_deref()))

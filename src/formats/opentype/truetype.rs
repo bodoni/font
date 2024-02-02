@@ -5,20 +5,25 @@ use opentype::truetype::tables::glyph_data::{
     self, CompositeDescription, GlyphData, SimpleDescription,
 };
 
+use crate::formats::opentype::cache::Reference;
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
 
 pub struct TrueType {
-    glyph_data: Rc<GlyphData>,
+    glyph_data: Reference<GlyphData>,
     mapping: Rc<Mapping>,
     metrics: Rc<Metrics>,
 }
 
 impl TrueType {
     #[inline]
-    pub fn new(glyph_data: Rc<GlyphData>, mapping: Rc<Mapping>, metrics: Rc<Metrics>) -> Self {
+    pub fn new(
+        glyph_data: Reference<GlyphData>,
+        mapping: Rc<Mapping>,
+        metrics: Rc<Metrics>,
+    ) -> Self {
         TrueType {
             glyph_data,
             mapping,
@@ -32,7 +37,8 @@ impl TrueType {
             Some(glyph_id) => glyph_id,
             _ => return Ok(None),
         };
-        let glyph = match self.glyph_data.get(glyph_id as usize) {
+        let glyph_data = self.glyph_data.borrow();
+        let glyph = match glyph_data.get(glyph_id as usize) {
             Some(glyph) => glyph,
             _ => raise!(
                 "found no data for character {} with glyph {}",
@@ -174,7 +180,8 @@ fn draw_composite(
             Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
             Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
         };
-        let glyph = match case.glyph_data.get(glyph_id as usize) {
+        let glyph_data = case.glyph_data.borrow();
+        let glyph = match glyph_data.get(glyph_id as usize) {
             Some(Some(glyph)) => glyph,
             Some(&None) => continue,
             _ => raise!("found no data for glyph {}", glyph_id),

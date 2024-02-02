@@ -23,6 +23,7 @@ fn adobe_vf_prototype() {
 
     let value = values[&Type::Other(Tag(*b"CNTR"))];
     let values: HashMap<_, _> = ok!(file[0].names())
+        .borrow()
         .iter()
         .map(|((_, _, _, name_id), value)| (name_id, value.unwrap()))
         .collect();

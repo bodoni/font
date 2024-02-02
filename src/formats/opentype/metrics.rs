@@ -1,28 +1,27 @@
 //! Metrics.
 
 use std::io::Result;
-use std::rc::Rc;
 
 use opentype::truetype::tables::HorizontalMetrics;
 use opentype::truetype::GlyphID;
 
-use crate::formats::opentype::cache::Cache;
+use crate::formats::opentype::cache::{Cache, Reference};
 use crate::Number;
 
 /// Metrics.
 pub struct Metrics {
-    horizontal_metrics: Rc<HorizontalMetrics>,
+    horizontal_metrics: Reference<HorizontalMetrics>,
 }
 
 impl Metrics {
     #[inline]
-    pub fn new(horizontal_metrics: Rc<HorizontalMetrics>) -> Self {
+    pub fn new(horizontal_metrics: Reference<HorizontalMetrics>) -> Self {
         Metrics { horizontal_metrics }
     }
 
     #[inline]
     pub fn get(&self, glyph_id: GlyphID) -> (Number, Number) {
-        let (advance_width, left_side_bearing) = self.horizontal_metrics.get(glyph_id);
+        let (advance_width, left_side_bearing) = self.horizontal_metrics.borrow().get(glyph_id);
         (advance_width.into(), left_side_bearing.into())
     }
 }
@@ -31,7 +30,8 @@ pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<crat
     use opentype::truetype::tables::WindowsMetrics;
 
     let font_header = cache.font_header()?.clone();
-    let windows_metrics = cache.windows_metrics()?.clone();
+    let font_header = font_header.borrow();
+    let windows_metrics = cache.windows_metrics()?.borrow();
     macro_rules! get(
         (@version0 $($version:ident),+) => (
             match &*windows_metrics {

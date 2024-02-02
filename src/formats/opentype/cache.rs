@@ -8,13 +8,15 @@ use opentype;
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 
+pub(crate) type Reference<T> = Rc<RefCell<T>>;
+
 macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (
         cache!(@define $($field, $type),+);
 
         impl<T: typeface::tape::Read> Cache<T> {
             #[inline]
-            pub fn new(tape: Rc<RefCell<T>>, backend: opentype::Font) -> Self {
+            pub fn new(tape: Reference<T>, backend: opentype::Font) -> Self {
                 Self {
                     tape,
                     backend,
@@ -31,18 +33,18 @@ macro_rules! cache(
     );
     (@define $($field:ident, $type:ty),+) => (
         pub struct Cache<T> {
-            pub tape: Rc<RefCell<T>>,
+            pub tape: Reference<T>,
             pub backend: opentype::Font,
 
             mapping: Option<Rc<Mapping>>,
             metrics: Option<Rc<Metrics>>,
 
-            $($field: Option<Rc<$type>>,)+
+            $($field: Option<Reference<$type>>,)+
         }
     );
     (@implement $field:ident -> $try_field:ident(), $type:ty, $name:literal) => (
         #[allow(dead_code)]
-        pub fn $field(&mut self) -> Result<&Rc<$type>> {
+        pub fn $field(&mut self) -> Result<&Reference<$type>> {
             match self.$try_field()? {
                 Some(table) => Ok(table),
                 _ => raise!(concat!("cannot find ", $name)),
@@ -50,12 +52,12 @@ macro_rules! cache(
         }
 
         #[allow(dead_code)]
-        pub fn $try_field(&mut self) -> Result<Option<&Rc<$type>>> {
+        pub fn $try_field(&mut self) -> Result<Option<&Reference<$type>>> {
             if self.$field.is_none() {
                 self.$field = match self.backend.take::<_, $type>(
                     self.tape.borrow_mut().deref_mut(),
                 )? {
-                    Some(value) => Some(Rc::new(value)),
+                    Some(value) => Some(Rc::new(RefCell::new(value))),
                     _ => None,
                 };
             }
@@ -64,7 +66,7 @@ macro_rules! cache(
     );
     (@implement $field:ident -> $try_field:ident($($argument:ident),+), $type:ty, $name:literal) => (
         #[allow(dead_code)]
-        pub fn $field(&mut self) -> Result<&Rc<$type>> {
+        pub fn $field(&mut self) -> Result<&Reference<$type>> {
             match self.$try_field()? {
                 Some(table) => Ok(table),
                 _ => raise!(concat!("cannot find ", $name)),
@@ -72,7 +74,7 @@ macro_rules! cache(
         }
 
         #[allow(dead_code)]
-        pub fn $try_field(&mut self) -> Result<Option<&Rc<$type>>> {
+        pub fn $try_field(&mut self) -> Result<Option<&Reference<$type>>> {
             if self.$field.is_none() {
                 $(
                     let $argument = match self.$argument()? {
@@ -82,9 +84,9 @@ macro_rules! cache(
                 )+
                 self.$field = match self.backend.take_given::<_, $type>(
                     self.tape.borrow_mut().deref_mut(),
-                    ($(&$argument),+)
+                    ($(&$argument.borrow()),+)
                 )? {
-                    Some(value) => Some(Rc::new(value)),
+                    Some(value) => Some(Rc::new(RefCell::new(value))),
                     _ => None,
                 };
             }
@@ -176,14 +178,16 @@ cache! {
 impl<T: typeface::tape::Read> Cache<T> {
     pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
         if self.mapping.is_none() {
-            self.mapping = Some(Rc::new(Mapping::new(self.character_mapping()?)?));
+            let mapping = Mapping::new(&self.character_mapping()?.borrow())?;
+            self.mapping = Some(Rc::new(mapping));
         }
         Ok(self.mapping.as_ref().unwrap())
     }
 
     pub fn metrics(&mut self) -> Result<&Rc<Metrics>> {
         if self.metrics.is_none() {
-            self.metrics = Some(Rc::new(Metrics::new(self.horizontal_metrics()?.clone())));
+            let metrics = Metrics::new(self.horizontal_metrics()?.clone());
+            self.metrics = Some(Rc::new(metrics));
         }
         Ok(self.metrics.as_ref().unwrap())
     }
