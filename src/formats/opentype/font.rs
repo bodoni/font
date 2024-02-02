@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 use std::io::Result;
-use std::ops::DerefMut;
+use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
+
+use opentype::truetype::Tag;
 
 use crate::formats::opentype::cache::{Cache, Reference};
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
@@ -10,6 +12,12 @@ use crate::formats::opentype::{axes, characters, features, metrics, names, palet
 pub struct Font<T> {
     cache: Reference<Cache<T>>,
     index: (bool, usize),
+}
+
+/// A disposition.
+pub enum Disposition {
+    Retain,
+    Update,
 }
 
 impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
@@ -102,10 +110,41 @@ pub fn read<T: typeface::tape::Read>(
 }
 
 /// Write a font.
-pub fn write<T, U>(_: Font<T>, _: &mut U) -> Result<()>
+pub fn write<T, U, F>(font: Font<T>, tape: &mut U, dispose: F) -> Result<()>
 where
     T: typeface::tape::Read + 'static,
-    T: typeface::tape::Write,
+    U: typeface::tape::Read + typeface::tape::Write,
+    F: Fn(&Tag) -> Disposition,
 {
+    if !font.index.0 {
+        raise!("writing PostScript fonts is not supported yet");
+    }
+    let position = tape.position()?;
+    let cache = font.cache.borrow_mut();
+    let mut other = cache.tape.borrow_mut();
+    let mut offsets = cache.backend.offsets.clone();
+    tape.give(&offsets)?;
+    for record in offsets.records.iter_mut() {
+        let offset = tape.position()?;
+        match dispose(&record.tag) {
+            Disposition::Retain => {
+                other.jump(record.offset as u64)?;
+                let mut table = std::io::Read::take(other.by_ref(), record.size as u64);
+                std::io::copy(&mut table, tape)?;
+            }
+            Disposition::Update => match &*record.tag {
+                b"name" => match cache.names.as_ref() {
+                    Some(table) => tape.give(table.borrow().deref())?,
+                    _ => raise!("found no update for {:?}", record.tag),
+                },
+                _ => raise!("updating {:?} is not supported yet", record.tag),
+            },
+        }
+        let size = tape.position()? - offset;
+        record.offset = offset as _;
+        record.size = size as _;
+    }
+    tape.jump(position)?;
+    tape.give(&offsets)?;
     Ok(())
 }

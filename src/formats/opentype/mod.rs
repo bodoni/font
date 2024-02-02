@@ -14,7 +14,7 @@ mod font;
 mod postscript;
 mod truetype;
 
-pub use self::font::{write, Font};
+pub use self::font::{write, Disposition, Font};
 
 use std::cell::RefCell;
 use std::io::Result;

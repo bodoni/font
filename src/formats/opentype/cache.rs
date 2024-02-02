@@ -39,7 +39,7 @@ macro_rules! cache(
             mapping: Option<Rc<Mapping>>,
             metrics: Option<Rc<Metrics>>,
 
-            $($field: Option<Reference<$type>>,)+
+            $(pub $field: Option<Reference<$type>>,)+
         }
     );
     (@implement $field:ident -> $try_field:ident(), $type:ty, $name:literal) => (
