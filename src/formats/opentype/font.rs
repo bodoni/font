@@ -15,6 +15,7 @@ pub struct Font<T> {
 }
 
 /// A disposition.
+#[derive(Eq, PartialEq)]
 pub enum Disposition {
     Retain,
     Update,
@@ -120,7 +121,8 @@ where
         raise!("writing PostScript fonts is not supported yet");
     }
     let offset = tape.position()?;
-    let cache = font.cache.borrow_mut();
+    let mut cache = font.cache.borrow_mut();
+    cache.font_header()?.borrow_mut().checksum_adjustment = 0;
     let mut other = cache.tape.borrow_mut();
     let mut offsets = cache.backend.offsets.clone();
     tape.give(&offsets)?;
@@ -128,33 +130,47 @@ where
     pad(tape, size as usize)?;
     for record in offsets.records.iter_mut() {
         let offset = tape.position()?;
-        let checksum = match dispose(&record.tag) {
+        let disposition = if &*record.tag == b"head" {
+            Disposition::Update
+        } else {
+            dispose(&record.tag)
+        };
+        match disposition {
             Disposition::Retain => {
                 other.jump(record.offset as u64)?;
-                let mut table = std::io::Read::take(other.by_ref(), record.size as u64);
-                std::io::copy(&mut table, tape)?;
-                false
+                copy(other.deref_mut(), tape, record.size as u64)?;
             }
-            Disposition::Update => {
-                match &*record.tag {
-                    b"name" => match cache.names.as_ref() {
-                        Some(table) => tape.give(table.borrow().deref())?,
-                        _ => raise!("found no update for {:?}", record.tag),
-                    },
-                    _ => raise!("updating {:?} is not supported yet", record.tag),
-                }
-                true
-            }
-        };
+            Disposition::Update => match &*record.tag {
+                b"head" => match cache.font_header.as_ref() {
+                    Some(table) => tape.give(table.borrow().deref())?,
+                    _ => raise!("found no update for {:?}", record.tag),
+                },
+                b"name" => match cache.names.as_ref() {
+                    Some(table) => tape.give(table.borrow().deref())?,
+                    _ => raise!("found no update for {:?}", record.tag),
+                },
+                _ => raise!("updating {:?} is not supported yet", record.tag),
+            },
+        }
         record.offset = offset as _;
         record.size = (tape.position()? - offset) as _;
         pad(tape, record.size as usize)?;
-        if checksum {
+        if disposition == Disposition::Update {
             record.checksum = record.checksum(tape)?;
         }
     }
     tape.jump(offset)?;
     tape.give(&offsets)?;
+    Ok(())
+}
+
+fn copy<T, U>(source: &mut T, destination: &mut U, size: u64) -> Result<()>
+where
+    T: typeface::tape::Read + 'static,
+    U: typeface::tape::Read + typeface::tape::Write,
+{
+    let mut source = std::io::Read::take(source.by_ref(), size);
+    std::io::copy(&mut source, destination)?;
     Ok(())
 }
 
