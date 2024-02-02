@@ -131,18 +131,24 @@ where
                 other.jump(record.offset as u64)?;
                 let mut table = std::io::Read::take(other.by_ref(), record.size as u64);
                 std::io::copy(&mut table, tape)?;
+                let size = tape.position()? - offset;
+                record.offset = offset as _;
+                record.size = size as _;
             }
-            Disposition::Update => match &*record.tag {
-                b"name" => match cache.names.as_ref() {
-                    Some(table) => tape.give(table.borrow().deref())?,
-                    _ => raise!("found no update for {:?}", record.tag),
-                },
-                _ => raise!("updating {:?} is not supported yet", record.tag),
-            },
+            Disposition::Update => {
+                match &*record.tag {
+                    b"name" => match cache.names.as_ref() {
+                        Some(table) => tape.give(table.borrow().deref())?,
+                        _ => raise!("found no update for {:?}", record.tag),
+                    },
+                    _ => raise!("updating {:?} is not supported yet", record.tag),
+                }
+                let size = tape.position()? - offset;
+                record.offset = offset as _;
+                record.size = size as _;
+                record.checksum = record.checksum(tape)?;
+            }
         }
-        let size = tape.position()? - offset;
-        record.offset = offset as _;
-        record.size = size as _;
     }
     tape.jump(position)?;
     tape.give(&offsets)?;
