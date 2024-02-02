@@ -48,7 +48,6 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
         tables::read(&mut self.cache.borrow_mut())
     }
 
-    #[inline]
     fn glyph(&mut self, character: char) -> Result<Option<crate::Glyph>> {
         let mut cache = self.cache.borrow_mut();
         let mapping = cache.mapping()?.clone();
