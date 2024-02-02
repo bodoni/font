@@ -119,11 +119,13 @@ where
     if !font.index.0 {
         raise!("writing PostScript fonts is not supported yet");
     }
-    let position = tape.position()?;
+    let offset = tape.position()?;
     let cache = font.cache.borrow_mut();
     let mut other = cache.tape.borrow_mut();
     let mut offsets = cache.backend.offsets.clone();
     tape.give(&offsets)?;
+    let size = tape.position()? - offset;
+    pad(tape, size as usize)?;
     for record in offsets.records.iter_mut() {
         let offset = tape.position()?;
         let checksum = match dispose(&record.tag) {
@@ -146,17 +148,22 @@ where
         };
         record.offset = offset as _;
         record.size = (tape.position()? - offset) as _;
-        match record.size % 4 {
-            1 => tape.give_bytes(&[0, 0, 0])?,
-            2 => tape.give_bytes(&[0, 0])?,
-            3 => tape.give_bytes(&[0])?,
-            _ => {}
-        }
+        pad(tape, record.size as usize)?;
         if checksum {
             record.checksum = record.checksum(tape)?;
         }
     }
-    tape.jump(position)?;
+    tape.jump(offset)?;
     tape.give(&offsets)?;
+    Ok(())
+}
+
+fn pad<T: typeface::tape::Write>(tape: &mut T, size: usize) -> Result<()> {
+    match size % 4 {
+        1 => tape.give_bytes(&[0, 0, 0])?,
+        2 => tape.give_bytes(&[0, 0])?,
+        3 => tape.give_bytes(&[0])?,
+        _ => {}
+    }
     Ok(())
 }
