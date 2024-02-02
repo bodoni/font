@@ -8,81 +8,50 @@ pub struct Font {
     case: Box<dyn Case>,
 }
 
-/// A type that represents a font in a specific format.
-pub trait Case {
-    /// Return the axes.
-    fn axes(&mut self) -> Result<Axes>;
+macro_rules! implement {
+    (
+        $(
+            $(#[$attribute:meta])*
+            fn $function:ident(&mut self $(, $argument_name:ident: $argument_type:ty)*) -> $type:ty;
+        )+
+    ) => (
+        /// A type that represents a font in a specific format.
+        pub trait Case {
+            $(
+                $(#[$attribute])*
+                fn $function(&mut self $(, $argument_name: $argument_type)*) -> Result<$type>;
+            )+
+        }
 
-    /// Return the characters.
-    fn characters(&mut self) -> Result<Characters>;
-
-    /// Return the features.
-    fn features(&mut self) -> Result<Features>;
-
-    /// Return the metrics.
-    fn metrics(&mut self) -> Result<Metrics>;
-
-    /// Return the names.
-    fn names(&mut self) -> Result<Names>;
-
-    /// Return the palettes.
-    fn palettes(&mut self) -> Result<Palettes>;
-
-    /// Return the tables.
-    fn tables(&mut self) -> Result<Tables>;
-
-    /// Draw a character.
-    fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
+        impl Font {
+            $(
+                $(#[$attribute])*
+                #[inline]
+                pub fn $function(&mut self $(, $argument_name: $argument_type)*) -> Result<$type> {
+                    self.case.$function($($argument_name),*)
+                }
+            )+
+        }
+    );
 }
 
-impl Font {
+implement! {
     /// Return the axes.
-    #[inline]
-    pub fn axes(&mut self) -> Result<Axes> {
-        self.case.axes()
-    }
-
+    fn axes(&mut self) -> Axes;
     /// Return the characters.
-    #[inline]
-    pub fn characters(&mut self) -> Result<Characters> {
-        self.case.characters()
-    }
-
+    fn characters(&mut self) -> Characters;
     /// Return the features.
-    #[inline]
-    pub fn features(&mut self) -> Result<Features> {
-        self.case.features()
-    }
-
+    fn features(&mut self) -> Features;
     /// Return the metrics.
-    #[inline]
-    pub fn metrics(&mut self) -> Result<Metrics> {
-        self.case.metrics()
-    }
-
+    fn metrics(&mut self) -> Metrics;
     /// Return the names.
-    #[inline]
-    pub fn names(&mut self) -> Result<Names> {
-        self.case.names()
-    }
-
+    fn names(&mut self) -> Names;
     /// Return the palettes.
-    #[inline]
-    pub fn palettes(&mut self) -> Result<Palettes> {
-        self.case.palettes()
-    }
-
+    fn palettes(&mut self) -> Palettes;
     /// Return the tables.
-    #[inline]
-    pub fn tables(&mut self) -> Result<Tables> {
-        self.case.tables()
-    }
-
+    fn tables(&mut self) -> Tables;
     /// Draw a character.
-    #[inline]
-    pub fn draw(&mut self, character: char) -> Result<Option<Glyph>> {
-        self.case.draw(character)
-    }
+    fn draw(&mut self, character: char) -> Option<Glyph>;
 }
 
 pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>> {
