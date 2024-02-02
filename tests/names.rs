@@ -77,6 +77,12 @@ mod noto_color_emoji {
         *table.borrow_mut() = other;
 
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
-        ok!(write(font, &mut cursor, |_| Disposition::Retain));
+        ok!(write(font, &mut cursor, |tag| {
+            if &**tag != b"name" {
+                Disposition::Retain
+            } else {
+                Disposition::Update
+            }
+        }));
     }
 }
