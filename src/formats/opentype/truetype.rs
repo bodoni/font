@@ -1,78 +1,99 @@
 use std::io::Result;
-use std::rc::Rc;
 
 use opentype::truetype::tables::glyph_data::{
     self, CompositeDescription, GlyphData, SimpleDescription,
 };
 
-use crate::formats::opentype::cache::Reference;
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
 
-pub struct TrueType {
-    glyph_data: Reference<GlyphData>,
-    mapping: Rc<Mapping>,
-    metrics: Rc<Metrics>,
+macro_rules! expect(
+    ($condition:expr) => (
+        if !$condition {
+            raise!("found a malformed glyph");
+        }
+    )
+);
+
+pub fn draw(
+    glyph_data: &GlyphData,
+    mapping: &Mapping,
+    metrics: &Metrics,
+    character: char,
+) -> Result<Option<Glyph>> {
+    let mut builder = Builder::default();
+    let glyph_id = match mapping.get(character) {
+        Some(glyph_id) => glyph_id,
+        _ => return Ok(None),
+    };
+    let glyph = match glyph_data.get(glyph_id as usize) {
+        Some(glyph) => glyph,
+        _ => raise!(
+            "found no data for character {} with glyph {}",
+            character,
+            glyph_id,
+        ),
+    };
+    builder.set_horizontal_metrics(metrics.get(glyph_id));
+    if let Some(ref glyph) = glyph {
+        draw_glyph(glyph_data, metrics, &mut builder, glyph)?;
+        builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
+    }
+    Ok(Some(builder.into()))
 }
 
-impl TrueType {
-    #[inline]
-    pub fn new(
-        glyph_data: Reference<GlyphData>,
-        mapping: Rc<Mapping>,
-        metrics: Rc<Metrics>,
-    ) -> Self {
-        TrueType {
-            glyph_data,
-            mapping,
-            metrics,
-        }
-    }
+fn draw_glyph(
+    glyph_data: &GlyphData,
+    metrics: &Metrics,
+    builder: &mut Builder,
+    glyph: &glyph_data::Glyph,
+) -> Result<()> {
+    use opentype::truetype::tables::glyph_data::Description::*;
 
-    pub fn draw(&self, character: char) -> Result<Option<Glyph>> {
-        let mut builder = Builder::default();
-        let glyph_id = match self.mapping.get(character) {
-            Some(glyph_id) => glyph_id,
-            _ => return Ok(None),
+    match &glyph.description {
+        Composite(ref description) => draw_composite(glyph_data, metrics, builder, description),
+        Simple(ref description) => draw_simple(builder, description),
+    }
+}
+
+fn draw_composite(
+    glyph_data: &GlyphData,
+    metrics: &Metrics,
+    builder: &mut Builder,
+    description: &CompositeDescription,
+) -> Result<()> {
+    use opentype::truetype::tables::glyph_data::{Arguments, Options};
+
+    for component in description.components.iter() {
+        let glyph_id = component.glyph_id;
+        let offset = match &component.arguments {
+            &Arguments::Offsets(x, y) => Offset::from((x, y)),
+            arguments => raise!("found a unknown component with arguments {arguments:?}"),
         };
-        let glyph_data = self.glyph_data.borrow();
+        let scale = match component.options {
+            Options::None => (1.0, 0.0, 0.0, 1.0),
+            Options::Scalar(value) => (value.into(), 0.0, 0.0, value.into()),
+            Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
+            Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
+        };
         let glyph = match glyph_data.get(glyph_id as usize) {
-            Some(glyph) => glyph,
-            _ => raise!(
-                "found no data for character {} with glyph {}",
-                character,
-                glyph_id,
-            ),
+            Some(Some(glyph)) => glyph,
+            Some(&None) => continue,
+            _ => raise!("found no data for glyph {}", glyph_id),
         };
-        builder.set_horizontal_metrics(self.metrics.get(glyph_id));
-        if let Some(ref glyph) = glyph {
-            self.draw_glyph(&mut builder, glyph)?;
-            builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
+        if component.flags.should_use_metrics() {
+            builder.set_horizontal_metrics(metrics.get(glyph_id));
         }
-        Ok(Some(builder.into()))
+        builder.nest(offset, scale, |builder| {
+            draw_glyph(glyph_data, metrics, builder, glyph)
+        })?;
     }
-
-    fn draw_glyph(&self, builder: &mut Builder, glyph: &glyph_data::Glyph) -> Result<()> {
-        use opentype::truetype::tables::glyph_data::Description::*;
-
-        match &glyph.description {
-            Simple(ref description) => draw_simple(builder, description),
-            Composite(ref description) => draw_composite(self, builder, description),
-        }
-    }
+    Ok(())
 }
 
 fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result<()> {
-    macro_rules! expect(
-        ($condition:expr) => (
-            if !$condition {
-                raise!("found a malformed glyph");
-            }
-        )
-    );
-
     let SimpleDescription {
         end_points,
         flags,
@@ -157,39 +178,6 @@ fn draw_simple(builder: &mut Builder, description: &SimpleDescription) -> Result
         builder.flush();
         sum += sum_delta;
         i = k + 1;
-    }
-    Ok(())
-}
-
-fn draw_composite(
-    case: &TrueType,
-    builder: &mut Builder,
-    description: &CompositeDescription,
-) -> Result<()> {
-    use opentype::truetype::tables::glyph_data::{Arguments, Options};
-
-    for component in description.components.iter() {
-        let glyph_id = component.glyph_id;
-        let offset = match &component.arguments {
-            &Arguments::Offsets(x, y) => Offset::from((x, y)),
-            arguments => raise!("found a unknown component with arguments {arguments:?}"),
-        };
-        let scale = match component.options {
-            Options::None => (1.0, 0.0, 0.0, 1.0),
-            Options::Scalar(value) => (value.into(), 0.0, 0.0, value.into()),
-            Options::Vector(x, y) => (x.into(), 0.0, 0.0, y.into()),
-            Options::Matrix(xx, xy, yx, yy) => (xx.into(), xy.into(), yx.into(), yy.into()),
-        };
-        let glyph_data = case.glyph_data.borrow();
-        let glyph = match glyph_data.get(glyph_id as usize) {
-            Some(Some(glyph)) => glyph,
-            Some(&None) => continue,
-            _ => raise!("found no data for glyph {}", glyph_id),
-        };
-        if component.flags.should_use_metrics() {
-            builder.set_horizontal_metrics(case.metrics.get(glyph_id));
-        }
-        builder.nest(offset, scale, |builder| case.draw_glyph(builder, glyph))?;
     }
     Ok(())
 }

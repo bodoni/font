@@ -1,21 +1,15 @@
 use std::cell::RefCell;
 use std::io::Result;
+use std::ops::DerefMut;
 use std::rc::Rc;
 
 use crate::formats::opentype::cache::{Cache, Reference};
-use crate::formats::opentype::postscript::PostScript;
-use crate::formats::opentype::truetype::TrueType;
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
 /// A font.
 pub struct Font<T> {
     cache: Reference<Cache<T>>,
-    case: Case,
-}
-
-enum Case {
-    PostScript(PostScript),
-    TrueType(TrueType),
+    index: (bool, usize),
 }
 
 impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
@@ -56,9 +50,20 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
 
     #[inline]
     fn draw(&mut self, character: char) -> Result<Option<crate::Glyph>> {
-        match &self.case {
-            Case::PostScript(ref case) => case.draw(character),
-            Case::TrueType(ref case) => case.draw(character),
+        let mut cache = self.cache.borrow_mut();
+        let mapping = cache.mapping()?.clone();
+        let metrics = cache.metrics()?.clone();
+        match self.index {
+            (true, _) => {
+                super::truetype::draw(&cache.glyph_data()?.borrow(), &mapping, &metrics, character)
+            }
+            (false, id) => super::postscript::draw(
+                &cache.font_set()?.borrow(),
+                &mapping,
+                &metrics,
+                id,
+                character,
+            ),
         }
     }
 }
@@ -67,25 +72,31 @@ pub fn read<T: typeface::tape::Read>(
     tape: Reference<T>,
     backend: opentype::Font,
 ) -> Result<Vec<Font<T>>> {
-    let mut fonts = vec![];
+    use opentype::postscript::compact1::FontSet;
+    use opentype::truetype::tables::GlyphData;
+
+    let truetype = backend.exists::<GlyphData>();
+    let postscript = {
+        let mut tape = tape.borrow_mut();
+        let tape = tape.deref_mut();
+        backend
+            .position::<_, FontSet>(tape)?
+            .map(|_| FontSet::count(tape))
+            .transpose()?
+            .unwrap_or(0)
+    };
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
-    let mut cache_borrowed = cache.borrow_mut();
-    let mapping = cache_borrowed.mapping()?.clone();
-    let metrics = cache_borrowed.metrics()?.clone();
-    if let Some(table) = cache_borrowed.try_font_set()? {
-        for id in 0..table.borrow().character_strings.len() {
-            let case = PostScript::new(id, table.clone(), mapping.clone(), metrics.clone());
-            fonts.push(Font {
-                cache: cache.clone(),
-                case: Case::PostScript(case),
-            });
-        }
-    }
-    if let Some(table) = cache_borrowed.try_glyph_data()? {
-        let case = TrueType::new(table.clone(), mapping, metrics);
+    let mut fonts = vec![];
+    if truetype {
         fonts.push(Font {
             cache: cache.clone(),
-            case: Case::TrueType(case),
+            index: (true, 0),
+        });
+    }
+    for id in 0..postscript {
+        fonts.push(Font {
+            cache: cache.clone(),
+            index: (false, id),
         });
     }
     Ok(fonts)
