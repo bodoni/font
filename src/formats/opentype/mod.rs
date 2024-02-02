@@ -14,7 +14,7 @@ mod font;
 mod postscript;
 mod truetype;
 
-pub use self::font::Font;
+pub use self::font::{write, Font};
 
 use std::cell::RefCell;
 use std::io::Result;
@@ -22,7 +22,10 @@ use std::ops::DerefMut;
 use std::rc::Rc;
 
 /// Read fonts.
-pub fn read<T: typeface::tape::Read + 'static>(tape: T) -> Result<Vec<Font<T>>> {
+pub fn read<T>(tape: T) -> Result<Vec<Font<T>>>
+where
+    T: typeface::tape::Read + 'static,
+{
     let tape = Rc::new(RefCell::new(tape));
     let mut fonts = vec![];
     let file = opentype::File::read(tape.borrow_mut().deref_mut())?;

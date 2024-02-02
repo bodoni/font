@@ -100,3 +100,12 @@ pub fn read<T: typeface::tape::Read>(
     }
     Ok(fonts)
 }
+
+/// Write a font.
+pub fn write<T, U>(_: Font<T>, _: &mut U) -> Result<()>
+where
+    T: typeface::tape::Read + 'static,
+    T: typeface::tape::Write,
+{
+    Ok(())
+}

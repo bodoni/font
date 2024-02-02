@@ -47,8 +47,9 @@ mod noto_color_emoji {
     #[test]
     fn write() {
         use std::fs::File;
+        use std::io::Cursor;
 
-        use font::formats::opentype::read;
+        use font::formats::opentype::{read, write};
         use font::Case;
 
         let path = crate::support::path(Fixture::NotoColorEmoji);
@@ -74,5 +75,8 @@ mod noto_color_emoji {
         ));
 
         *table.borrow_mut() = other;
+
+        let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
+        ok!(write(font, &mut cursor));
     }
 }
