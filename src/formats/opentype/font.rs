@@ -147,9 +147,9 @@ where
         record.offset = offset as _;
         record.size = (tape.position()? - offset) as _;
         match record.size % 4 {
-            1 => tape.give_bytes(&[0u8, 0, 0])?,
-            2 => tape.give_bytes(&[0u8, 0])?,
-            3 => tape.give_bytes(&[0u8])?,
+            1 => tape.give_bytes(&[0, 0, 0])?,
+            2 => tape.give_bytes(&[0, 0])?,
+            3 => tape.give_bytes(&[0])?,
             _ => {}
         }
         if checksum {
