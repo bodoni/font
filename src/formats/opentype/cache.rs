@@ -157,7 +157,7 @@ cache! {
         "the maximum profile",
     ),
     (
-        naming_table -> try_naming_table(),
+        names -> try_names(),
         opentype::truetype::tables::Names,
         "the naming table",
     ),
