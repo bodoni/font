@@ -8,15 +8,30 @@ pub struct Font {
     case: Box<dyn Case>,
 }
 
+/// A type that represents a font in a specific format.
 pub trait Case {
+    /// Return the axes.
     fn axes(&mut self) -> Result<Axes>;
+
+    /// Return the characters.
     fn characters(&mut self) -> Result<Characters>;
+
+    /// Return the features.
     fn features(&mut self) -> Result<Features>;
+
+    /// Return the metrics.
     fn metrics(&mut self) -> Result<Metrics>;
+
+    /// Return the names.
     fn names(&mut self) -> Result<Names>;
+
+    /// Return the palettes.
     fn palettes(&mut self) -> Result<Palettes>;
+
+    /// Return the tables.
     fn tables(&mut self) -> Result<Tables>;
 
+    /// Draw a character.
     fn draw(&mut self, character: char) -> Result<Option<Glyph>>;
 }
 

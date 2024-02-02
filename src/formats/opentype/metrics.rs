@@ -1,3 +1,5 @@
+//! Metrics.
+
 use std::io::Result;
 use std::rc::Rc;
 
@@ -7,6 +9,7 @@ use opentype::truetype::GlyphID;
 use crate::formats::opentype::cache::Cache;
 use crate::Number;
 
+/// Metrics.
 pub struct Metrics {
     horizontal_metrics: Rc<HorizontalMetrics>,
 }

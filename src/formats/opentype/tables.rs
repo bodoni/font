@@ -1,10 +1,12 @@
+//! Font tables.
+
 use std::io::Result;
 
 use opentype::truetype::Tag;
 
 use crate::formats::opentype::cache::Cache;
 
-/// Tables.
+/// Font tables.
 pub type Tables = Vec<Tag>;
 
 pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Tables> {

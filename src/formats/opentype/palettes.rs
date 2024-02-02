@@ -1,3 +1,5 @@
+//! Color palettes.
+
 use std::io::Result;
 use std::rc::Rc;
 

@@ -5,6 +5,7 @@ use std::rc::Rc;
 use crate::formats::opentype::cache::Cache;
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
+/// A font.
 pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
 }

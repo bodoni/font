@@ -29,15 +29,15 @@ pub extern crate webtype;
 #[macro_use(dereference, error, raise)]
 extern crate typeface;
 
+pub mod formats;
 pub mod glyph;
 
 mod file;
 mod font;
-mod formats;
 mod metrics;
 mod offset;
 
-pub use self::font::Font;
+pub use self::font::{Case, Font};
 pub use file::File;
 pub use formats::opentype::axes::{self, Axes};
 pub use formats::opentype::characters::Characters;

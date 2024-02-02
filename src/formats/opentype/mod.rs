@@ -1,13 +1,16 @@
+//! The OpenType font format.
+
 pub mod axes;
-pub mod cache;
 pub mod characters;
 pub mod features;
-pub mod font;
 pub mod metrics;
 pub mod names;
 pub mod palettes;
 pub mod tables;
 
+pub(crate) mod cache;
+
+mod font;
 mod postscript;
 mod truetype;
 
@@ -18,6 +21,7 @@ use std::io::Result;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
+/// Read fonts.
 pub fn read<T: typeface::tape::Read + 'static>(tape: T) -> Result<Vec<Font<T>>> {
     let tape = Rc::new(RefCell::new(tape));
     let mut fonts = vec![];

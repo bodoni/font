@@ -7,6 +7,7 @@ use crate::formats::opentype::postscript::PostScript;
 use crate::formats::opentype::truetype::TrueType;
 use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
 
+/// A font.
 pub struct Font<T> {
     cache: Rc<RefCell<Cache<T>>>,
     case: Case,

@@ -1,3 +1,5 @@
+//! Unicode code points.
+
 use std::collections::HashMap;
 use std::io::Result;
 use std::ops::RangeInclusive;
@@ -10,7 +12,7 @@ use crate::formats::opentype::cache::Cache;
 /// Unicode code points.
 pub type Characters = Vec<RangeInclusive<u32>>;
 
-pub struct Mapping(HashMap<u32, GlyphID>);
+pub(crate) struct Mapping(HashMap<u32, GlyphID>);
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
