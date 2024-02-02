@@ -46,7 +46,15 @@ mod noto_color_emoji {
 
     #[test]
     fn write() {
-        let font = &mut setup(Fixture::NotoColorEmoji)[0];
+        use std::fs::File;
+
+        use font::formats::opentype::read;
+        use font::Case;
+
+        let path = crate::support::path(Fixture::NotoColorEmoji);
+        let file = ok!(File::open(path));
+        let mut font = ok!(ok!(read(file)).pop());
+
         let table = ok!(font.names());
 
         let records = table

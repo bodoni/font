@@ -21,6 +21,10 @@ pub enum Fixture {
 }
 
 pub fn setup(fixture: Fixture) -> File {
+    ok!(File::open(path(fixture)))
+}
+
+pub fn path(fixture: Fixture) -> PathBuf {
     let file_name = match fixture {
         Fixture::AdobeBlank => "AdobeBlank-Regular.ttf",
         Fixture::AdobeVFPrototype => "AdobeVFPrototype.ttf",
@@ -34,9 +38,7 @@ pub fn setup(fixture: Fixture) -> File {
         Fixture::VesperLibre => "VesperLibre-Regular.ttf",
         Fixture::ZenLoop => "ZenLoop-Regular.ttf",
     };
-    ok!(File::open(
-        PathBuf::from("tests").join("fixtures").join(file_name)
-    ))
+    PathBuf::from("tests").join("fixtures").join(file_name)
 }
 
 pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
