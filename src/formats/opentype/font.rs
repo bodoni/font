@@ -120,17 +120,25 @@ where
     if !font.index.0 {
         raise!("writing PostScript fonts is not supported yet");
     }
-    let offset = tape.position()?;
+
     let mut cache = font.cache.borrow_mut();
-    cache.font_header()?.borrow_mut().checksum_adjustment = 0;
-    let mut other = cache.tape.borrow_mut();
+
+    let offsets_position = tape.position()?;
     let mut offsets = cache.backend.offsets.clone();
+
+    let mut font_header_position = None;
+    let mut font_header = cache.font_header()?.borrow().clone();
+    font_header.checksum_adjustment = 0;
+
     tape.give(&offsets)?;
-    let size = tape.position()? - offset;
+    let size = tape.position()? - offsets_position;
     pad(tape, size as usize)?;
+
+    let mut other = cache.tape.borrow_mut();
     for record in offsets.records.iter_mut() {
         let offset = tape.position()?;
         let disposition = if &*record.tag == b"head" {
+            font_header_position = Some(offset);
             Disposition::Update
         } else {
             dispose(&record.tag)
@@ -141,10 +149,7 @@ where
                 copy(other.deref_mut(), tape, record.size as u64)?;
             }
             Disposition::Update => match &*record.tag {
-                b"head" => match cache.font_header.as_ref() {
-                    Some(table) => tape.give(table.borrow().deref())?,
-                    _ => raise!("found no update for {:?}", record.tag),
-                },
+                b"head" => tape.give(&font_header)?,
                 b"name" => match cache.names.as_ref() {
                     Some(table) => tape.give(table.borrow().deref())?,
                     _ => raise!("found no update for {:?}", record.tag),
@@ -159,8 +164,16 @@ where
             record.checksum = record.checksum(tape)?;
         }
     }
-    tape.jump(offset)?;
+
+    tape.jump(offsets_position)?;
     tape.give(&offsets)?;
+    if let Some(position) = font_header_position {
+        tape.jump(position)?;
+        tape.give(&font_header)?;
+    } else {
+        raise!("found no font header");
+    }
+
     Ok(())
 }
 
