@@ -47,7 +47,7 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn draw(&mut self, _: char) -> Result<Option<crate::Glyph>> {
+    fn glyph(&mut self, _: char) -> Result<Option<crate::Glyph>> {
         error!("working with glyphs is not supported yet")
     }
 }

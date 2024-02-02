@@ -50,8 +50,8 @@ implement! {
     fn palettes() -> Palettes;
     /// Return the tables.
     fn tables() -> Tables;
-    /// Draw a character.
-    fn draw(character: char) -> Option<Glyph>;
+    /// Return the glyph of a character.
+    fn glyph(character: char) -> Option<Glyph>;
 }
 
 pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>> {

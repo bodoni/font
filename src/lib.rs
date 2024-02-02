@@ -11,7 +11,7 @@
 //! let path = "SourceSerifPro-Regular.otf";
 //! # let path = "tests/fixtures/SourceSerifPro-Regular.otf";
 //! let File { mut fonts } = ok!(File::open(path));
-//! let glyph = ok!(ok!(fonts[0].draw('a')));
+//! let glyph = ok!(ok!(fonts[0].glyph('a')));
 //! for contour in glyph.iter() {
 //!     for segment in contour.iter() {
 //!         match segment {

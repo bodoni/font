@@ -7,7 +7,7 @@ mod adobe_blank {
     #[test]
     fn a() {
         let font = &mut setup(Fixture::AdobeBlank)[0];
-        let glyph = ok!(ok!(font.draw('a')));
+        let glyph = ok!(ok!(font.glyph('a')));
         assert_eq!(glyph.len(), 0);
     }
 }
@@ -18,7 +18,7 @@ mod monte_carlo {
     #[test]
     fn i() {
         let font = &mut setup(Fixture::MonteCarlo)[0];
-        let glyph = ok!(ok!(font.draw('i')));
+        let glyph = ok!(ok!(font.glyph('i')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -72,7 +72,7 @@ mod numans {
     #[test]
     fn a() {
         let font = &mut setup(Fixture::Numans)[0];
-        let glyph = ok!(ok!(font.draw('a')));
+        let glyph = ok!(ok!(font.glyph('a')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -124,14 +124,14 @@ mod source_serif {
     fn from_a_to_z() {
         let font = &mut setup(Fixture::SourceSerif)[0];
         for code in b'a'..=b'z' {
-            ok!(ok!(font.draw(code as char)));
+            ok!(ok!(font.glyph(code as char)));
         }
     }
 
     #[test]
     fn o() {
         let font = &mut setup(Fixture::SourceSerif)[0];
-        let glyph = ok!(ok!(font.draw('o')));
+        let glyph = ok!(ok!(font.glyph('o')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -152,7 +152,7 @@ mod source_serif {
     #[test]
     fn r() {
         let font = &mut setup(Fixture::SourceSerif)[0];
-        let glyph = ok!(ok!(font.draw('r')));
+        let glyph = ok!(ok!(font.glyph('r')));
         assert_eq!(glyph.bounding_box, (34.0, 0.0, 412.0, 491.0));
         assert_eq!(glyph.side_bearings, (34.0, 11.0));
     }
@@ -164,7 +164,7 @@ mod open_sans {
     #[test]
     fn a_ring() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = ok!(ok!(font.draw('å')));
+        let glyph = ok!(ok!(font.glyph('å')));
         assert_eq!(glyph.len(), 4);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -220,7 +220,7 @@ mod open_sans {
     #[test]
     fn copyright() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = ok!(ok!(font.draw('©')));
+        let glyph = ok!(ok!(font.glyph('©')));
         assert_eq!(glyph.bounding_box, (139.0, -20.0, 1642.0, 1483.0));
         assert_eq!(glyph.side_bearings, (139.0, 62.0));
     }
@@ -229,14 +229,14 @@ mod open_sans {
     fn from_a_to_z() {
         let font = &mut setup(Fixture::OpenSans)[0];
         for code in b'a'..(b'z' + 1) {
-            ok!(ok!(font.draw(code as char)));
+            ok!(ok!(font.glyph(code as char)));
         }
     }
 
     #[test]
     fn o() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = ok!(ok!(font.draw('o')));
+        let glyph = ok!(ok!(font.glyph('o')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -269,7 +269,7 @@ mod open_sans {
     #[test]
     fn slash() {
         let font = &mut setup(Fixture::OpenSans)[0];
-        let glyph = ok!(ok!(font.draw('/')));
+        let glyph = ok!(ok!(font.glyph('/')));
         assert_eq!(glyph.len(), 1);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -288,7 +288,7 @@ mod vesper_libre {
     #[test]
     fn a() {
         let font = &mut setup(Fixture::VesperLibre)[0];
-        let glyph = ok!(ok!(font.draw('a')));
+        let glyph = ok!(ok!(font.glyph('a')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -348,7 +348,7 @@ mod vesper_libre {
     #[test]
     fn ellipsis() {
         let font = &mut setup(Fixture::VesperLibre)[0];
-        let glyph = ok!(ok!(font.draw('…')));
+        let glyph = ok!(ok!(font.glyph('…')));
         assert_eq!(glyph.len(), 3);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![
@@ -403,7 +403,7 @@ mod zen_loop {
     #[test]
     fn d() {
         let font = &mut setup(Fixture::ZenLoop)[0];
-        let glyph = ok!(ok!(font.draw('d')));
+        let glyph = ok!(ok!(font.glyph('d')));
         assert_eq!(glyph.len(), 2);
         #[rustfmt::skip]
         assert_eq!(&trace(&glyph), &vec![

@@ -49,7 +49,7 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     }
 
     #[inline]
-    fn draw(&mut self, character: char) -> Result<Option<crate::Glyph>> {
+    fn glyph(&mut self, character: char) -> Result<Option<crate::Glyph>> {
         let mut cache = self.cache.borrow_mut();
         let mapping = cache.mapping()?.clone();
         let metrics = cache.metrics()?.clone();
