@@ -136,9 +136,9 @@ where
 
     let mut other = cache.tape.borrow_mut();
     for record in offsets.records.iter_mut() {
-        let offset = tape.position()?;
+        let position = tape.position()?;
         let disposition = if &*record.tag == b"head" {
-            font_header_position = Some(offset);
+            font_header_position = Some(position);
             Disposition::Update
         } else {
             dispose(&record.tag)
@@ -157,8 +157,8 @@ where
                 _ => raise!("updating {:?} is not supported yet", record.tag),
             },
         }
-        record.offset = offset as _;
-        record.size = (tape.position()? - offset) as _;
+        record.offset = position as _;
+        record.size = (tape.position()? - position) as _;
         pad(tape, record.size as usize)?;
         if disposition == Disposition::Update {
             record.checksum = record.checksum(tape)?;
