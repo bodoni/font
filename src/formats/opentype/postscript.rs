@@ -16,7 +16,7 @@ macro_rules! expect(
     )
 );
 
-pub fn draw(
+pub(super) fn draw(
     font_set: &FontSet,
     mapping: &Mapping,
     metrics: &Metrics,

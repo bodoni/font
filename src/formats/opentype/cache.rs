@@ -8,7 +8,7 @@ use opentype;
 use crate::formats::opentype::characters::Mapping;
 use crate::formats::opentype::metrics::Metrics;
 
-pub(crate) type Reference<T> = Rc<RefCell<T>>;
+pub type Reference<T> = Rc<RefCell<T>>;
 
 macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (
@@ -32,7 +32,7 @@ macro_rules! cache(
         }
     );
     (@define $($field:ident, $type:ty),+) => (
-        pub struct Cache<T> {
+        pub(crate) struct Cache<T> {
             pub tape: Reference<T>,
             pub backend: opentype::Font,
 

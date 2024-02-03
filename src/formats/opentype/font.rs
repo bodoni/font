@@ -127,7 +127,7 @@ where
     let mut offsets = cache.backend.offsets.clone();
 
     let mut font_header_position = None;
-    let mut font_header = cache.font_header()?.borrow().clone();
+    let mut font_header = *cache.font_header()?.borrow();
     font_header.checksum_adjustment = 0;
 
     tape.give(&offsets)?;

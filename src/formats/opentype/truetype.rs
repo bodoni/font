@@ -17,7 +17,7 @@ macro_rules! expect(
     )
 );
 
-pub fn draw(
+pub(super) fn draw(
     glyph_data: &GlyphData,
     mapping: &Mapping,
     metrics: &Metrics,
