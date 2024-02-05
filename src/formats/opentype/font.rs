@@ -3,6 +3,7 @@ use std::io::Result;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
+use opentype::truetype::tables::FontHeader;
 use opentype::truetype::Tag;
 
 use crate::formats::opentype::cache::{Cache, Reference};
@@ -167,12 +168,17 @@ where
 
     tape.jump(offsets_position)?;
     tape.give(&offsets)?;
-    if let Some(position) = font_header_position {
-        tape.jump(position)?;
-        tape.give(&font_header)?;
-    } else {
-        raise!("found no font header");
-    }
+
+    let font_header_position = match font_header_position {
+        Some(value) => value,
+        _ => raise!("found no font header"),
+    };
+
+    tape.jump(offsets_position)?;
+    let checksum = FontHeader::checksum(tape)?;
+    font_header.checksum_adjustment = FontHeader::CHECKSUM_ADJUSTMENT.wrapping_sub(checksum);
+    tape.jump(font_header_position)?;
+    tape.give(&font_header)?;
 
     Ok(())
 }
