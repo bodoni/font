@@ -19,6 +19,17 @@ jobs:
       - run: cargo clippy -- -D warnings
       - run: cargo fmt --all -- --check
 
+  bench:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ructions/toolchain@v2
+        with: {toolchain: nightly, override: true}
+      - run: cargo bench
+
   test:
     strategy:
       matrix:
