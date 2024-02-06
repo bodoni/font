@@ -3,7 +3,7 @@
 extern crate test;
 
 use std::fs::File;
-use std::io::Cursor;
+use std::io::{Cursor, Read};
 use std::path::PathBuf;
 
 use font::formats::opentype::Disposition;
@@ -20,9 +20,13 @@ fn read(bencher: &mut Bencher) {
     let path = PathBuf::from("tests")
         .join("fixtures")
         .join("OpenSans-Italic.ttf");
+    let mut file = ok!(File::open(&path));
+    let mut data = vec![];
+    ok!(file.read_to_end(&mut data));
+
     bencher.iter(|| {
-        let file = ok!(File::open(&path));
-        let mut font = ok!(ok!(read(file)).pop());
+        let cursor = Cursor::new(data.clone());
+        let mut font = ok!(ok!(read(cursor)).pop());
         black_box(ok!(font.names()));
     });
 }
@@ -34,9 +38,13 @@ fn read_write(bencher: &mut Bencher) {
     let path = PathBuf::from("tests")
         .join("fixtures")
         .join("OpenSans-Italic.ttf");
+    let mut file = ok!(File::open(&path));
+    let mut data = vec![];
+    ok!(file.read_to_end(&mut data));
+
     bencher.iter(|| {
-        let file = ok!(File::open(&path));
-        let mut font = ok!(ok!(read(file)).pop());
+        let cursor = Cursor::new(data.clone());
+        let mut font = ok!(ok!(read(cursor)).pop());
         black_box(ok!(font.names()));
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
         black_box(ok!(write(font, &mut cursor, |tag| {
@@ -56,9 +64,13 @@ fn read_update_write(bencher: &mut Bencher) {
     let path = PathBuf::from("tests")
         .join("fixtures")
         .join("OpenSans-Italic.ttf");
+    let mut file = ok!(File::open(&path));
+    let mut data = vec![];
+    ok!(file.read_to_end(&mut data));
+
     bencher.iter(|| {
-        let file = ok!(File::open(&path));
-        let mut font = ok!(ok!(read(file)).pop());
+        let cursor = Cursor::new(data.clone());
+        let mut font = ok!(ok!(read(cursor)).pop());
         let table = ok!(font.names());
         let other = {
             let table = table.borrow();
