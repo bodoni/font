@@ -40,7 +40,7 @@ mod noto_color_emoji {
 
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
         ok!(write(font, &mut cursor, |tag| {
-            if &**tag != b"name" {
+            if tag != b"name" {
                 Disposition::Retain
             } else {
                 Disposition::Update

@@ -39,7 +39,7 @@ fn read_write(bencher: &mut Bencher) {
         black_box(ok!(font.names()));
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
         black_box(ok!(write(font, &mut cursor, |tag| {
-            if &**tag != b"name" {
+            if tag != b"name" {
                 Disposition::Retain
             } else {
                 Disposition::Update

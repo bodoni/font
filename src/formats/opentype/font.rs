@@ -138,7 +138,7 @@ where
     let mut other = cache.tape.borrow_mut();
     for record in offsets.records.iter_mut() {
         let position = tape.position()?;
-        let disposition = if &*record.tag == b"head" {
+        let disposition = if record.tag == b"head" {
             font_header_position = Some(position);
             Disposition::Update
         } else {
