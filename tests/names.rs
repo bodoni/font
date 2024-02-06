@@ -26,23 +26,16 @@ mod noto_color_emoji {
         let mut font = ok!(ok!(read(file)).pop());
 
         let table = ok!(font.names());
-
-        let records = table
-            .borrow()
-            .iter()
-            .map(|(id, value)| (id, ok!(value)))
-            .collect::<Vec<_>>();
-        let language_tags = table
-            .borrow()
-            .language_tags()
-            .map(Option::unwrap)
-            .collect::<Vec<_>>();
-        let other = ok!(Names::from_iter(
-            records,
-            language_tags,
-            &mut Default::default(),
-        ));
-
+        let other = {
+            let table = table.borrow();
+            let records = table.iter().map(|(id, value)| (id, ok!(value)));
+            let language_tags = table.language_tags().map(Option::unwrap);
+            ok!(Names::from_iter(
+                records,
+                language_tags,
+                &mut Default::default(),
+            ))
+        };
         *table.borrow_mut() = other;
 
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
