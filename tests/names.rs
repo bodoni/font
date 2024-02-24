@@ -1,6 +1,11 @@
 #[macro_use]
 mod support;
 
+use std::fs::File;
+use std::io::Cursor;
+
+use crate::support::Fixture;
+
 mod noto_color_emoji {
     use font::opentype::truetype::tables::names::Names;
 
@@ -15,39 +20,10 @@ mod noto_color_emoji {
 
     #[test]
     fn write() {
-        use std::fs::File;
-        use std::io::Cursor;
-
-        use font::formats::opentype::{read, write, Disposition};
+        use font::formats::opentype::read;
         use font::Case;
 
-        let path = crate::support::path(Fixture::NotoColorEmoji);
-        let file = ok!(File::open(path));
-        let mut font = ok!(ok!(read(file)).pop());
-
-        let table = ok!(font.names());
-        let other = {
-            let table = table.borrow();
-            let records = table.iter().map(|(id, value)| (id, ok!(value)));
-            let language_tags = table.language_tags().map(Option::unwrap);
-            ok!(Names::from_iter(
-                records,
-                language_tags,
-                &mut Default::default(),
-            ))
-        };
-        *table.borrow_mut() = other;
-
-        let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
-        ok!(write(font, &mut cursor, |tag| {
-            if tag != b"name" {
-                Disposition::Retain
-            } else {
-                Disposition::Update
-            }
-        }));
-
-        let cursor = Cursor::new(cursor.into_inner());
+        let cursor = super::write(Fixture::NotoColorEmoji);
         let mut font = ok!(ok!(read(cursor)).pop());
         let table = ok!(font.names());
         test(&table.borrow());
@@ -86,4 +62,86 @@ mod noto_color_emoji {
             ],
         );
     }
+}
+
+mod source_serif {
+    use font::opentype::truetype::tables::names::Names;
+
+    use crate::support::{setup, Fixture};
+
+    #[test]
+    fn read() {
+        let font = &mut setup(Fixture::SourceSerif)[0];
+        let table = ok!(font.names());
+        test(&table.borrow());
+    }
+
+    #[test]
+    fn write() {
+        use font::formats::opentype::read;
+        use font::Case;
+
+        let cursor = super::write(Fixture::SourceSerif);
+        let mut font = ok!(ok!(read(cursor)).pop());
+        let table = ok!(font.names());
+        test(&table.borrow());
+    }
+
+    fn test(table: &Names) {
+        let records = table.iter().collect::<Vec<_>>();
+        let values = records
+            .iter()
+            .map(|(_, value)| ok!(value.as_deref()))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            values.into_iter().take(11).collect::<Vec<_>>(),
+            &[
+                "Copyright 2014 Adobe Systems Incorporated. All Rights Reserved.",
+                "Source Serif Pro",
+                "Regular",
+                "1.017;ADBE;SourceSerifPro-Regular;ADOBE",
+                "Source Serif Pro",
+                "Version 1.017;PS 1.0;hotconv 1.0.79;makeotf.lib2.5.61930",
+                "SourceSerifPro-Regular",
+                "Source is a trademark of Adobe Systems Incorporated in the United States and/or other countries.",
+                "Adobe Systems Incorporated",
+                "Frank Grießhammer",
+                "http://www.adobe.com/type",
+            ],
+        );
+    }
+}
+
+fn write(fixture: Fixture) -> Cursor<Vec<u8>> {
+    use font::formats::opentype::{read, write, Disposition};
+    use font::opentype::truetype::tables::names::Names;
+    use font::Case;
+
+    let path = crate::support::path(fixture);
+    let file = ok!(File::open(path));
+    let mut font = ok!(ok!(read(file)).pop());
+
+    let table = ok!(font.names());
+    let other = {
+        let table = table.borrow();
+        let records = table.iter().map(|(id, value)| (id, ok!(value)));
+        let language_tags = table.language_tags().map(Option::unwrap);
+        ok!(Names::from_iter(
+            records,
+            language_tags,
+            &mut Default::default(),
+        ))
+    };
+    *table.borrow_mut() = other;
+
+    let mut cursor: Cursor<Vec<u8>> = Cursor::new(vec![]);
+    ok!(write(font, &mut cursor, |tag| {
+        if tag != b"name" {
+            Disposition::Retain
+        } else {
+            Disposition::Update
+        }
+    }));
+
+    Cursor::new(cursor.into_inner())
 }

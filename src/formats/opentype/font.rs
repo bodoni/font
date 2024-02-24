@@ -118,10 +118,6 @@ where
     U: typeface::tape::Read + typeface::tape::Write,
     F: Fn(&Tag) -> Disposition,
 {
-    if !font.index.0 {
-        raise!("writing PostScript fonts is not supported yet");
-    }
-
     let mut cache = font.cache.borrow_mut();
 
     let offsets_position = tape.position()?;
