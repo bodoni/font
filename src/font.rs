@@ -59,20 +59,21 @@ pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>>
 
     let tag = tape.peek::<Tag>()?;
     if opentype::accept(&tag) {
-        Ok(crate::formats::opentype::read(tape)?
+        return Ok(crate::formats::opentype::read(tape)?
             .into_iter()
             .map(|font| Font {
                 case: Box::new(font),
             })
-            .collect())
-    } else if webtype::accept(&tag) {
-        Ok(crate::formats::webtype::read(tape)?
-            .into_iter()
-            .map(|font| Font {
-                case: Box::new(font),
-            })
-            .collect())
-    } else {
-        error!("found an unknown file format")
+            .collect());
     }
+    #[cfg(feature = "webtype")]
+    if webtype::accept(&tag) {
+        return Ok(crate::formats::webtype::read(tape)?
+            .into_iter()
+            .map(|font| Font {
+                case: Box::new(font),
+            })
+            .collect());
+    }
+    error!("found an unknown file format")
 }

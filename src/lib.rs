@@ -24,6 +24,7 @@
 //! ```
 
 pub extern crate opentype;
+#[cfg(feature = "webtype")]
 pub extern crate webtype;
 
 #[macro_use(dereference, error, raise)]
