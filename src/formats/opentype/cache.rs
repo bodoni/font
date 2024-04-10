@@ -14,7 +14,7 @@ macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (
         cache!(@define $($field, $type),+);
 
-        impl<T: typeface::tape::Read> Cache<T> {
+        impl<T: crate::Read> Cache<T> {
             #[inline]
             pub fn new(tape: Reference<T>, backend: opentype::Font) -> Self {
                 Self {
@@ -175,7 +175,7 @@ cache! {
     ),
 }
 
-impl<T: typeface::tape::Read> Cache<T> {
+impl<T: crate::Read> Cache<T> {
     pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
         if self.mapping.is_none() {
             let mapping = Mapping::new(&self.character_mapping()?.borrow())?;

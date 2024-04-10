@@ -9,7 +9,7 @@ use std::io::Result;
 use std::rc::Rc;
 
 /// Read fonts.
-pub fn read<T: typeface::tape::Read>(mut tape: T) -> Result<Vec<Font<T>>> {
+pub fn read<T: crate::Read>(mut tape: T) -> Result<Vec<Font<T>>> {
     let mut fonts = vec![];
     let file = webtype::File::read(&mut tape)?;
     let tape = Rc::new(RefCell::new(file.tape));

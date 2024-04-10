@@ -26,7 +26,7 @@ impl Metrics {
     }
 }
 
-pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
+pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
     use opentype::truetype::tables::WindowsMetrics;
 
     let font_header = cache.font_header()?.clone();

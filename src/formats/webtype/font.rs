@@ -12,7 +12,7 @@ pub struct Font<T> {
     tape: std::marker::PhantomData<T>,
 }
 
-impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
+impl<T: crate::Read> crate::font::Case for Font<T> {
     #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
         axes::read(&mut self.cache.borrow_mut())
@@ -56,7 +56,7 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
 
 pub fn read<T>(tape: Reference<Cursor<Vec<u8>>>, backend: webtype::Font) -> Result<Vec<Font<T>>>
 where
-    T: typeface::tape::Read,
+    T: crate::Read,
 {
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
     let tape = std::marker::PhantomData;

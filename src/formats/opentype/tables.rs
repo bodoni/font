@@ -9,7 +9,7 @@ use crate::formats::opentype::cache::Cache;
 /// Font tables.
 pub type Tables = Vec<Tag>;
 
-pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Tables> {
+pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Tables> {
     Ok(cache
         .backend
         .offsets

@@ -31,7 +31,7 @@ macro_rules! implement {
 
         impl<T> Font<T>
         where
-            T: typeface::tape::Read,
+            T: crate::Read,
         {
             $(
                 $(#[$attribute])*
@@ -67,7 +67,7 @@ implement! {
     fn glyph(character: char) -> Option<Glyph>;
 }
 
-pub fn read<T: typeface::tape::Read>(mut tape: T) -> Result<Vec<Font<T>>> {
+pub fn read<T: crate::Read>(mut tape: T) -> Result<Vec<Font<T>>> {
     use opentype::truetype::Tag;
 
     let tag = tape.peek::<Tag>()?;

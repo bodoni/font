@@ -24,7 +24,7 @@ use std::rc::Rc;
 /// Read fonts.
 pub fn read<T>(tape: T) -> Result<Vec<Font<T>>>
 where
-    T: typeface::tape::Read,
+    T: crate::Read,
 {
     let tape = Rc::new(RefCell::new(tape));
     let mut fonts = vec![];

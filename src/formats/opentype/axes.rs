@@ -111,7 +111,7 @@ impl From<Number> for Value {
     }
 }
 
-pub(crate) fn read<T: typeface::tape::Read>(cache: &mut Cache<T>) -> Result<Axes> {
+pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Axes> {
     use opentype::truetype::tables::{PostScript, WindowsMetrics};
 
     let font_header = cache.font_header()?.clone();

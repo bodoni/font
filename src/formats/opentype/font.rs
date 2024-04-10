@@ -22,7 +22,7 @@ pub enum Disposition {
     Update,
 }
 
-impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
+impl<T: crate::Read> crate::font::Case for Font<T> {
     #[inline]
     fn axes(&mut self) -> Result<crate::Axes> {
         axes::read(&mut self.cache.borrow_mut())
@@ -77,10 +77,7 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     }
 }
 
-pub fn read<T: typeface::tape::Read>(
-    tape: Reference<T>,
-    backend: opentype::Font,
-) -> Result<Vec<Font<T>>> {
+pub fn read<T: crate::Read>(tape: Reference<T>, backend: opentype::Font) -> Result<Vec<Font<T>>> {
     use opentype::postscript::compact1::FontSet;
     use opentype::truetype::tables::GlyphData;
 
@@ -114,8 +111,8 @@ pub fn read<T: typeface::tape::Read>(
 /// Write a font.
 pub fn write<T, U, F>(font: Font<T>, tape: &mut U, dispose: F) -> Result<()>
 where
-    T: typeface::tape::Read + 'static,
-    U: typeface::tape::Read + typeface::tape::Write,
+    T: crate::Read + 'static,
+    U: crate::Read + crate::Write,
     F: Fn(&Tag) -> Disposition,
 {
     let mut cache = font.cache.borrow_mut();
@@ -181,15 +178,15 @@ where
 
 fn copy<T, U>(source: &mut T, destination: &mut U, size: u64) -> Result<()>
 where
-    T: typeface::tape::Read + 'static,
-    U: typeface::tape::Read + typeface::tape::Write,
+    T: crate::Read + 'static,
+    U: crate::Read + crate::Write,
 {
     let mut source = std::io::Read::take(source.by_ref(), size);
     std::io::copy(&mut source, destination)?;
     Ok(())
 }
 
-fn pad<T: typeface::tape::Write>(tape: &mut T, size: usize) -> Result<()> {
+fn pad<T: crate::Write>(tape: &mut T, size: usize) -> Result<()> {
     match size % 4 {
         1 => tape.give_bytes(&[0, 0, 0])?,
         2 => tape.give_bytes(&[0, 0])?,

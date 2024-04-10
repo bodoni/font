@@ -9,7 +9,7 @@ pub struct File<T> {
 
 impl<T> File<T>
 where
-    T: typeface::tape::Read,
+    T: crate::Read,
 {
     /// Read a file.
     #[inline]
