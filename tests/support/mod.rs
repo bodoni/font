@@ -20,7 +20,7 @@ pub enum Fixture {
     ZenLoop,
 }
 
-pub fn setup(fixture: Fixture) -> File {
+pub fn setup(fixture: Fixture) -> File<std::fs::File> {
     ok!(File::open(path(fixture)))
 }
 

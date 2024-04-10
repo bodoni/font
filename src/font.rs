@@ -4,8 +4,13 @@ use crate::metrics::Metrics;
 use crate::{Axes, Characters, Features, Glyph, Names, Palettes, Tables};
 
 /// A font.
-pub struct Font {
-    case: Box<dyn Case>,
+pub struct Font<T> {
+    format: Format<T>,
+}
+
+enum Format<T> {
+    OpenType(crate::formats::opentype::Font<T>),
+    WebType(crate::formats::webtype::Font<T>),
 }
 
 macro_rules! implement {
@@ -23,12 +28,18 @@ macro_rules! implement {
             )+
         }
 
-        impl Font {
+        impl<T> Font<T>
+        where
+            T: typeface::tape::Read,
+        {
             $(
                 $(#[$attribute])*
                 #[inline]
                 pub fn $function(&mut self $(, $argument_name: $argument_type)*) -> Result<$type> {
-                    self.case.$function($($argument_name),*)
+                    match self.format {
+                        Format::OpenType(ref mut font) => font.$function($($argument_name),*),
+                        Format::WebType(ref mut font) => font.$function($($argument_name),*),
+                    }
                 }
             )+
         }
@@ -54,7 +65,7 @@ implement! {
     fn glyph(character: char) -> Option<Glyph>;
 }
 
-pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>> {
+pub fn read<T: typeface::tape::Read>(mut tape: T) -> Result<Vec<Font<T>>> {
     use opentype::truetype::Tag;
 
     let tag = tape.peek::<Tag>()?;
@@ -62,7 +73,7 @@ pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>>
         return Ok(crate::formats::opentype::read(tape)?
             .into_iter()
             .map(|font| Font {
-                case: Box::new(font),
+                format: Format::OpenType(font),
             })
             .collect());
     }
@@ -71,7 +82,7 @@ pub fn read<T: typeface::tape::Read + 'static>(mut tape: T) -> Result<Vec<Font>>
         return Ok(crate::formats::webtype::read(tape)?
             .into_iter()
             .map(|font| Font {
-                case: Box::new(font),
+                format: Format::WebType(font),
             })
             .collect());
     }

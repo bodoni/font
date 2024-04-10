@@ -2,28 +2,33 @@ use std::io::Result;
 use std::path::Path;
 
 /// A file.
-pub struct File {
+pub struct File<T> {
     /// The fonts.
-    pub fonts: Vec<crate::font::Font>,
+    pub fonts: Vec<crate::font::Font<T>>,
 }
 
-impl File {
-    /// Open a file.
-    #[inline]
-    pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
-        Self::read(std::fs::File::open(path)?)
-    }
-
+impl<T> File<T>
+where
+    T: typeface::tape::Read,
+{
     /// Read a file.
     #[inline]
-    pub fn read<T: typeface::tape::Read + 'static>(tape: T) -> Result<Self> {
+    pub fn read(tape: T) -> Result<Self> {
         Ok(Self {
             fonts: crate::font::read(tape)?,
         })
     }
 }
 
-dereference! { File::fonts => [crate::font::Font] }
+impl File<std::fs::File> {
+    /// Open a file.
+    #[inline]
+    pub fn open<T: AsRef<Path>>(path: T) -> Result<Self> {
+        Self::read(std::fs::File::open(path)?)
+    }
+}
+
+dereference! { File<T>::fonts => [crate::font::Font<T>] }
 
 #[cfg(test)]
 mod tests {

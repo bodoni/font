@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::io::Result;
+use std::io::{Cursor, Result};
 use std::rc::Rc;
 
 use crate::formats::opentype::cache::{Cache, Reference};
@@ -7,7 +7,9 @@ use crate::formats::opentype::{axes, characters, features, metrics, names, palet
 
 /// A font.
 pub struct Font<T> {
-    cache: Reference<Cache<T>>,
+    cache: Reference<Cache<Cursor<Vec<u8>>>>,
+    #[allow(unused_variables)]
+    tape: std::marker::PhantomData<T>,
 }
 
 impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
@@ -52,10 +54,11 @@ impl<T: typeface::tape::Read> crate::font::Case for Font<T> {
     }
 }
 
-pub fn read<T>(tape: Reference<T>, backend: webtype::Font) -> Result<Vec<Font<T>>>
+pub fn read<T>(tape: Reference<Cursor<Vec<u8>>>, backend: webtype::Font) -> Result<Vec<Font<T>>>
 where
     T: typeface::tape::Read,
 {
     let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
-    Ok(vec![Font { cache }])
+    let tape = std::marker::PhantomData;
+    Ok(vec![Font { cache, tape }])
 }
