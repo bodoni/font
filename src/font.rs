@@ -10,6 +10,7 @@ pub struct Font<T> {
 
 enum Format<T> {
     OpenType(crate::formats::opentype::Font<T>),
+    #[cfg(feature = "webtype")]
     WebType(crate::formats::webtype::Font<T>),
 }
 
@@ -38,6 +39,7 @@ macro_rules! implement {
                 pub fn $function(&mut self $(, $argument_name: $argument_type)*) -> Result<$type> {
                     match self.format {
                         Format::OpenType(ref mut font) => font.$function($($argument_name),*),
+                        #[cfg(feature = "webtype")]
                         Format::WebType(ref mut font) => font.$function($($argument_name),*),
                     }
                 }
