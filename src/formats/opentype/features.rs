@@ -1,6 +1,6 @@
 //! Layout features.
 
-pub use opentype::layout::{Language, Script};
+pub use opentype::layout::{Coverage, Language, Script};
 
 use std::collections::BTreeMap;
 use std::io::Result;
@@ -104,6 +104,23 @@ impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
     fn characters(&self) -> Vec<Vec<Character>> {
-        Default::default()
+        use opentype::tables::glyph_substitution::SingleSubstitution;
+        use opentype::tables::glyph_substitution::Type;
+
+        let mut values = Vec::default();
+        match self {
+            Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
+                values.extend(expand(&value.coverage));
+            }
+            Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
+                values.extend(expand(&value.coverage));
+            }
+            _ => {}
+        }
+        values
     }
+}
+
+fn expand(_: &Coverage) -> impl IntoIterator<Item = Vec<Character>> {
+    vec![]
 }
