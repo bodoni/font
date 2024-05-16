@@ -23,6 +23,13 @@ pub struct Value {
     pub scripts: BTreeMap<Script, BTreeMap<Option<Language>, Vec<Vec<Character>>>>,
 }
 
+trait Characters {
+    #[inline]
+    fn characters(&self) -> Vec<Vec<Character>> {
+        Default::default()
+    }
+}
+
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Features::default();
     if let Some(table) = cache.try_glyph_positioning()? {
@@ -34,14 +41,25 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     Ok(values)
 }
 
-fn populate<T>(values: &mut Features, table: &Directory<T>) {
+fn populate<T>(values: &mut Features, table: &Directory<T>)
+where
+    T: Characters,
+{
     for (i, header) in table.scripts.headers.iter().enumerate() {
         let script = Script::from_tag(&header.tag);
         if let Some(record) = table.scripts.records[i].default_language.as_ref() {
             for index in record.feature_indices.iter() {
-                if let Some(header) = table.features.headers.get(*index as usize) {
+                if let (Some(header), Some(record)) = (
+                    table.features.headers.get(*index as usize),
+                    table.features.records.get(*index as usize),
+                ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let characters = Default::default();
+                    let characters = record
+                        .lookup_indices
+                        .iter()
+                        .filter_map(|index| table.lookups.records.get(*index as usize))
+                        .flat_map(|record| record.tables.iter().flat_map(Characters::characters))
+                        .collect();
                     values
                         .entry(feature)
                         .or_default()
@@ -56,9 +74,17 @@ fn populate<T>(values: &mut Features, table: &Directory<T>) {
             let language = Language::from_tag(&header.tag);
             let record = &table.scripts.records[i].language_records[j];
             for index in record.feature_indices.iter() {
-                if let Some(header) = table.features.headers.get(*index as usize) {
+                if let (Some(header), Some(record)) = (
+                    table.features.headers.get(*index as usize),
+                    table.features.records.get(*index as usize),
+                ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let characters = Default::default();
+                    let characters = record
+                        .lookup_indices
+                        .iter()
+                        .filter_map(|index| table.lookups.records.get(*index as usize))
+                        .flat_map(|record| record.tables.iter().flat_map(Characters::characters))
+                        .collect();
                     values
                         .entry(feature)
                         .or_default()
@@ -71,3 +97,7 @@ fn populate<T>(values: &mut Features, table: &Directory<T>) {
         }
     }
 }
+
+impl Characters for opentype::tables::glyph_positioning::Type {}
+
+impl Characters for opentype::tables::glyph_substitution::Type {}
