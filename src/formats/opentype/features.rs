@@ -54,12 +54,13 @@ where
                     table.features.records.get(*index as usize),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let characters = record
+                    let mut characters = record
                         .lookup_indices
                         .iter()
                         .filter_map(|index| table.lookups.records.get(*index as usize))
                         .flat_map(|record| record.tables.iter().flat_map(Characters::characters))
-                        .collect();
+                        .collect::<Vec<_>>();
+                    characters.sort();
                     values
                         .entry(feature)
                         .or_default()
@@ -79,12 +80,13 @@ where
                     table.features.records.get(*index as usize),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let characters = record
+                    let mut characters = record
                         .lookup_indices
                         .iter()
                         .filter_map(|index| table.lookups.records.get(*index as usize))
                         .flat_map(|record| record.tables.iter().flat_map(Characters::characters))
-                        .collect();
+                        .collect::<Vec<_>>();
+                    characters.sort();
                     values
                         .entry(feature)
                         .or_default()
@@ -100,4 +102,8 @@ where
 
 impl Characters for opentype::tables::glyph_positioning::Type {}
 
-impl Characters for opentype::tables::glyph_substitution::Type {}
+impl Characters for opentype::tables::glyph_substitution::Type {
+    fn characters(&self) -> Vec<Vec<Character>> {
+        Default::default()
+    }
+}
