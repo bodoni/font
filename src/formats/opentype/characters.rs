@@ -8,11 +8,12 @@ use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
 
 use crate::formats::opentype::cache::Cache;
+use crate::Character;
 
-/// Unicode code points.
-pub type Characters = Vec<RangeInclusive<u32>>;
+/// Ranges of Unicode code points.
+pub type Characters = Vec<RangeInclusive<Character>>;
 
-pub(crate) struct Mapping(HashMap<u32, GlyphID>);
+pub(crate) struct Mapping(HashMap<Character, GlyphID>);
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
@@ -30,7 +31,7 @@ impl Mapping {
 
     #[inline]
     pub fn get(&self, character: char) -> Option<GlyphID> {
-        self.0.get(&(character as u32)).copied()
+        self.0.get(&(character as Character)).copied()
     }
 }
 
@@ -48,8 +49,8 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Characters> {
     raise!("found no known character-to-glyph encoding")
 }
 
-fn compress(ranges: Vec<(u32, u32)>) -> Vec<RangeInclusive<u32>> {
-    let mut result: Vec<RangeInclusive<u32>> = Vec::with_capacity(ranges.len());
+fn compress(ranges: Vec<(Character, Character)>) -> Vec<RangeInclusive<Character>> {
+    let mut result: Vec<RangeInclusive<Character>> = Vec::with_capacity(ranges.len());
     for range in ranges {
         if let Some(last) = result.last_mut() {
             if last.end() + 1 == range.0 {
