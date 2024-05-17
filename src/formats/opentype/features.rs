@@ -115,7 +115,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
                 values.extend(
-                    iterate(&value.coverage)
+                    uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
                         .map(expand),
@@ -123,7 +123,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
                 values.extend(
-                    iterate(&value.coverage)
+                    uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
                         .map(expand),
@@ -131,7 +131,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
             }
             Type::MultipleSubstitution(value) => {
                 values.extend(
-                    iterate(&value.coverage)
+                    uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
                         .map(expand),
@@ -139,14 +139,14 @@ impl Characters for opentype::tables::glyph_substitution::Type {
             }
             Type::AlternateSubstitution(value) => {
                 values.extend(
-                    iterate(&value.coverage)
+                    uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
                         .map(expand),
                 );
             }
             Type::LigatureSubstitution(value) => {
-                values.extend(iterate(&value.coverage).zip(&value.rules).flat_map(
+                values.extend(uncover(&value.coverage).zip(&value.rules).flat_map(
                     |(glyph_id, rule)| {
                         rule.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
@@ -160,7 +160,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 ));
             }
             Type::ContextualSubstitution(Context::Format1(value)) => {
-                values.extend(iterate(&value.coverage).zip(&value.rules).flat_map(
+                values.extend(uncover(&value.coverage).zip(&value.rules).flat_map(
                     |(glyph_id, rule)| {
                         rule.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
@@ -174,15 +174,13 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 ));
             }
             Type::ContextualSubstitution(Context::Format2(value)) => {
+                let classes = unclass(&value.class);
+                let classes = &classes;
                 values.extend(
-                    iterate(&value.coverage)
+                    uncover(&value.coverage)
                         .zip(&value.rules)
                         .filter_map(|(glyph_id, rule)| rule.as_ref().map(|rule| (glyph_id, rule)))
                         .flat_map(|(glyph_id, rule)| {
-                            let classes: Vec<CharacterRange> = match &value.class {
-                                Class::Format1(_) => vec![],
-                                Class::Format2(_) => vec![],
-                            };
                             rule.records.iter().filter_map(move |record| {
                                 let mut value = Vec::with_capacity(record.glyph_count as usize);
                                 value.push(range(mapping.get(glyph_id)?));
@@ -205,11 +203,15 @@ fn expand<T>(value: T) -> Vec<T> {
     vec![value]
 }
 
-fn iterate(_: &Coverage) -> impl Iterator<Item = GlyphID> {
-    vec![].into_iter()
-}
-
 #[inline]
 fn range(value: char) -> CharacterRange {
     value..=value
+}
+
+fn unclass(_: &Class) -> Vec<CharacterRange> {
+    vec![]
+}
+
+fn uncover(_: &Coverage) -> impl Iterator<Item = GlyphID> {
+    vec![].into_iter()
 }
