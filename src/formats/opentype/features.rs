@@ -1,6 +1,7 @@
 //! Layout features.
 
 pub use opentype::layout::{Coverage, Language, Script};
+pub use opentype::truetype::GlyphID;
 
 use std::collections::BTreeMap;
 use std::io::Result;
@@ -110,16 +111,19 @@ impl Characters for opentype::tables::glyph_substitution::Type {
         let mut values = Vec::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
-                values.extend(expand(&value.coverage));
+                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
-                values.extend(expand(&value.coverage));
+                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
             }
             Type::MultipleSubstitution(value) => {
-                values.extend(expand(&value.coverage));
+                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
             }
             Type::AlternateSubstitution(value) => {
-                values.extend(expand(&value.coverage))
+                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
+            }
+            Type::LigatureSubstitution(value) => {
+                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
             }
             _ => {}
         }
@@ -127,6 +131,16 @@ impl Characters for opentype::tables::glyph_substitution::Type {
     }
 }
 
-fn expand(_: &Coverage) -> impl IntoIterator<Item = Vec<Character>> {
-    vec![]
+#[inline]
+fn expand<T>(value: T) -> Vec<T> {
+    vec![value]
+}
+
+fn iterate(_: &Coverage) -> impl Iterator<Item = GlyphID> {
+    vec![].into_iter()
+}
+
+#[inline]
+fn map(value: GlyphID) -> Option<Character> {
+    Some(value as Character)
 }
