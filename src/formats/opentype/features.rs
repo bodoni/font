@@ -154,9 +154,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 values.extend(iterate(&value.coverage).zip(&value.rules).flat_map(
                     |(glyph_id, rule)| {
                         rule.records.iter().filter_map(move |record| {
-                            let mut value = Vec::with_capacity(record.component_count as usize);
+                            let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(mapping.get(glyph_id)?);
-                            for glyph_id in &record.component_ids {
+                            for glyph_id in &record.glyph_ids {
                                 value.push(mapping.get(*glyph_id)?);
                             }
                             Some(value)
@@ -168,9 +168,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 values.extend(iterate(&value.coverage).zip(&value.rules).flat_map(
                     |(glyph_id, rule)| {
                         rule.records.iter().filter_map(move |record| {
-                            let mut value = Vec::with_capacity(record.input_glyph_count as usize);
+                            let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(mapping.get(glyph_id)?);
-                            for glyph_id in &record.input_glyph_ids {
+                            for glyph_id in &record.glyph_ids {
                                 value.push(mapping.get(*glyph_id)?);
                             }
                             Some(value)
