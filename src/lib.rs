@@ -54,7 +54,7 @@ pub use self::metrics::Metrics;
 pub use self::offset::Offset;
 
 /// A Unicode code point.
-pub type Character = u32;
+pub type CharacterID = u32;
 
 /// A number.
 pub type Number = f32;

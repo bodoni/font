@@ -9,7 +9,8 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 
 use crate::formats::opentype::cache::Cache;
-use crate::Character;
+use crate::formats::opentype::characters::ReverseMapping;
+use crate::CharacterID;
 
 /// Layout features.
 pub type Features = BTreeMap<Type, Value>;
@@ -21,28 +22,29 @@ pub type Type = Feature;
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Value {
     /// The scripts and languages.
-    pub scripts: BTreeMap<Script, BTreeMap<Option<Language>, Vec<Vec<Character>>>>,
+    pub scripts: BTreeMap<Script, BTreeMap<Option<Language>, Vec<Vec<CharacterID>>>>,
 }
 
 trait Characters {
     #[inline]
-    fn characters(&self) -> Vec<Vec<Character>> {
+    fn characters(&self, _: &ReverseMapping) -> Vec<Vec<CharacterID>> {
         Default::default()
     }
 }
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Features::default();
+    let mapping = cache.reverse_mapping()?.clone();
     if let Some(table) = cache.try_glyph_positioning()? {
-        populate(&mut values, &table.borrow());
+        populate(&mut values, &table.borrow(), &mapping);
     }
     if let Some(table) = cache.try_glyph_substitution()? {
-        populate(&mut values, &table.borrow());
+        populate(&mut values, &table.borrow(), &mapping);
     }
     Ok(values)
 }
 
-fn populate<T>(values: &mut Features, table: &Directory<T>)
+fn populate<T>(values: &mut Features, table: &Directory<T>, mapping: &ReverseMapping)
 where
     T: Characters,
 {
@@ -59,7 +61,12 @@ where
                         .lookup_indices
                         .iter()
                         .filter_map(|index| table.lookups.records.get(*index as usize))
-                        .flat_map(|record| record.tables.iter().flat_map(Characters::characters))
+                        .flat_map(|record| {
+                            record
+                                .tables
+                                .iter()
+                                .flat_map(|table| table.characters(mapping))
+                        })
                         .collect::<Vec<_>>();
                     characters.sort();
                     values
@@ -85,7 +92,12 @@ where
                         .lookup_indices
                         .iter()
                         .filter_map(|index| table.lookups.records.get(*index as usize))
-                        .flat_map(|record| record.tables.iter().flat_map(Characters::characters))
+                        .flat_map(|record| {
+                            record
+                                .tables
+                                .iter()
+                                .flat_map(|table| table.characters(mapping))
+                        })
                         .collect::<Vec<_>>();
                     characters.sort();
                     values
@@ -104,26 +116,46 @@ where
 impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
-    fn characters(&self) -> Vec<Vec<Character>> {
+    fn characters(&self, mapping: &ReverseMapping) -> Vec<Vec<CharacterID>> {
         use opentype::tables::glyph_substitution::SingleSubstitution;
         use opentype::tables::glyph_substitution::Type;
 
         let mut values = Vec::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
-                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
+                values.extend(
+                    iterate(&value.coverage)
+                        .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(expand),
+                );
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
-                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
+                values.extend(
+                    iterate(&value.coverage)
+                        .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(expand),
+                );
             }
             Type::MultipleSubstitution(value) => {
-                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
+                values.extend(
+                    iterate(&value.coverage)
+                        .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(expand),
+                );
             }
             Type::AlternateSubstitution(value) => {
-                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
+                values.extend(
+                    iterate(&value.coverage)
+                        .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(expand),
+                );
             }
             Type::LigatureSubstitution(value) => {
-                values.extend(iterate(&value.coverage).filter_map(map).map(expand));
+                values.extend(
+                    iterate(&value.coverage)
+                        .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(expand),
+                );
             }
             _ => {}
         }
@@ -138,9 +170,4 @@ fn expand<T>(value: T) -> Vec<T> {
 
 fn iterate(_: &Coverage) -> impl Iterator<Item = GlyphID> {
     vec![].into_iter()
-}
-
-#[inline]
-fn map(value: GlyphID) -> Option<Character> {
-    Some(value as Character)
 }

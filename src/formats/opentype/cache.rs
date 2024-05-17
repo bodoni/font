@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use opentype;
 
-use crate::formats::opentype::characters::Mapping;
+use crate::formats::opentype::characters::{Mapping, ReverseMapping};
 use crate::formats::opentype::metrics::Metrics;
 
 pub type Reference<T> = Rc<RefCell<T>>;
@@ -23,6 +23,7 @@ macro_rules! cache(
 
                     mapping: Default::default(),
                     metrics: Default::default(),
+                    reverse_mapping: Default::default(),
 
                     $($field: Default::default(),)+
                 }
@@ -38,6 +39,7 @@ macro_rules! cache(
 
             mapping: Option<Rc<Mapping>>,
             metrics: Option<Rc<Metrics>>,
+            reverse_mapping: Option<Rc<ReverseMapping>>,
 
             $(pub $field: Option<Reference<$type>>,)+
         }
@@ -178,17 +180,25 @@ cache! {
 impl<T: crate::Read> Cache<T> {
     pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
         if self.mapping.is_none() {
-            let mapping = Mapping::new(&self.character_mapping()?.borrow())?;
-            self.mapping = Some(Rc::new(mapping));
+            let value = Mapping::new(&self.character_mapping()?.borrow())?;
+            self.mapping = Some(Rc::new(value));
         }
         Ok(self.mapping.as_ref().unwrap())
     }
 
     pub fn metrics(&mut self) -> Result<&Rc<Metrics>> {
         if self.metrics.is_none() {
-            let metrics = Metrics::new(self.horizontal_metrics()?.clone());
-            self.metrics = Some(Rc::new(metrics));
+            let value = Metrics::new(self.horizontal_metrics()?.clone());
+            self.metrics = Some(Rc::new(value));
         }
         Ok(self.metrics.as_ref().unwrap())
+    }
+
+    pub fn reverse_mapping(&mut self) -> Result<&Rc<ReverseMapping>> {
+        if self.reverse_mapping.is_none() {
+            let value = ReverseMapping::new(&self.mapping()?.clone());
+            self.reverse_mapping = Some(Rc::new(value));
+        }
+        Ok(self.reverse_mapping.as_ref().unwrap())
     }
 }
