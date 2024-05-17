@@ -12,7 +12,11 @@ fn crimson_text() {
     let mut file = setup(Fixture::CrimsonText);
     let mut values: BTreeMap<_, BTreeSet<Feature>> = Default::default();
     for (feature, value) in ok!(file[0].features()).into_iter() {
-        values.entry(value.scripts).or_default().insert(feature);
+        let scripts = value
+            .into_iter()
+            .map(|(script, languages)| (script, languages.into_keys().collect::<BTreeSet<_>>()))
+            .collect::<BTreeMap<_, BTreeSet<_>>>();
+        values.entry(scripts).or_default().insert(feature);
     }
     let values = values
         .into_iter()
@@ -21,7 +25,7 @@ fn crimson_text() {
                 features.into_iter().collect::<Vec<_>>(),
                 scripts
                     .into_iter()
-                    .map(|(script, languages)| (script, languages.into_keys().collect::<Vec<_>>()))
+                    .map(|(script, languages)| (script, languages.into_iter().collect::<Vec<_>>()))
                     .collect::<Vec<_>>(),
             )
         })

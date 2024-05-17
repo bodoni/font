@@ -1,6 +1,6 @@
 //! Layout features.
 
-pub use opentype::layout::{Coverage, Language, Script};
+pub use opentype::layout::{Class, Coverage, Language, Script};
 pub use opentype::truetype::GlyphID;
 
 use std::collections::BTreeMap;
@@ -9,7 +9,7 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::characters::ReverseMapping;
+use crate::formats::opentype::characters::{CharacterRange, ReverseMapping};
 use crate::CharacterID;
 
 /// Layout features.
@@ -19,15 +19,11 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct Value {
-    /// The scripts and languages.
-    pub scripts: BTreeMap<Script, BTreeMap<Option<Language>, Vec<Vec<CharacterID>>>>,
-}
+pub type Value = BTreeMap<Script, BTreeMap<Option<Language>, Vec<Vec<CharacterRange>>>>;
 
 trait Characters {
     #[inline]
-    fn characters(&self, _: &ReverseMapping) -> Vec<Vec<CharacterID>> {
+    fn characters(&self, _: &ReverseMapping) -> Vec<Vec<CharacterRange>> {
         Default::default()
     }
 }
@@ -57,7 +53,7 @@ where
                     table.features.records.get(*index as usize),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let mut characters = record
+                    let characters = record
                         .lookup_indices
                         .iter()
                         .filter_map(|index| table.lookups.records.get(*index as usize))
@@ -68,11 +64,9 @@ where
                                 .flat_map(|table| table.characters(mapping))
                         })
                         .collect::<Vec<_>>();
-                    characters.sort();
                     values
                         .entry(feature)
                         .or_default()
-                        .scripts
                         .entry(script)
                         .or_default()
                         .insert(None, characters);
@@ -88,7 +82,7 @@ where
                     table.features.records.get(*index as usize),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let mut characters = record
+                    let characters = record
                         .lookup_indices
                         .iter()
                         .filter_map(|index| table.lookups.records.get(*index as usize))
@@ -99,11 +93,9 @@ where
                                 .flat_map(|table| table.characters(mapping))
                         })
                         .collect::<Vec<_>>();
-                    characters.sort();
                     values
                         .entry(feature)
                         .or_default()
-                        .scripts
                         .entry(script)
                         .or_default()
                         .insert(Some(language), characters);
@@ -116,7 +108,7 @@ where
 impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
-    fn characters(&self, mapping: &ReverseMapping) -> Vec<Vec<CharacterID>> {
+    fn characters(&self, mapping: &ReverseMapping) -> Vec<Vec<CharacterRange>> {
         use opentype::layout::Context;
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
@@ -126,6 +118,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 values.extend(
                     iterate(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(range)
                         .map(expand),
                 );
             }
@@ -133,6 +126,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 values.extend(
                     iterate(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(range)
                         .map(expand),
                 );
             }
@@ -140,6 +134,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 values.extend(
                     iterate(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(range)
                         .map(expand),
                 );
             }
@@ -147,6 +142,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 values.extend(
                     iterate(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
+                        .map(range)
                         .map(expand),
                 );
             }
@@ -155,9 +151,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, rule)| {
                         rule.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(mapping.get(glyph_id)?);
+                            value.push(range(mapping.get(glyph_id)?));
                             for glyph_id in &record.glyph_ids {
-                                value.push(mapping.get(*glyph_id)?);
+                                value.push(range(mapping.get(*glyph_id)?));
                             }
                             Some(value)
                         })
@@ -169,14 +165,35 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, rule)| {
                         rule.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(mapping.get(glyph_id)?);
+                            value.push(range(mapping.get(glyph_id)?));
                             for glyph_id in &record.glyph_ids {
-                                value.push(mapping.get(*glyph_id)?);
+                                value.push(range(mapping.get(*glyph_id)?));
                             }
                             Some(value)
                         })
                     },
                 ));
+            }
+            Type::ContextualSubstitution(Context::Format2(value)) => {
+                values.extend(
+                    iterate(&value.coverage)
+                        .zip(&value.rules)
+                        .filter_map(|(glyph_id, rule)| rule.as_ref().map(|rule| (glyph_id, rule)))
+                        .flat_map(|(glyph_id, rule)| {
+                            let classes: Vec<CharacterRange> = match &value.class {
+                                Class::Format1(_) => vec![],
+                                Class::Format2(_) => vec![],
+                            };
+                            rule.records.iter().filter_map(move |record| {
+                                let mut value = Vec::with_capacity(record.glyph_count as usize);
+                                value.push(range(mapping.get(glyph_id)?));
+                                for class_id in &record.class_ids {
+                                    classes.get(*class_id as usize)?;
+                                }
+                                Some(value)
+                            })
+                        }),
+                );
             }
             _ => {}
         }
@@ -191,4 +208,9 @@ fn expand<T>(value: T) -> Vec<T> {
 
 fn iterate(_: &Coverage) -> impl Iterator<Item = GlyphID> {
     vec![].into_iter()
+}
+
+#[inline]
+fn range(value: CharacterID) -> CharacterRange {
+    value..=value
 }

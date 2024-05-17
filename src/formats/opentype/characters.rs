@@ -11,7 +11,9 @@ use crate::formats::opentype::cache::Cache;
 use crate::CharacterID;
 
 /// Ranges of Unicode code points.
-pub type Characters = Vec<RangeInclusive<CharacterID>>;
+pub type Characters = Vec<CharacterRange>;
+
+pub(crate) type CharacterRange = RangeInclusive<CharacterID>;
 
 pub(crate) struct Mapping(HashMap<CharacterID, GlyphID>);
 
@@ -68,8 +70,8 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Characters> {
     raise!("found no known character-to-glyph encoding")
 }
 
-fn compress(ranges: Vec<(CharacterID, CharacterID)>) -> Vec<RangeInclusive<CharacterID>> {
-    let mut result: Vec<RangeInclusive<CharacterID>> = Vec::with_capacity(ranges.len());
+fn compress(ranges: Vec<(CharacterID, CharacterID)>) -> Vec<CharacterRange> {
+    let mut result: Vec<CharacterRange> = Vec::with_capacity(ranges.len());
     for range in ranges {
         if let Some(last) = result.last_mut() {
             if last.end() + 1 == range.0 {
