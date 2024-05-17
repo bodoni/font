@@ -117,8 +117,8 @@ impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
     fn characters(&self, mapping: &ReverseMapping) -> Vec<Vec<CharacterID>> {
-        use opentype::tables::glyph_substitution::SingleSubstitution;
-        use opentype::tables::glyph_substitution::Type;
+        use opentype::layout::Context;
+        use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
         let mut values = Vec::default();
         match self {
@@ -157,6 +157,20 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                             let mut value = Vec::with_capacity(record.component_count as usize);
                             value.push(mapping.get(glyph_id)?);
                             for glyph_id in &record.component_ids {
+                                value.push(mapping.get(*glyph_id)?);
+                            }
+                            Some(value)
+                        })
+                    },
+                ));
+            }
+            Type::ContextualSubstitution(Context::Format1(value)) => {
+                values.extend(iterate(&value.coverage).zip(&value.rules).flat_map(
+                    |(glyph_id, rule)| {
+                        rule.records.iter().filter_map(move |record| {
+                            let mut value = Vec::with_capacity(record.input_glyph_count as usize);
+                            value.push(mapping.get(glyph_id)?);
+                            for glyph_id in &record.input_glyph_ids {
                                 value.push(mapping.get(*glyph_id)?);
                             }
                             Some(value)
