@@ -10,7 +10,6 @@ use opentype::layout::{Directory, Feature};
 
 use crate::formats::opentype::cache::Cache;
 use crate::formats::opentype::characters::{CharacterRange, ReverseMapping};
-use crate::CharacterID;
 
 /// Layout features.
 pub type Features = BTreeMap<Type, Value>;
@@ -211,6 +210,6 @@ fn iterate(_: &Coverage) -> impl Iterator<Item = GlyphID> {
 }
 
 #[inline]
-fn range(value: CharacterID) -> CharacterRange {
+fn range(value: char) -> CharacterRange {
     value..=value
 }

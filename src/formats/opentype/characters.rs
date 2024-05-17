@@ -8,16 +8,15 @@ use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
 
 use crate::formats::opentype::cache::Cache;
-use crate::CharacterID;
 
 /// Ranges of Unicode code points.
 pub type Characters = Vec<CharacterRange>;
 
-pub(crate) type CharacterRange = RangeInclusive<CharacterID>;
+pub(crate) type CharacterRange = RangeInclusive<char>;
 
-pub(crate) struct Mapping(HashMap<CharacterID, GlyphID>);
+pub(crate) struct Mapping(HashMap<u32, GlyphID>);
 
-pub(crate) struct ReverseMapping(HashMap<GlyphID, CharacterID>);
+pub(crate) struct ReverseMapping(HashMap<GlyphID, u32>);
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
@@ -35,7 +34,7 @@ impl Mapping {
 
     #[inline]
     pub fn get(&self, character: char) -> Option<GlyphID> {
-        self.0.get(&(character as CharacterID)).copied()
+        self.0.get(&(character as u32)).copied()
     }
 }
 
@@ -51,8 +50,8 @@ impl ReverseMapping {
     }
 
     #[inline]
-    pub fn get(&self, glyph_id: GlyphID) -> Option<CharacterID> {
-        self.0.get(&glyph_id).cloned()
+    pub fn get(&self, glyph_id: GlyphID) -> Option<char> {
+        self.0.get(&glyph_id).cloned().and_then(char::from_u32)
     }
 }
 
@@ -65,21 +64,23 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Characters> {
             Encoding::Format12(encoding) => encoding.characters(),
             _ => continue,
         };
-        return Ok(compress(ranges));
+        return compress(ranges);
     }
     raise!("found no known character-to-glyph encoding")
 }
 
-fn compress(ranges: Vec<(CharacterID, CharacterID)>) -> Vec<CharacterRange> {
+fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<CharacterRange>> {
     let mut result: Vec<CharacterRange> = Vec::with_capacity(ranges.len());
     for range in ranges {
-        if let Some(last) = result.last_mut() {
-            if last.end() + 1 == range.0 {
-                *last = *last.start()..=range.1;
-                continue;
+        if let (Some(start), Some(end)) = (char::from_u32(range.0), char::from_u32(range.1)) {
+            if let Some(last) = result.last_mut() {
+                if *last.end() as usize + 1 == start as usize {
+                    *last = *last.start()..=end;
+                    continue;
+                }
             }
+            result.push(start..=end);
         }
-        result.push(range.0..=range.1);
     }
-    result
+    Ok(result)
 }

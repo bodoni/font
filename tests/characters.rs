@@ -6,7 +6,10 @@ use crate::support::{setup, Fixture};
 #[test]
 fn adobe_blank() {
     let mut file = setup(Fixture::CrimsonText);
-    let values = ok!(file[0].characters());
+    let values = ok!(file[0].characters())
+        .into_iter()
+        .map(|range| (*range.start() as usize)..=(*range.end() as usize))
+        .collect::<Vec<_>>();
     assert_eq!(
         values,
         [
