@@ -115,6 +115,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
             Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
                 values.extend(expand(&value.coverage));
             }
+            Type::MultipleSubstitution(value) => {
+                values.extend(expand(&value.coverage));
+            }
             _ => {}
         }
         values
