@@ -214,6 +214,14 @@ fn unclass(_: &Class) -> Vec<CharacterRange> {
     vec![]
 }
 
-fn uncover(_: &Coverage) -> impl Iterator<Item = GlyphID> {
-    vec![].into_iter()
+fn uncover(value: &Coverage) -> Box<dyn Iterator<Item = GlyphID> + '_> {
+    match value {
+        Coverage::Format1(value) => Box::new(value.records.iter().cloned()),
+        Coverage::Format2(value) => Box::new(
+            value
+                .records
+                .iter()
+                .flat_map(|record| record.start_glyph_id..=record.end_glyph_id),
+        ),
+    }
 }
