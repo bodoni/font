@@ -202,7 +202,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
 
 #[inline]
 fn range(value: char) -> CharacterRange {
-    value..=value
+    (value, value)
 }
 
 #[inline]

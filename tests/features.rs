@@ -1,8 +1,6 @@
 #[macro_use]
 mod support;
 
-use std::ops::RangeInclusive;
-
 use font::opentype::truetype::Tag;
 use font::Font;
 
@@ -377,11 +375,10 @@ where
         .collect()
 }
 
-fn flatten(entries: &[Vec<RangeInclusive<char>>]) -> String {
+fn flatten(entries: &[Vec<(char, char)>]) -> String {
     let mut value = String::new();
     for (index, entry) in entries.iter().enumerate() {
-        for character in entry {
-            let (start, end) = (character.start(), character.end());
+        for (start, end) in entry {
             if start == end {
                 value.push(*start);
             } else {

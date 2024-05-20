@@ -2,7 +2,6 @@
 
 use std::collections::HashMap;
 use std::io::Result;
-use std::ops::RangeInclusive;
 
 use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
@@ -12,7 +11,7 @@ use crate::formats::opentype::cache::Cache;
 /// Ranges of Unicode code points.
 pub type Characters = Vec<CharacterRange>;
 
-pub(crate) type CharacterRange = RangeInclusive<char>;
+pub(crate) type CharacterRange = (char, char);
 
 pub(crate) struct Mapping(HashMap<u32, GlyphID>);
 
@@ -74,12 +73,12 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<CharacterRange>> {
     for range in ranges {
         if let (Some(start), Some(end)) = (char::from_u32(range.0), char::from_u32(range.1)) {
             if let Some(last) = result.last_mut() {
-                if *last.end() as usize + 1 == start as usize {
-                    *last = *last.start()..=end;
+                if last.1 as usize + 1 == start as usize {
+                    *last = (last.0, end);
                     continue;
                 }
             }
-            result.push(start..=end);
+            result.push((start, end));
         }
     }
     Ok(result)
