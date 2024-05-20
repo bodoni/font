@@ -118,7 +118,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
-                        .map(expand),
+                        .map(vector),
                 );
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
@@ -126,7 +126,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
-                        .map(expand),
+                        .map(vector),
                 );
             }
             Type::MultipleSubstitution(value) => {
@@ -134,7 +134,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
-                        .map(expand),
+                        .map(vector),
                 );
             }
             Type::AlternateSubstitution(value) => {
@@ -142,7 +142,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     uncover(&value.coverage)
                         .filter_map(|glyph_id| mapping.get(glyph_id))
                         .map(range)
-                        .map(expand),
+                        .map(vector),
                 );
             }
             Type::LigatureSubstitution(value) => {
@@ -192,6 +192,8 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                         }),
                 );
             }
+            Type::ChainedContextualSubstitution(_) => {}
+            Type::ReverseChainedContextualSubstibution(_) => {}
             _ => {}
         }
         values
@@ -199,13 +201,13 @@ impl Characters for opentype::tables::glyph_substitution::Type {
 }
 
 #[inline]
-fn expand<T>(value: T) -> Vec<T> {
-    vec![value]
+fn range(value: char) -> CharacterRange {
+    value..=value
 }
 
 #[inline]
-fn range(value: char) -> CharacterRange {
-    value..=value
+fn vector<T>(value: T) -> Vec<T> {
+    vec![value]
 }
 
 fn unclass(_: &Class) -> Vec<CharacterRange> {
