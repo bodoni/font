@@ -3,7 +3,7 @@
 pub use opentype::layout::{Class, Coverage, Language, Script};
 pub use opentype::truetype::GlyphID;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;
 
 use opentype::layout::{Directory, Feature};
@@ -18,11 +18,11 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, Vec<Vec<CharacterRange>>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<CharacterRange>>>>;
 
 trait Characters {
     #[inline]
-    fn characters(&self, _: &ReverseMapping) -> Vec<Vec<CharacterRange>> {
+    fn characters(&self, _: &ReverseMapping) -> BTreeSet<Vec<CharacterRange>> {
         Default::default()
     }
 }
@@ -62,7 +62,7 @@ where
                                 .iter()
                                 .flat_map(|table| table.characters(mapping))
                         })
-                        .collect::<Vec<_>>();
+                        .collect::<BTreeSet<_>>();
                     values
                         .entry(feature)
                         .or_default()
@@ -91,7 +91,7 @@ where
                                 .iter()
                                 .flat_map(|table| table.characters(mapping))
                         })
-                        .collect::<Vec<_>>();
+                        .collect::<BTreeSet<_>>();
                     values
                         .entry(feature)
                         .or_default()
@@ -107,11 +107,11 @@ where
 impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
-    fn characters(&self, mapping: &ReverseMapping) -> Vec<Vec<CharacterRange>> {
+    fn characters(&self, mapping: &ReverseMapping) -> BTreeSet<Vec<CharacterRange>> {
         use opentype::layout::Context;
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
-        let mut values = Vec::default();
+        let mut values = BTreeSet::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
                 values.extend(
