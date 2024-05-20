@@ -18,7 +18,7 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Option<Language>, Vec<Vec<CharacterRange>>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, Vec<Vec<CharacterRange>>>>;
 
 trait Characters {
     #[inline]
@@ -68,7 +68,7 @@ where
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(None, characters);
+                        .insert(Language::Default, characters);
                 }
             }
         }
@@ -97,7 +97,7 @@ where
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(Some(language), characters);
+                        .insert(language, characters);
                 }
             }
         }

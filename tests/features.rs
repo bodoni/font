@@ -16,14 +16,6 @@ fn crimson_text() {
         [
             (
                 vec![
-                    Feature::Kerning,
-                    Feature::MarkPositioning,
-                    Feature::MarkToMarkPositioning
-                ],
-                vec![(Script::Default, vec![None]), (Script::Latin, vec![None])],
-            ),
-            (
-                vec![
                     Feature::CaseSensitiveForms,
                     Feature::GlyphCompositionDecomposition,
                     Feature::DiscretionaryLigatures,
@@ -34,24 +26,35 @@ fn crimson_text() {
                     Feature::ScientificInferiors,
                     Feature::Subscript,
                     Feature::Superscript,
-                    Feature::SlashedZero
+                    Feature::SlashedZero,
                 ],
                 vec![
-                    (Script::Default, vec![None]),
+                    (Script::Default, vec![Language::Default]),
                     (
                         Script::Latin,
                         vec![
-                            None,
-                            Some(Language::Azerbaijani),
-                            Some(Language::Catalan),
-                            Some(Language::CrimeanTatar),
-                            Some(Language::Kazakh),
-                            Some(Language::Moldavian),
-                            Some(Language::Romanian),
-                            Some(Language::Tatar),
-                            Some(Language::Turkish)
+                            Language::Azerbaijani,
+                            Language::Catalan,
+                            Language::CrimeanTatar,
+                            Language::Default,
+                            Language::Kazakh,
+                            Language::Moldavian,
+                            Language::Romanian,
+                            Language::Tatar,
+                            Language::Turkish,
                         ]
                     )
+                ],
+            ),
+            (
+                vec![
+                    Feature::Kerning,
+                    Feature::MarkPositioning,
+                    Feature::MarkToMarkPositioning,
+                ],
+                vec![
+                    (Script::Default, vec![Language::Default]),
+                    (Script::Latin, vec![Language::Default])
                 ],
             ),
             (
@@ -59,14 +62,14 @@ fn crimson_text() {
                 vec![(
                     Script::Latin,
                     vec![
-                        Some(Language::Azerbaijani),
-                        Some(Language::Catalan),
-                        Some(Language::CrimeanTatar),
-                        Some(Language::Kazakh),
-                        Some(Language::Moldavian),
-                        Some(Language::Romanian),
-                        Some(Language::Tatar),
-                        Some(Language::Turkish)
+                        Language::Azerbaijani,
+                        Language::Catalan,
+                        Language::CrimeanTatar,
+                        Language::Kazakh,
+                        Language::Moldavian,
+                        Language::Romanian,
+                        Language::Tatar,
+                        Language::Turkish,
                     ]
                 )],
             )
@@ -89,64 +92,61 @@ fn noto_serif() {
                     Feature::MarkPositioning,
                     Feature::MarkToMarkPositioning,
                     Feature::Ordinals,
-                    Feature::StylisticSet1
+                    Feature::StylisticSet1,
                 ],
                 vec![
                     (
                         Script::Cyrillic,
-                        vec![None, Some(Language::Macedonian), Some(Language::Serbian)]
+                        vec![Language::Default, Language::Macedonian, Language::Serbian]
                     ),
-                    (Script::Default, vec![None]),
+                    (Script::Default, vec![Language::Default]),
                     (
                         Script::Greek,
                         vec![
-                            None,
-                            Some(Language::AmericanistPhoneticNotation),
-                            Some(Language::InternationalPhoneticAlphabet)
+                            Language::AmericanistPhoneticNotation,
+                            Language::Default,
+                            Language::InternationalPhoneticAlphabet,
                         ]
                     ),
                     (
                         Script::Latin,
                         vec![
-                            None,
-                            Some(Language::AmericanistPhoneticNotation),
-                            Some(Language::Catalan),
-                            Some(Language::InternationalPhoneticAlphabet),
-                            Some(Language::Marshallese),
-                            Some(Language::Moldavian),
-                            Some(Language::Navajo),
-                            Some(Language::Romanian)
+                            Language::AmericanistPhoneticNotation,
+                            Language::Catalan,
+                            Language::Default,
+                            Language::InternationalPhoneticAlphabet,
+                            Language::Marshallese,
+                            Language::Moldavian,
+                            Language::Navajo,
+                            Language::Romanian,
                         ]
                     ),
-                    (Script::Thai, vec![None])
+                    (Script::Thai, vec![Language::Default])
                 ]
             ),
             (
                 vec![Feature::Kerning],
                 vec![
-                    (Script::Default, vec![None]),
+                    (Script::Default, vec![Language::Default]),
                     (
                         Script::Latin,
                         vec![
-                            None,
-                            Some(Language::AmericanistPhoneticNotation),
-                            Some(Language::Catalan),
-                            Some(Language::InternationalPhoneticAlphabet),
-                            Some(Language::Marshallese),
-                            Some(Language::Moldavian),
-                            Some(Language::Navajo),
-                            Some(Language::Romanian)
+                            Language::AmericanistPhoneticNotation,
+                            Language::Catalan,
+                            Language::Default,
+                            Language::InternationalPhoneticAlphabet,
+                            Language::Marshallese,
+                            Language::Moldavian,
+                            Language::Navajo,
+                            Language::Romanian,
                         ]
                     ),
-                    (Script::Thai, vec![None])
+                    (Script::Thai, vec![Language::Default])
                 ]
             ),
             (
                 vec![Feature::LocalizedForms],
-                vec![(
-                    Script::Latin,
-                    vec![Some(Language::Moldavian), Some(Language::Romanian)]
-                )]
+                vec![(Script::Latin, vec![Language::Moldavian, Language::Romanian],)]
             ),
         ],
     );
@@ -177,25 +177,28 @@ fn qahiri() {
                     Feature::StylisticSet1,
                     Feature::StylisticSet2
                 ],
-                vec![(Script::Arabic, vec![None]), (Script::Default, vec![None])]
+                vec![
+                    (Script::Arabic, vec![Language::Default]),
+                    (Script::Default, vec![Language::Default])
+                ]
             ),
             (
                 vec![Feature::StylisticAlternates],
                 vec![
-                    (Script::Arabic, vec![None]),
-                    (Script::Default, vec![None]),
-                    (Script::Latin, vec![None])
+                    (Script::Arabic, vec![Language::Default]),
+                    (Script::Default, vec![Language::Default]),
+                    (Script::Latin, vec![Language::Default])
                 ]
             ),
             (
                 vec![Feature::LocalizedForms],
-                vec![(Script::Latin, vec![None])]
+                vec![(Script::Latin, vec![Language::Default])]
             ),
         ],
     );
 }
 
-fn extract<T>(font: &mut Font<T>) -> Vec<(Vec<Feature>, Vec<(Script, Vec<Option<Language>>)>)>
+fn extract<T>(font: &mut Font<T>) -> Vec<(Vec<Feature>, Vec<(Script, Vec<Language>)>)>
 where
     T: font::Read,
 {

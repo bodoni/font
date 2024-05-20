@@ -17,6 +17,6 @@ default = ["webtype"]
 webtype = ["dep:webtype"]
 
 [dependencies]
-opentype = "0.36.0"
+opentype = { version = "0.36.1", features = ["default-language"] }
 typeface = "0.4.2"
 webtype = { version = "0.14.0", optional = true }
