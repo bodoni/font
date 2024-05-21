@@ -31,83 +31,6 @@ trait Compress {
     fn compress(self, _: &ReverseMapping) -> Option<Character>;
 }
 
-pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
-    let mut values = Features::default();
-    let mapping = cache.reverse_mapping()?.clone();
-    if let Some(table) = cache.try_glyph_positioning()? {
-        populate(&mut values, &table.borrow(), &mapping);
-    }
-    if let Some(table) = cache.try_glyph_substitution()? {
-        populate(&mut values, &table.borrow(), &mapping);
-    }
-    Ok(values)
-}
-
-fn populate<T>(values: &mut Features, table: &Directory<T>, mapping: &ReverseMapping)
-where
-    T: Characters,
-{
-    for (i, header) in table.scripts.headers.iter().enumerate() {
-        let script = Script::from_tag(&header.tag);
-        if let Some(record) = table.scripts.records[i].default_language.as_ref() {
-            for index in record.feature_indices.iter() {
-                if let (Some(header), Some(record)) = (
-                    table.features.headers.get(*index as usize),
-                    table.features.records.get(*index as usize),
-                ) {
-                    let feature = Feature::from_tag(&header.tag);
-                    let characters = record
-                        .lookup_indices
-                        .iter()
-                        .filter_map(|index| table.lookups.records.get(*index as usize))
-                        .flat_map(|record| {
-                            record
-                                .tables
-                                .iter()
-                                .flat_map(|table| table.characters(mapping))
-                        })
-                        .collect::<BTreeSet<_>>();
-                    values
-                        .entry(feature)
-                        .or_default()
-                        .entry(script)
-                        .or_default()
-                        .insert(Language::Default, characters);
-                }
-            }
-        }
-        for (j, header) in table.scripts.records[i].language_headers.iter().enumerate() {
-            let language = Language::from_tag(&header.tag);
-            let record = &table.scripts.records[i].language_records[j];
-            for index in record.feature_indices.iter() {
-                if let (Some(header), Some(record)) = (
-                    table.features.headers.get(*index as usize),
-                    table.features.records.get(*index as usize),
-                ) {
-                    let feature = Feature::from_tag(&header.tag);
-                    let characters = record
-                        .lookup_indices
-                        .iter()
-                        .filter_map(|index| table.lookups.records.get(*index as usize))
-                        .flat_map(|record| {
-                            record
-                                .tables
-                                .iter()
-                                .flat_map(|table| table.characters(mapping))
-                        })
-                        .collect::<BTreeSet<_>>();
-                    values
-                        .entry(feature)
-                        .or_default()
-                        .entry(script)
-                        .or_default()
-                        .insert(language, characters);
-                }
-            }
-        }
-    }
-}
-
 impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
@@ -294,6 +217,83 @@ impl Compress for &Coverage {
                     0 => None,
                     1 => Some(Character::Range(value[0].0, value[0].1)),
                     _ => Some(Character::Ranges(value)),
+                }
+            }
+        }
+    }
+}
+
+pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
+    let mut values = Features::default();
+    let mapping = cache.reverse_mapping()?.clone();
+    if let Some(table) = cache.try_glyph_positioning()? {
+        populate(&mut values, &table.borrow(), &mapping);
+    }
+    if let Some(table) = cache.try_glyph_substitution()? {
+        populate(&mut values, &table.borrow(), &mapping);
+    }
+    Ok(values)
+}
+
+fn populate<T>(values: &mut Features, table: &Directory<T>, mapping: &ReverseMapping)
+where
+    T: Characters,
+{
+    for (i, header) in table.scripts.headers.iter().enumerate() {
+        let script = Script::from_tag(&header.tag);
+        if let Some(record) = table.scripts.records[i].default_language.as_ref() {
+            for index in record.feature_indices.iter() {
+                if let (Some(header), Some(record)) = (
+                    table.features.headers.get(*index as usize),
+                    table.features.records.get(*index as usize),
+                ) {
+                    let feature = Feature::from_tag(&header.tag);
+                    let characters = record
+                        .lookup_indices
+                        .iter()
+                        .filter_map(|index| table.lookups.records.get(*index as usize))
+                        .flat_map(|record| {
+                            record
+                                .tables
+                                .iter()
+                                .flat_map(|table| table.characters(mapping))
+                        })
+                        .collect::<BTreeSet<_>>();
+                    values
+                        .entry(feature)
+                        .or_default()
+                        .entry(script)
+                        .or_default()
+                        .insert(Language::Default, characters);
+                }
+            }
+        }
+        for (j, header) in table.scripts.records[i].language_headers.iter().enumerate() {
+            let language = Language::from_tag(&header.tag);
+            let record = &table.scripts.records[i].language_records[j];
+            for index in record.feature_indices.iter() {
+                if let (Some(header), Some(record)) = (
+                    table.features.headers.get(*index as usize),
+                    table.features.records.get(*index as usize),
+                ) {
+                    let feature = Feature::from_tag(&header.tag);
+                    let characters = record
+                        .lookup_indices
+                        .iter()
+                        .filter_map(|index| table.lookups.records.get(*index as usize))
+                        .flat_map(|record| {
+                            record
+                                .tables
+                                .iter()
+                                .flat_map(|table| table.characters(mapping))
+                        })
+                        .collect::<BTreeSet<_>>();
+                    values
+                        .entry(feature)
+                        .or_default()
+                        .entry(script)
+                        .or_default()
+                        .insert(language, characters);
                 }
             }
         }
