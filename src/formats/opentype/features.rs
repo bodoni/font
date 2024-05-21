@@ -9,7 +9,7 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::characters::{CharacterRange, ReverseMapping};
+use crate::formats::opentype::characters::{Character, ReverseMapping};
 
 /// Layout features.
 pub type Features = BTreeMap<Type, Value>;
@@ -18,11 +18,11 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<CharacterRange>>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<Character>>>>;
 
 trait Characters {
     #[inline]
-    fn characters(&self, _: &ReverseMapping) -> BTreeSet<Vec<CharacterRange>> {
+    fn characters(&self, _: &ReverseMapping) -> BTreeSet<Vec<Character>> {
         Default::default()
     }
 }
@@ -107,41 +107,42 @@ where
 impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
-    fn characters(&self, mapping: &ReverseMapping) -> BTreeSet<Vec<CharacterRange>> {
+    fn characters(&self, mapping: &ReverseMapping) -> BTreeSet<Vec<Character>> {
         use opentype::layout::Context;
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
+        let map = |glyph_id| mapping.get(glyph_id);
         let mut values = BTreeSet::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
                 values.extend(
                     uncover(&value.coverage)
-                        .filter_map(|glyph_id| mapping.get(glyph_id))
-                        .map(range)
+                        .filter_map(map)
+                        .map(Character::Scalar)
                         .map(vector),
                 );
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
                 values.extend(
                     uncover(&value.coverage)
-                        .filter_map(|glyph_id| mapping.get(glyph_id))
-                        .map(range)
+                        .filter_map(map)
+                        .map(Character::Scalar)
                         .map(vector),
                 );
             }
             Type::MultipleSubstitution(value) => {
                 values.extend(
                     uncover(&value.coverage)
-                        .filter_map(|glyph_id| mapping.get(glyph_id))
-                        .map(range)
+                        .filter_map(map)
+                        .map(Character::Scalar)
                         .map(vector),
                 );
             }
             Type::AlternateSubstitution(value) => {
                 values.extend(
                     uncover(&value.coverage)
-                        .filter_map(|glyph_id| mapping.get(glyph_id))
-                        .map(range)
+                        .filter_map(map)
+                        .map(Character::Scalar)
                         .map(vector),
                 );
             }
@@ -150,9 +151,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         record.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(range(mapping.get(glyph_id)?));
+                            value.push(Character::Scalar(mapping.get(glyph_id)?));
                             for glyph_id in &record.glyph_ids {
-                                value.push(range(mapping.get(*glyph_id)?));
+                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
                             }
                             Some(value)
                         })
@@ -164,9 +165,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         record.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(range(mapping.get(glyph_id)?));
+                            value.push(Character::Scalar(mapping.get(glyph_id)?));
                             for glyph_id in &record.glyph_ids {
-                                value.push(range(mapping.get(*glyph_id)?));
+                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
                             }
                             Some(value)
                         })
@@ -174,18 +175,24 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 ));
             }
             Type::ContextualSubstitution(Context::Format2(value)) => {
-                let classes = unclass(&value.class);
-                let classes = &classes;
+                let (classes, mapping) = unclass(&value.class, mapping);
                 values.extend(
                     uncover(&value.coverage)
-                        .zip(&value.records)
-                        .filter_map(|(glyph_id, record)| record.as_ref().map(|record| (glyph_id, record)))
-                        .flat_map(|(glyph_id, record)| {
-                            record.records.iter().filter_map(move |record| {
+                        .filter_map(|glyph_id| mapping.get(&glyph_id))
+                        .collect::<BTreeSet<_>>()
+                        .into_iter()
+                        .filter_map(|index| {
+                            value
+                                .records
+                                .get(*index as usize)
+                                .and_then(|record| record.as_ref().map(|record| (index, record)))
+                        })
+                        .flat_map(|(index, record)| {
+                            record.records.iter().filter_map(|record| {
                                 let mut value = Vec::with_capacity(record.glyph_count as usize);
-                                value.push(range(mapping.get(glyph_id)?));
-                                for class_id in &record.class_ids {
-                                    classes.get(*class_id as usize)?;
+                                value.push(classes.get(index)?.clone());
+                                for index in &record.indices {
+                                    value.push(classes.get(index)?.clone());
                                 }
                                 Some(value)
                             })
@@ -201,8 +208,8 @@ impl Characters for opentype::tables::glyph_substitution::Type {
 }
 
 #[inline]
-fn range(value: char) -> CharacterRange {
-    (value, value)
+fn compress(values: BTreeSet<char>) -> Character {
+    Character::List(values.into_iter().collect())
 }
 
 #[inline]
@@ -210,8 +217,31 @@ fn vector<T>(value: T) -> Vec<T> {
     vec![value]
 }
 
-fn unclass(_: &Class) -> Vec<CharacterRange> {
-    vec![]
+fn unclass(
+    value: &Class,
+    mapping: &ReverseMapping,
+) -> (BTreeMap<u16, Character>, BTreeMap<GlyphID, u16>) {
+    match value {
+        Class::Format1(value) => {
+            let mut forward = BTreeMap::<_, BTreeSet<_>>::default();
+            let mut reverse = BTreeMap::default();
+            let range = value.start_glyph_id..value.start_glyph_id + value.glyph_count;
+            for (glyph_id, index) in range.zip(value.indices.iter().cloned()) {
+                if let Some(character) = mapping.get(glyph_id) {
+                    forward.entry(index).or_default().insert(character);
+                }
+                reverse.insert(glyph_id, index);
+            }
+            (
+                forward
+                    .into_iter()
+                    .map(|(index, glyph_ids)| (index, compress(glyph_ids)))
+                    .collect(),
+                reverse,
+            )
+        }
+        Class::Format2(_) => unreachable!(),
+    }
 }
 
 fn uncover(value: &Coverage) -> Box<dyn Iterator<Item = GlyphID> + '_> {

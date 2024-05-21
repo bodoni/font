@@ -8,10 +8,16 @@ use opentype::truetype::GlyphID;
 
 use crate::formats::opentype::cache::Cache;
 
-/// Ranges of Unicode code points.
-pub type Characters = Vec<CharacterRange>;
+/// A character.
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub enum Character {
+    Scalar(char),
+    Range(char, char),
+    List(Vec<char>),
+}
 
-pub(crate) type CharacterRange = (char, char);
+/// Characters.
+pub type Characters = Vec<Character>;
 
 pub(crate) struct Mapping(HashMap<u32, GlyphID>);
 
@@ -68,18 +74,27 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Characters> {
     raise!("found no known character-to-glyph encoding")
 }
 
-fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<CharacterRange>> {
-    let mut result: Vec<CharacterRange> = Vec::with_capacity(ranges.len());
+fn compress(ranges: Vec<(u32, u32)>) -> Result<Characters> {
+    let mut values = Vec::with_capacity(ranges.len());
     for range in ranges {
         if let (Some(start), Some(end)) = (char::from_u32(range.0), char::from_u32(range.1)) {
-            if let Some(last) = result.last_mut() {
-                if last.1 as usize + 1 == start as usize {
-                    *last = (last.0, end);
+            if let Some(value) = values.last_mut() {
+                let (first, last) = match value {
+                    Character::Scalar(first) => (*first, *first),
+                    Character::Range(first, last) => (*first, *last),
+                    _ => unreachable!(),
+                };
+                if last as usize + 1 == start as usize {
+                    *value = Character::Range(first, end);
                     continue;
                 }
             }
-            result.push((start, end));
+            if start == end {
+                values.push(Character::Scalar(start));
+            } else {
+                values.push(Character::Range(start, end));
+            }
         }
     }
-    Ok(result)
+    Ok(values)
 }

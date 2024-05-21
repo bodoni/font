@@ -4,7 +4,7 @@ mod support;
 use std::collections::BTreeSet;
 
 use font::opentype::truetype::Tag;
-use font::Font;
+use font::{Character, Font};
 
 use crate::support::{setup, Fixture};
 
@@ -377,18 +377,31 @@ where
         .collect()
 }
 
-fn flatten(entries: &BTreeSet<Vec<(char, char)>>) -> String {
+fn flatten(entries: &BTreeSet<Vec<Character>>) -> String {
     let mut value = String::new();
-    for (index, entry) in entries.iter().enumerate() {
-        for (start, end) in entry {
-            if start == end {
-                value.push(*start);
-            } else {
-                value.push('[');
-                value.push(*start);
-                value.push('-');
-                value.push(*end);
-                value.push(']');
+    for (index, characters) in entries.iter().enumerate() {
+        for character in characters {
+            match character {
+                Character::Scalar(other) => {
+                    value.push(*other);
+                }
+                Character::Range(start, end) => {
+                    value.push('[');
+                    value.push(*start);
+                    value.push_str(", ");
+                    value.push(*end);
+                    value.push(']');
+                }
+                Character::List(others) => {
+                    value.push('(');
+                    for (index, other) in others.iter().enumerate() {
+                        value.push(*other);
+                        if index + 1 < others.len() {
+                            value.push_str(", ");
+                        }
+                    }
+                    value.push(')');
+                }
             }
         }
         if index + 1 < entries.len() {
