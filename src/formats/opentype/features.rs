@@ -27,6 +27,10 @@ trait Characters {
     }
 }
 
+trait Compress {
+    fn compress(self, _: &ReverseMapping) -> Option<Character>;
+}
+
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Features::default();
     let mapping = cache.reverse_mapping()?.clone();
@@ -199,6 +203,7 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                         }),
                 );
             }
+            Type::ContextualSubstitution(Context::Format3(_)) => {}
             Type::ChainedContextualSubstitution(ChainedContext::Format1(value)) => {
                 values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
                     |(glyph_id, record)| {
@@ -232,9 +237,58 @@ impl Characters for opentype::tables::glyph_substitution::Type {
     }
 }
 
-#[inline]
-fn compress(values: BTreeSet<char>) -> Character {
-    Character::List(values.into_iter().collect())
+impl Compress for BTreeSet<GlyphID> {
+    fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
+        let value = self
+            .into_iter()
+            .filter_map(|glyph_id| mapping.get(glyph_id))
+            .collect::<Vec<_>>();
+        match value.len() {
+            0 => None,
+            1 => Some(Character::Scalar(value[0])),
+            _ => Some(Character::List(value)),
+        }
+    }
+}
+
+impl Compress for &Coverage {
+    fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
+        match self {
+            Coverage::Format1(value) => match value.glyph_ids.len() {
+                0 => None,
+                1 => Some(Character::Scalar(mapping.get(value.glyph_ids[0])?)),
+                _ => {
+                    let value = value
+                        .glyph_ids
+                        .iter()
+                        .filter_map(|glyph_id| mapping.get(*glyph_id))
+                        .collect::<Vec<_>>();
+                    match value.len() {
+                        0 => None,
+                        1 => Some(Character::Scalar(value[0])),
+                        _ => Some(Character::List(value)),
+                    }
+                }
+            },
+            Coverage::Format2(value) => {
+                let value = value
+                    .records
+                    .iter()
+                    .filter_map(|record| {
+                        Some((
+                            mapping.get(record.start_glyph_id)?,
+                            mapping.get(record.end_glyph_id)?,
+                        ))
+                    })
+                    .collect::<Vec<_>>();
+                match value.len() {
+                    0 => None,
+                    1 => Some(Character::Range(value[0].0, value[0].1)),
+                    _ => Some(Character::Ranges(value)),
+                }
+            }
+        }
+    }
 }
 
 #[inline]
@@ -252,15 +306,17 @@ fn unclass(
             let mut reverse = BTreeMap::default();
             let range = value.start_glyph_id..value.start_glyph_id + value.glyph_count;
             for (glyph_id, index) in range.zip(value.indices.iter().cloned()) {
-                if let Some(character) = mapping.get(glyph_id) {
-                    forward.entry(index).or_default().insert(character);
-                }
+                forward.entry(index).or_default().insert(glyph_id);
                 reverse.insert(glyph_id, index);
             }
             (
                 forward
                     .into_iter()
-                    .map(|(index, glyph_ids)| (index, compress(glyph_ids)))
+                    .filter_map(|(index, glyph_ids)| {
+                        glyph_ids
+                            .compress(mapping)
+                            .map(|characters| (index, characters))
+                    })
                     .collect(),
                 reverse,
             )

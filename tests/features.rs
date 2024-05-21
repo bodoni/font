@@ -408,6 +408,23 @@ fn flatten(entries: &BTreeSet<Vec<Character>>) -> String {
                     }
                     value.push(']');
                 }
+                Character::Ranges(ranges) => {
+                    for (start, end) in ranges {
+                        value.push('[');
+                        if *start as u32 > 0xFF {
+                            value.push_str(&format!("{:0x}", *start as u32));
+                        } else {
+                            value.push(*start);
+                        }
+                        value.push_str(", ");
+                        if *end as u32 > 0xFF {
+                            value.push_str(&format!("{:0x}", *end as u32));
+                        } else {
+                            value.push(*end);
+                        }
+                        value.push(']');
+                    }
+                }
                 Character::List(others) => {
                     value.push('(');
                     for (index, other) in others.iter().enumerate() {
