@@ -17,6 +17,6 @@ default = ["webtype"]
 webtype = ["dep:webtype"]
 
 [dependencies]
-opentype = { version = "0.36.1", features = ["default-language"] }
+opentype = { git = "https://github.com/bodoni/opentype.git", features = ["default-language"] }
 typeface = "0.4.2"
-webtype = { version = "0.14.0", optional = true }
+webtype = { git = "https://github.com/bodoni/webtype.git", optional = true }

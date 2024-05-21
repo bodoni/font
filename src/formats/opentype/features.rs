@@ -146,9 +146,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 );
             }
             Type::LigatureSubstitution(value) => {
-                values.extend(uncover(&value.coverage).zip(&value.rules).flat_map(
-                    |(glyph_id, rule)| {
-                        rule.records.iter().filter_map(move |record| {
+                values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
+                    |(glyph_id, record)| {
+                        record.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(range(mapping.get(glyph_id)?));
                             for glyph_id in &record.glyph_ids {
@@ -160,9 +160,9 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 ));
             }
             Type::ContextualSubstitution(Context::Format1(value)) => {
-                values.extend(uncover(&value.coverage).zip(&value.rules).flat_map(
-                    |(glyph_id, rule)| {
-                        rule.records.iter().filter_map(move |record| {
+                values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
+                    |(glyph_id, record)| {
+                        record.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(range(mapping.get(glyph_id)?));
                             for glyph_id in &record.glyph_ids {
@@ -178,10 +178,10 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                 let classes = &classes;
                 values.extend(
                     uncover(&value.coverage)
-                        .zip(&value.rules)
-                        .filter_map(|(glyph_id, rule)| rule.as_ref().map(|rule| (glyph_id, rule)))
-                        .flat_map(|(glyph_id, rule)| {
-                            rule.records.iter().filter_map(move |record| {
+                        .zip(&value.records)
+                        .filter_map(|(glyph_id, record)| record.as_ref().map(|record| (glyph_id, record)))
+                        .flat_map(|(glyph_id, record)| {
+                            record.records.iter().filter_map(move |record| {
                                 let mut value = Vec::with_capacity(record.glyph_count as usize);
                                 value.push(range(mapping.get(glyph_id)?));
                                 for class_id in &record.class_ids {
@@ -216,7 +216,7 @@ fn unclass(_: &Class) -> Vec<CharacterRange> {
 
 fn uncover(value: &Coverage) -> Box<dyn Iterator<Item = GlyphID> + '_> {
     match value {
-        Coverage::Format1(value) => Box::new(value.records.iter().cloned()),
+        Coverage::Format1(value) => Box::new(value.glyph_ids.iter().cloned()),
         Coverage::Format2(value) => Box::new(
             value
                 .records
