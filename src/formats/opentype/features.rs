@@ -259,12 +259,22 @@ impl Compress for Vec<char> {
 }
 
 impl Compress for Vec<(char, char)> {
-    fn compress(mut self, _: &ReverseMapping) -> Option<Character> {
+    fn compress(mut self, mapping: &ReverseMapping) -> Option<Character> {
         self.sort();
         match self.len() {
             0 => None,
-            1 => Some(Character::Range(self[0].0, self[0].1)),
+            1 => self[0].compress(mapping),
             _ => Some(Character::Ranges(self)),
+        }
+    }
+}
+
+impl Compress for (char, char) {
+    fn compress(self, _: &ReverseMapping) -> Option<Character> {
+        if self.0 == self.1 {
+            Some(Character::Scalar(self.0))
+        } else {
+            Some(Character::Range(self.0, self.1))
         }
     }
 }
