@@ -207,16 +207,10 @@ impl Characters for opentype::tables::glyph_substitution::Type {
 
 impl Compress for BTreeSet<GlyphID> {
     fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
-        let mut value = self
-            .into_iter()
+        self.into_iter()
             .filter_map(|glyph_id| mapping.get(glyph_id))
-            .collect::<Vec<_>>();
-        value.sort();
-        match value.len() {
-            0 => None,
-            1 => Some(Character::Scalar(value[0])),
-            _ => Some(Character::List(value)),
-        }
+            .collect::<Vec<_>>()
+            .compress(mapping)
     }
 }
 
