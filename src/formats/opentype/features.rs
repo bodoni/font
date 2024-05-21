@@ -223,41 +223,54 @@ impl Compress for BTreeSet<GlyphID> {
 impl Compress for &Coverage {
     fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
         match self {
-            Coverage::Format1(value) => match value.glyph_ids.len() {
-                0 => None,
-                1 => Some(Character::Scalar(mapping.get(value.glyph_ids[0])?)),
-                _ => {
-                    let mut value = value
-                        .glyph_ids
-                        .iter()
-                        .filter_map(|glyph_id| mapping.get(*glyph_id))
-                        .collect::<Vec<_>>();
-                    value.sort();
-                    match value.len() {
-                        0 => None,
-                        1 => Some(Character::Scalar(value[0])),
-                        _ => Some(Character::List(value)),
-                    }
-                }
-            },
-            Coverage::Format2(value) => {
-                let mut value = value
-                    .records
-                    .iter()
-                    .filter_map(|record| {
-                        Some((
-                            mapping.get(record.start_glyph_id)?,
-                            mapping.get(record.end_glyph_id)?,
-                        ))
-                    })
-                    .collect::<Vec<_>>();
-                value.sort();
-                match value.len() {
-                    0 => None,
-                    1 => Some(Character::Range(value[0].0, value[0].1)),
-                    _ => Some(Character::Ranges(value)),
-                }
-            }
+            Coverage::Format1(value) => value.glyph_ids.compress(mapping),
+            Coverage::Format2(value) => value
+                .records
+                .iter()
+                .filter_map(|record| {
+                    Some((
+                        mapping.get(record.start_glyph_id)?,
+                        mapping.get(record.end_glyph_id)?,
+                    ))
+                })
+                .collect::<Vec<_>>()
+                .compress(mapping),
+        }
+    }
+}
+
+impl Compress for &[GlyphID] {
+    fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
+        match self.len() {
+            0 => None,
+            1 => Some(Character::Scalar(mapping.get(self[0])?)),
+            _ => self
+                .iter()
+                .filter_map(|glyph_id| mapping.get(*glyph_id))
+                .collect::<Vec<_>>()
+                .compress(mapping),
+        }
+    }
+}
+
+impl Compress for Vec<char> {
+    fn compress(mut self, _: &ReverseMapping) -> Option<Character> {
+        self.sort();
+        match self.len() {
+            0 => None,
+            1 => Some(Character::Scalar(self[0])),
+            _ => Some(Character::List(self)),
+        }
+    }
+}
+
+impl Compress for Vec<(char, char)> {
+    fn compress(mut self, _: &ReverseMapping) -> Option<Character> {
+        self.sort();
+        match self.len() {
+            0 => None,
+            1 => Some(Character::Range(self[0].0, self[0].1)),
+            _ => Some(Character::Ranges(self)),
         }
     }
 }
