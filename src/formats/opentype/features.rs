@@ -205,14 +205,14 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                         record.records.iter().filter_map(move |record| {
                             let mut value = Vec::with_capacity(
                                 record.backward_glyph_count as usize
-                                    + record.input_glyph_count as usize
+                                    + record.glyph_count as usize
                                     + record.forward_glyph_count as usize,
                             );
                             for glyph_id in record.backward_glyph_ids.iter().rev() {
                                 value.push(Character::Scalar(mapping.get(*glyph_id)?));
                             }
                             value.push(Character::Scalar(mapping.get(glyph_id)?));
-                            for glyph_id in &record.input_glyph_ids {
+                            for glyph_id in &record.glyph_ids {
                                 value.push(Character::Scalar(mapping.get(*glyph_id)?));
                             }
                             for glyph_id in &record.forward_glyph_ids {
