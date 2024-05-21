@@ -160,7 +160,43 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     },
                 ));
             }
-            Type::ChainedContextualSubstitution(ChainedContext::Format2(_)) => {}
+            Type::ChainedContextualSubstitution(ChainedContext::Format2(value)) => {
+                let (backward_classes, _) = unclass(&value.backward_class, mapping);
+                let (forward_classes, _) = unclass(&value.forward_class, mapping);
+                let (classes, mapping) = unclass(&value.class, mapping);
+                values.extend(
+                    uncover(&value.coverage)
+                        .filter_map(|glyph_id| mapping.get(&glyph_id))
+                        .collect::<BTreeSet<_>>()
+                        .into_iter()
+                        .filter_map(|index| {
+                            value
+                                .records
+                                .get(*index as usize)
+                                .and_then(|record| record.as_ref().map(|record| (index, record)))
+                        })
+                        .flat_map(|(index, record)| {
+                            record.records.iter().filter_map(|record| {
+                                let mut value = Vec::with_capacity(
+                                    record.backward_glyph_count as usize
+                                        + record.glyph_count as usize
+                                        + record.forward_glyph_count as usize,
+                                );
+                                for index in record.backward_indices.iter().rev() {
+                                    value.push(backward_classes.get(index)?.clone());
+                                }
+                                value.push(classes.get(index)?.clone());
+                                for index in &record.indices {
+                                    value.push(classes.get(index)?.clone());
+                                }
+                                for index in &record.forward_indices {
+                                    value.push(forward_classes.get(index)?.clone());
+                                }
+                                Some(value)
+                            })
+                        }),
+                );
+            }
             Type::ChainedContextualSubstitution(ChainedContext::Format3(_)) => {}
             Type::ReverseChainedContextualSubstibution(_) => {}
             _ => {}
@@ -171,10 +207,11 @@ impl Characters for opentype::tables::glyph_substitution::Type {
 
 impl Compress for BTreeSet<GlyphID> {
     fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
-        let value = self
+        let mut value = self
             .into_iter()
             .filter_map(|glyph_id| mapping.get(glyph_id))
             .collect::<Vec<_>>();
+        value.sort();
         match value.len() {
             0 => None,
             1 => Some(Character::Scalar(value[0])),
@@ -190,11 +227,12 @@ impl Compress for &Coverage {
                 0 => None,
                 1 => Some(Character::Scalar(mapping.get(value.glyph_ids[0])?)),
                 _ => {
-                    let value = value
+                    let mut value = value
                         .glyph_ids
                         .iter()
                         .filter_map(|glyph_id| mapping.get(*glyph_id))
                         .collect::<Vec<_>>();
+                    value.sort();
                     match value.len() {
                         0 => None,
                         1 => Some(Character::Scalar(value[0])),
@@ -203,7 +241,7 @@ impl Compress for &Coverage {
                 }
             },
             Coverage::Format2(value) => {
-                let value = value
+                let mut value = value
                     .records
                     .iter()
                     .filter_map(|record| {
@@ -213,6 +251,7 @@ impl Compress for &Coverage {
                         ))
                     })
                     .collect::<Vec<_>>();
+                value.sort();
                 match value.len() {
                     0 => None,
                     1 => Some(Character::Range(value[0].0, value[0].1)),
@@ -309,29 +348,36 @@ fn unclass(
     value: &Class,
     mapping: &ReverseMapping,
 ) -> (BTreeMap<u16, Character>, BTreeMap<GlyphID, u16>) {
+    let mut forward = BTreeMap::<_, BTreeSet<_>>::default();
+    let mut reverse = BTreeMap::default();
     match value {
         Class::Format1(value) => {
-            let mut forward = BTreeMap::<_, BTreeSet<_>>::default();
-            let mut reverse = BTreeMap::default();
             let range = value.start_glyph_id..value.start_glyph_id + value.glyph_count;
             for (glyph_id, index) in range.zip(value.indices.iter().cloned()) {
                 forward.entry(index).or_default().insert(glyph_id);
                 reverse.insert(glyph_id, index);
             }
-            (
-                forward
-                    .into_iter()
-                    .filter_map(|(index, glyph_ids)| {
-                        glyph_ids
-                            .compress(mapping)
-                            .map(|characters| (index, characters))
-                    })
-                    .collect(),
-                reverse,
-            )
         }
-        Class::Format2(_) => unreachable!(),
+        Class::Format2(value) => {
+            for record in &value.records {
+                for glyph_id in record.start_glyph_id..=record.end_glyph_id {
+                    forward.entry(record.index).or_default().insert(glyph_id);
+                    reverse.insert(glyph_id, record.index);
+                }
+            }
+        }
     }
+    (
+        forward
+            .into_iter()
+            .filter_map(|(index, glyph_ids)| {
+                glyph_ids
+                    .compress(mapping)
+                    .map(|characters| (index, characters))
+            })
+            .collect(),
+        reverse,
+    )
 }
 
 fn uncover(value: &Coverage) -> Box<dyn Iterator<Item = GlyphID> + '_> {
