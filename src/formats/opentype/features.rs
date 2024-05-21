@@ -203,7 +203,16 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                         }),
                 );
             }
-            Type::ContextualSubstitution(Context::Format3(_)) => {}
+            Type::ContextualSubstitution(Context::Format3(value)) => {
+                if let Some(value) = value
+                    .coverages
+                    .iter()
+                    .map(|coverage| coverage.compress(mapping))
+                    .collect::<Option<Vec<_>>>()
+                {
+                    values.insert(value);
+                }
+            }
             Type::ChainedContextualSubstitution(ChainedContext::Format1(value)) => {
                 values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
                     |(glyph_id, record)| {
