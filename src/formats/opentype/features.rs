@@ -108,7 +108,7 @@ impl Characters for opentype::tables::glyph_positioning::Type {}
 
 impl Characters for opentype::tables::glyph_substitution::Type {
     fn characters(&self, mapping: &ReverseMapping) -> BTreeSet<Vec<Character>> {
-        use opentype::layout::Context;
+        use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
         let map = |glyph_id| mapping.get(glyph_id);
@@ -199,7 +199,32 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                         }),
                 );
             }
-            Type::ChainedContextualSubstitution(_) => {}
+            Type::ChainedContextualSubstitution(ChainedContext::Format1(value)) => {
+                values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
+                    |(glyph_id, record)| {
+                        record.records.iter().filter_map(move |record| {
+                            let mut value = Vec::with_capacity(
+                                record.backward_glyph_count as usize
+                                    + record.input_glyph_count as usize
+                                    + record.forward_glyph_count as usize,
+                            );
+                            for glyph_id in record.backward_glyph_ids.iter().rev() {
+                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            }
+                            value.push(Character::Scalar(mapping.get(glyph_id)?));
+                            for glyph_id in &record.input_glyph_ids {
+                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            }
+                            for glyph_id in &record.forward_glyph_ids {
+                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            }
+                            Some(value)
+                        })
+                    },
+                ));
+            }
+            Type::ChainedContextualSubstitution(ChainedContext::Format2(_)) => {}
+            Type::ChainedContextualSubstitution(ChainedContext::Format3(_)) => {}
             Type::ReverseChainedContextualSubstibution(_) => {}
             _ => {}
         }

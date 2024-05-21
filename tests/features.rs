@@ -85,7 +85,7 @@ fn crimson_text() {
             ("liga", "latn", "TAT ", "ff, ffi, ffl, fi, fl"),
             ("liga", "latn", "TRK ", "ff, ffi, ffl, fi, fl"),
             ("locl", "latn", "AZE ", "i"),
-            ("locl", "latn", "CAT ", ""),
+            ("locl", "latn", "CAT ", "L\u{b7}L, l\u{b7}l"),
             ("locl", "latn", "CRT ", "i"),
             ("locl", "latn", "KAZ ", "i"),
             ("locl", "latn", "MOL ", "15e, 15f, 162, 163"),
@@ -156,7 +156,9 @@ fn noto_serif() {
     let entries = extract(&mut file[0]);
     let entries = entries
         .iter()
-        .map(|(feature, script, language, characters)| (&**feature, &**script, &**language, &**characters))
+        .map(|(feature, script, language, characters)| {
+            (&**feature, &**script, &**language, &**characters)
+        })
         .collect::<Vec<_>>();
     assert_eq!(
         entries,
