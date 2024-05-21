@@ -221,7 +221,26 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                     values.insert(backward_value);
                 }
             }
-            Type::ReverseChainedContextualSubstibution(_) => {}
+            Type::ReverseChainedContextualSubstibution(value) => {
+                if let (Some(mut backward_value), Some(value), Some(forward_value)) = (
+                    value
+                        .backward_coverages
+                        .iter()
+                        .rev()
+                        .map(|coverage| coverage.compress(mapping))
+                        .collect::<Option<Vec<_>>>(),
+                    value.coverage.compress(mapping),
+                    value
+                        .forward_coverages
+                        .iter()
+                        .map(|coverage| coverage.compress(mapping))
+                        .collect::<Option<Vec<_>>>(),
+                ) {
+                    backward_value.push(value);
+                    backward_value.extend(forward_value);
+                    values.insert(backward_value);
+                }
+            }
             _ => {}
         }
         values
