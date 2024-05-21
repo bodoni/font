@@ -197,7 +197,30 @@ impl Characters for opentype::tables::glyph_substitution::Type {
                         }),
                 );
             }
-            Type::ChainedContextualSubstitution(ChainedContext::Format3(_)) => {}
+            Type::ChainedContextualSubstitution(ChainedContext::Format3(value)) => {
+                if let (Some(mut backward_value), Some(value), Some(forward_value)) = (
+                    value
+                        .backward_coverages
+                        .iter()
+                        .rev()
+                        .map(|coverage| coverage.compress(mapping))
+                        .collect::<Option<Vec<_>>>(),
+                    value
+                        .coverages
+                        .iter()
+                        .map(|coverage| coverage.compress(mapping))
+                        .collect::<Option<Vec<_>>>(),
+                    value
+                        .forward_coverages
+                        .iter()
+                        .map(|coverage| coverage.compress(mapping))
+                        .collect::<Option<Vec<_>>>(),
+                ) {
+                    backward_value.extend(value);
+                    backward_value.extend(forward_value);
+                    values.insert(backward_value);
+                }
+            }
             Type::ReverseChainedContextualSubstibution(_) => {}
             _ => {}
         }
