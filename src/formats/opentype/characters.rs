@@ -1,6 +1,6 @@
 //! Unicode code points.
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::io::Result;
 
 use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
@@ -21,7 +21,7 @@ pub type Characters = Vec<Character>;
 
 pub(crate) struct Mapping(HashMap<u32, GlyphID>);
 
-pub(crate) struct ReverseMapping(HashMap<GlyphID, u32>);
+pub(crate) struct ReverseMapping(HashMap<GlyphID, BTreeSet<u32>>);
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
@@ -45,18 +45,20 @@ impl Mapping {
 
 impl ReverseMapping {
     pub fn new(mapping: &Mapping) -> Self {
-        Self(
-            mapping
-                .0
-                .iter()
-                .map(|(character_id, glyph_id)| (*glyph_id, *character_id))
-                .collect(),
-        )
+        let mut values = HashMap::<_, BTreeSet<_>>::default();
+        for (character_id, glyph_id) in &mapping.0 {
+            values.entry(*glyph_id).or_default().insert(*character_id);
+        }
+        Self(values)
     }
 
     #[inline]
     pub fn get(&self, glyph_id: GlyphID) -> Option<char> {
-        self.0.get(&glyph_id).cloned().and_then(char::from_u32)
+        self.0
+            .get(&glyph_id)
+            .and_then(BTreeSet::first)
+            .cloned()
+            .and_then(char::from_u32)
     }
 }
 
