@@ -111,6 +111,7 @@ where
         match iterator.next() {
             Some(next) => {
                 if end as usize + 1 == next as usize {
+                    end = next;
                     continue;
                 }
                 ranges.push((start, end));
