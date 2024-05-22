@@ -1,126 +1,69 @@
-//! Layout features.
-
-pub use opentype::layout::{Class, Coverage, Language, Script};
-pub use opentype::truetype::GlyphID;
-
 use std::collections::{BTreeMap, BTreeSet};
-use std::io::Result;
 
-use opentype::layout::{Directory, Feature};
-
-use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::characters::{Character, ReverseMapping as Mapping};
-
-/// Layout features.
-pub type Features = BTreeMap<Type, Value>;
-
-/// A type.
-pub type Type = Feature;
-
-/// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<Character>>>>;
+use opentype::layout::{Class, Coverage};
+use opentype::truetype::GlyphID;
 
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
-enum Glyph {
+pub enum Glyph {
     Scalar(GlyphID),
     Range(GlyphID, GlyphID),
     Ranges(Vec<(GlyphID, GlyphID)>),
     List(Vec<GlyphID>),
 }
 
-type Glyphs = BTreeSet<Vec<Glyph>>;
-
-trait ToCharacters<'l> {
-    type Target;
-    type Parameter: 'l;
-
-    fn to_characters(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
-}
-
-trait ToGlyphs {
+pub trait Glyphs {
     #[inline]
-    fn to_glyphs(&self) -> Glyphs {
+    fn glyphs(&self) -> BTreeSet<Vec<Glyph>> {
         Default::default()
     }
 }
 
-impl<'l> ToCharacters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Glyphs>>> {
-    type Target = Features;
-    type Parameter = ();
-
-    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
-        self.iter()
-            .map(|(key, value)| (*key, value.to_characters(mapping, ())))
-            .collect()
+impl From<GlyphID> for Glyph {
+    #[inline]
+    fn from(value: GlyphID) -> Self {
+        Self::Scalar(value)
     }
 }
 
-impl<'l> ToCharacters<'l> for &BTreeMap<Script, BTreeMap<Language, Glyphs>> {
-    type Target = Value;
-    type Parameter = ();
-
-    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
-        self.iter()
-            .map(|(key, value)| (*key, value.to_characters(mapping, ())))
-            .collect()
+impl From<(GlyphID, GlyphID)> for Glyph {
+    #[inline]
+    fn from(value: (GlyphID, GlyphID)) -> Self {
+        Self::Range(value.0, value.1)
     }
 }
 
-impl<'l> ToCharacters<'l> for &BTreeMap<Language, Glyphs> {
-    type Target = BTreeMap<Language, BTreeSet<Vec<Character>>>;
-    type Parameter = ();
-
-    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
-        self.iter()
-            .map(|(key, value)| (*key, value.to_characters(mapping, ())))
-            .collect()
+impl From<Vec<GlyphID>> for Glyph {
+    #[inline]
+    fn from(value: Vec<GlyphID>) -> Self {
+        Self::List(value)
     }
 }
 
-impl<'l> ToCharacters<'l> for &Glyphs {
-    type Target = BTreeSet<Vec<Character>>;
-    type Parameter = ();
-
-    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
-        self.iter()
-            .filter_map(|value| value.to_characters(mapping, self))
-            .collect()
+impl From<Vec<(GlyphID, GlyphID)>> for Glyph {
+    #[inline]
+    fn from(value: Vec<(GlyphID, GlyphID)>) -> Self {
+        Self::Ranges(value)
     }
 }
 
-impl<'l> ToCharacters<'l> for &[Glyph] {
-    type Target = Option<Vec<Character>>;
-    type Parameter = &'l Glyphs;
-
-    fn to_characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
-        self.iter()
-            .map(|value| value.to_characters(mapping, glyphs))
-            .collect()
-    }
-}
-
-impl<'l> ToCharacters<'l> for &Glyph {
-    type Target = Option<Character>;
-    type Parameter = &'l Glyphs;
-
-    fn to_characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
-        match self {
-            Glyph::Scalar(value) => mapping.get(*value).map(Character::Scalar),
-            Glyph::Range(start, end) => to_characters(*start..=*end, mapping, glyphs),
-            Glyph::Ranges(value) => to_characters(
-                value.iter().flat_map(|value| value.0..=value.1),
-                mapping,
-                glyphs,
-            ),
-            Glyph::List(value) => to_characters(value.iter().cloned(), mapping, glyphs),
+impl From<Coverage> for Glyph {
+    fn from(value: Coverage) -> Self {
+        match value {
+            Coverage::Format1(value) => value.glyph_ids.into(),
+            Coverage::Format2(value) => value
+                .records
+                .into_iter()
+                .map(|record| (record.start_glyph_id, record.end_glyph_id))
+                .collect::<Vec<_>>()
+                .into(),
         }
     }
 }
 
-impl ToGlyphs for opentype::tables::glyph_positioning::Type {}
+impl Glyphs for opentype::tables::glyph_positioning::Type {}
 
-impl ToGlyphs for opentype::tables::glyph_substitution::Type {
-    fn to_glyphs(&self) -> Glyphs {
+impl Glyphs for opentype::tables::glyph_substitution::Type {
+    fn glyphs(&self) -> BTreeSet<Vec<Glyph>> {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
@@ -287,166 +230,6 @@ impl ToGlyphs for opentype::tables::glyph_substitution::Type {
             _ => {}
         }
         values
-    }
-}
-
-impl From<GlyphID> for Glyph {
-    #[inline]
-    fn from(value: GlyphID) -> Self {
-        Self::Scalar(value)
-    }
-}
-
-impl From<(GlyphID, GlyphID)> for Glyph {
-    #[inline]
-    fn from(value: (GlyphID, GlyphID)) -> Self {
-        Self::Range(value.0, value.1)
-    }
-}
-
-impl From<Vec<GlyphID>> for Glyph {
-    #[inline]
-    fn from(value: Vec<GlyphID>) -> Self {
-        Self::List(value)
-    }
-}
-
-impl From<Vec<(GlyphID, GlyphID)>> for Glyph {
-    #[inline]
-    fn from(value: Vec<(GlyphID, GlyphID)>) -> Self {
-        Self::Ranges(value)
-    }
-}
-
-impl From<Coverage> for Glyph {
-    fn from(value: Coverage) -> Self {
-        match value {
-            Coverage::Format1(value) => value.glyph_ids.into(),
-            Coverage::Format2(value) => value
-                .records
-                .into_iter()
-                .map(|record| (record.start_glyph_id, record.end_glyph_id))
-                .collect::<Vec<_>>()
-                .into(),
-        }
-    }
-}
-
-pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
-    let mut values = Default::default();
-    if let Some(table) = cache.try_glyph_positioning()? {
-        populate(&mut values, &table.borrow());
-    }
-    if let Some(table) = cache.try_glyph_substitution()? {
-        populate(&mut values, &table.borrow());
-    }
-    let mapping = cache.reverse_mapping()?.clone();
-    Ok(values.to_characters(&mapping, ()))
-}
-
-fn populate<T>(
-    values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Glyphs>>>,
-    table: &Directory<T>,
-) where
-    T: ToGlyphs,
-{
-    for (i, header) in table.scripts.headers.iter().enumerate() {
-        let script = Script::from_tag(&header.tag);
-        if let Some(record) = table.scripts.records[i].default_language.as_ref() {
-            for index in record.feature_indices.iter().cloned().map(usize::from) {
-                if let (Some(header), Some(record)) = (
-                    table.features.headers.get(index),
-                    table.features.records.get(index),
-                ) {
-                    let feature = Feature::from_tag(&header.tag);
-                    let glyphs = record
-                        .lookup_indices
-                        .iter()
-                        .cloned()
-                        .filter_map(|index| table.lookups.records.get(index as usize))
-                        .flat_map(|record| record.tables.iter().flat_map(|table| table.to_glyphs()))
-                        .collect::<BTreeSet<_>>();
-                    values
-                        .entry(feature)
-                        .or_default()
-                        .entry(script)
-                        .or_default()
-                        .insert(Language::Default, glyphs);
-                }
-            }
-        }
-        for (j, header) in table.scripts.records[i].language_headers.iter().enumerate() {
-            let language = Language::from_tag(&header.tag);
-            let record = &table.scripts.records[i].language_records[j];
-            for index in record.feature_indices.iter().cloned().map(usize::from) {
-                if let (Some(header), Some(record)) = (
-                    table.features.headers.get(index),
-                    table.features.records.get(index),
-                ) {
-                    let feature = Feature::from_tag(&header.tag);
-                    let glyphs = record
-                        .lookup_indices
-                        .iter()
-                        .cloned()
-                        .filter_map(|index| table.lookups.records.get(index as usize))
-                        .flat_map(|record| record.tables.iter().flat_map(|table| table.to_glyphs()))
-                        .collect::<BTreeSet<_>>();
-                    values
-                        .entry(feature)
-                        .or_default()
-                        .entry(script)
-                        .or_default()
-                        .insert(language, glyphs);
-                }
-            }
-        }
-    }
-}
-
-fn to_characters<T>(values: T, mapping: &Mapping, _: &Glyphs) -> Option<Character>
-where
-    T: Iterator<Item = GlyphID>,
-{
-    let mut values = values
-        .filter_map(|glyph_id| mapping.get(glyph_id))
-        .collect::<Vec<_>>();
-    values.sort();
-    values.dedup();
-    if values.is_empty() {
-        return None;
-    }
-    if values.len() == 1 {
-        return Some(Character::Scalar(values[0]));
-    }
-    let mut ranges = Vec::new();
-    let (mut start, mut end) = (values[0], values[0]);
-    let mut iterator = values.iter().skip(1).cloned();
-    loop {
-        match iterator.next() {
-            Some(next) => {
-                if end as usize + 1 == next as usize {
-                    continue;
-                }
-                ranges.push((start, end));
-                start = next;
-                end = next;
-            }
-            _ => {
-                ranges.push((start, end));
-                break;
-            }
-        }
-    }
-    if ranges.len() == 1 {
-        if ranges[0].0 == ranges[0].1 {
-            return Some(Character::Scalar(ranges[0].0));
-        }
-        return Some(Character::Range(ranges[0].0, ranges[0].1));
-    }
-    if 2 * ranges.len() < values.len() {
-        Some(Character::Ranges(ranges))
-    } else {
-        Some(Character::List(values))
     }
 }
 

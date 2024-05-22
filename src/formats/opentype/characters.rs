@@ -63,7 +63,7 @@ impl ReverseMapping {
     }
 }
 
-pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Characters> {
+pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Vec<Character>> {
     for encoding in cache.character_mapping()?.borrow().encodings.iter() {
         let ranges = match encoding {
             Encoding::Format0(encoding) => encoding.characters(),
@@ -77,7 +77,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Characters> {
     raise!("found no known character-to-glyph encoding")
 }
 
-fn compress(ranges: Vec<(u32, u32)>) -> Result<Characters> {
+fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
     let mut values = Vec::with_capacity(ranges.len());
     for range in ranges {
         if let (Some(start), Some(end)) = (char::from_u32(range.0), char::from_u32(range.1)) {
