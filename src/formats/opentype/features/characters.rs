@@ -94,25 +94,20 @@ fn precompress<T>(values: T, mapping: &Mapping, _: &Glyphs) -> Option<Character>
 where
     T: Iterator<Item = GlyphID>,
 {
-    let mut values = values
+    let values = values
         .filter_map(|glyph_id| mapping.get(glyph_id))
-        .collect::<Vec<_>>();
-    values.sort();
-    values.dedup();
-    if values.is_empty() {
-        return None;
-    }
-    if values.len() == 1 {
-        return Some(Character::Scalar(values[0]));
-    }
-    let (mut start, mut end) = (values[0], values[0]);
-    let mut iterator = values.iter().skip(1).cloned();
+        .collect::<BTreeSet<_>>();
+    let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
+    let mut range = None;
     loop {
-        match iterator.next() {
-            Some(next) => {
+        match (range, iterator.next()) {
+            (None, Some(next)) => {
+                range = Some((next, next));
+            }
+            (Some((start, end)), Some(next)) => {
                 if end as usize + 1 == next as usize {
-                    end = next;
+                    range = Some((start, next));
                     continue;
                 }
                 if start == end {
@@ -123,10 +118,9 @@ where
                 } else {
                     values.insert(Character::Range(start, end));
                 }
-                start = next;
-                end = next;
+                range = Some((next, next));
             }
-            _ => {
+            (Some((start, end)), None) => {
                 if start == end {
                     values.insert(Character::Scalar(start));
                 } else if start as usize + 1 == end as usize {
@@ -137,12 +131,13 @@ where
                 }
                 break;
             }
+            (None, None) => break,
         }
     }
-    if values.len() == 1 {
-        values.pop_first()
-    } else {
-        Some(Character::Set(values))
+    match values.len() {
+        0 => None,
+        1 => values.first().cloned(),
+        _ => Some(Character::Set(values)),
     }
 }
 
