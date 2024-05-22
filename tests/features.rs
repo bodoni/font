@@ -381,12 +381,10 @@ where
         .collect()
 }
 
-fn flatten(entries: &BTreeSet<Vec<Character>>) -> String {
+fn flatten(entries: &BTreeSet<Character>) -> String {
     let mut buffer = String::new();
-    for (index, characters) in entries.iter().enumerate() {
-        for character in characters {
-            flatter_character(character, &mut buffer);
-        }
+    for (index, character) in entries.iter().enumerate() {
+        flatter_character(character, &mut buffer, false);
         if index + 1 < entries.len() {
             buffer.push_str(", ");
         }
@@ -394,7 +392,7 @@ fn flatten(entries: &BTreeSet<Vec<Character>>) -> String {
     buffer
 }
 
-fn flatter_character(value: &Character, buffer: &mut String) {
+fn flatter_character(value: &Character, buffer: &mut String, inner: bool) {
     match value {
         Character::Scalar(value) => {
             if *value as u32 > 0xFF {
@@ -404,29 +402,39 @@ fn flatter_character(value: &Character, buffer: &mut String) {
             }
         }
         Character::Range(start, end) => {
-            buffer.push('(');
+            if inner {
+                buffer.push('(');
+            }
             if *start as u32 > 0xFF {
                 buffer.push_str(&format!("{:0x}", *start as u32));
             } else {
                 buffer.push(*start);
             }
-            buffer.push_str(", ");
+            if inner {
+                buffer.push_str(", ");
+            }
             if *end as u32 > 0xFF {
                 buffer.push_str(&format!("{:0x}", *end as u32));
             } else {
                 buffer.push(*end);
             }
-            buffer.push(')');
+            if inner {
+                buffer.push(')');
+            }
         }
         Character::List(values) => {
-            buffer.push('[');
+            if inner {
+                buffer.push('[');
+            }
             for (index, other) in values.iter().enumerate() {
-                flatter_character(other, buffer);
-                if index + 1 < values.len() {
+                flatter_character(other, buffer, true);
+                if inner && (index + 1 < values.len()) {
                     buffer.push_str(", ");
                 }
             }
-            buffer.push(']');
+            if inner {
+                buffer.push(']');
+            }
         }
     }
 }

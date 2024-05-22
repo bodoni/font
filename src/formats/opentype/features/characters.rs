@@ -39,7 +39,7 @@ impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Glyphs>> {
 }
 
 impl<'l> Characters<'l> for &BTreeMap<Language, Glyphs> {
-    type Target = BTreeMap<Language, BTreeSet<Vec<Character>>>;
+    type Target = BTreeMap<Language, BTreeSet<Character>>;
     type Parameter = ();
 
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
@@ -50,12 +50,13 @@ impl<'l> Characters<'l> for &BTreeMap<Language, Glyphs> {
 }
 
 impl<'l> Characters<'l> for &Glyphs {
-    type Target = BTreeSet<Vec<Character>>;
+    type Target = BTreeSet<Character>;
     type Parameter = ();
 
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
         self.iter()
             .filter_map(|value| value.characters(mapping, self))
+            .map(Character::List)
             .collect()
     }
 }

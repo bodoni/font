@@ -22,7 +22,7 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<Character>>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Character>>>;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Default::default();
