@@ -39,7 +39,7 @@ impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Glyphs>> {
 }
 
 impl<'l> Characters<'l> for &BTreeMap<Language, Glyphs> {
-    type Target = BTreeMap<Language, BTreeSet<Character>>;
+    type Target = BTreeMap<Language, Character>;
     type Parameter = ();
 
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
@@ -50,7 +50,7 @@ impl<'l> Characters<'l> for &BTreeMap<Language, Glyphs> {
 }
 
 impl<'l> Characters<'l> for &Glyphs {
-    type Target = BTreeSet<Character>;
+    type Target = Character;
     type Parameter = ();
 
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
@@ -58,7 +58,6 @@ impl<'l> Characters<'l> for &Glyphs {
             self.iter()
                 .filter_map(|value| value.characters(mapping, self)),
         )
-        .collect()
     }
 }
 
@@ -108,7 +107,7 @@ where
     }
     let (mut start, mut end) = (values[0], values[0]);
     let mut iterator = values.iter().skip(1).cloned();
-    let mut values = Vec::new();
+    let mut values = BTreeSet::new();
     loop {
         match iterator.next() {
             Some(next) => {
@@ -117,44 +116,49 @@ where
                     continue;
                 }
                 if start == end {
-                    values.push(Character::Scalar(start));
+                    values.insert(Character::Scalar(start));
+                } else if start as usize + 1 == end as usize {
+                    values.insert(Character::Scalar(start));
+                    values.insert(Character::Scalar(end));
                 } else {
-                    values.push(Character::Range(start, end));
+                    values.insert(Character::Range(start, end));
                 }
                 start = next;
                 end = next;
             }
             _ => {
                 if start == end {
-                    values.push(Character::Scalar(start));
+                    values.insert(Character::Scalar(start));
+                } else if start as usize + 1 == end as usize {
+                    values.insert(Character::Scalar(start));
+                    values.insert(Character::Scalar(end));
                 } else {
-                    values.push(Character::Range(start, end));
+                    values.insert(Character::Range(start, end));
                 }
                 break;
             }
         }
     }
     if values.len() == 1 {
-        return values.pop();
+        values.pop_first()
+    } else {
+        Some(Character::Set(values))
     }
-    Some(Character::List(values))
 }
 
-fn postcompress<T>(values: T) -> impl Iterator<Item = Character>
+fn postcompress<T>(values: T) -> Character
 where
     T: Iterator<Item = Vec<Character>>,
 {
-    let mut values = values
+    let values = values
         .filter_map(|mut values| match values.len() {
             0 => None,
             1 => values.pop(),
             _ => Some(Character::List(values)),
         })
-        .collect::<Vec<_>>();
-    values.sort();
-    values.dedup();
+        .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
-    let mut values = Vec::new();
+    let mut values = BTreeSet::new();
     let mut range = None;
     loop {
         match (range, iterator.next()) {
@@ -167,31 +171,42 @@ where
                     continue;
                 }
                 if start == end {
-                    values.push(Character::Scalar(start));
+                    values.insert(Character::Scalar(start));
+                } else if start as usize + 1 == end as usize {
+                    values.insert(Character::Scalar(start));
+                    values.insert(Character::Scalar(end));
                 } else {
-                    values.push(Character::Range(start, end));
+                    values.insert(Character::Range(start, end));
                 }
                 range = Some((next, next));
             }
-            (None, Some(value)) => values.push(value),
+            (None, Some(value)) => {
+                values.insert(value);
+            }
             (Some((start, end)), Some(value)) => {
                 if start == end {
-                    values.push(Character::Scalar(start));
+                    values.insert(Character::Scalar(start));
+                } else if start as usize + 1 == end as usize {
+                    values.insert(Character::Scalar(start));
+                    values.insert(Character::Scalar(end));
                 } else {
-                    values.push(Character::Range(start, end));
+                    values.insert(Character::Range(start, end));
                 }
-                values.push(value);
+                values.insert(value);
             }
             (Some((start, end)), None) => {
                 if start == end {
-                    values.push(Character::Scalar(start));
+                    values.insert(Character::Scalar(start));
+                } else if start as usize + 1 == end as usize {
+                    values.insert(Character::Scalar(start));
+                    values.insert(Character::Scalar(end));
                 } else {
-                    values.push(Character::Range(start, end));
+                    values.insert(Character::Range(start, end));
                 }
                 break;
             }
             (None, None) => break,
         }
     }
-    values.into_iter()
+    Character::Set(values)
 }

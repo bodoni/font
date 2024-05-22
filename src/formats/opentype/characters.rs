@@ -9,11 +9,12 @@ use opentype::truetype::GlyphID;
 use crate::formats::opentype::cache::Cache;
 
 /// A character.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Character {
     Scalar(char),
     Range(char, char),
     List(Vec<Character>),
+    Set(BTreeSet<Character>),
 }
 
 /// Characters.
@@ -22,6 +23,31 @@ pub type Characters = Vec<Character>;
 pub(crate) struct Mapping(HashMap<u32, GlyphID>);
 
 pub(crate) struct ReverseMapping(HashMap<GlyphID, BTreeSet<u32>>);
+
+impl Character {
+    fn first(&self) -> Option<char> {
+        match self {
+            Self::Scalar(value) => Some(*value),
+            Self::Range(value, _) => Some(*value),
+            Self::List(value) => value.first().and_then(Character::first),
+            Self::Set(value) => value.first().and_then(Character::first),
+        }
+    }
+}
+
+impl std::cmp::Ord for Character {
+    #[inline]
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.first().cmp(&other.first())
+    }
+}
+
+impl std::cmp::PartialOrd for Character {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
 
 impl Mapping {
     pub fn new(character_mapping: &CharacterMapping) -> Result<Self> {
