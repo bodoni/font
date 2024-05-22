@@ -188,6 +188,7 @@ where
                     values.insert(Character::Range(start, end));
                 }
                 values.insert(value);
+                range = None;
             }
             (Some((start, end)), None) => {
                 if start == end {
