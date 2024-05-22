@@ -144,11 +144,54 @@ fn postcompress<T>(values: T) -> impl Iterator<Item = Character>
 where
     T: Iterator<Item = Vec<Character>>,
 {
-    values.filter_map(|mut values| {
-        match values.len() {
+    let mut values = values
+        .filter_map(|mut values| match values.len() {
             0 => None,
             1 => values.pop(),
             _ => Some(Character::List(values)),
+        })
+        .collect::<Vec<_>>();
+    values.sort();
+    values.dedup();
+    let mut iterator = values.into_iter();
+    let mut values = Vec::new();
+    let mut range = None;
+    loop {
+        match (range, iterator.next()) {
+            (None, Some(Character::Scalar(next))) => {
+                range = Some((next, next));
+            }
+            (Some((start, end)), Some(Character::Scalar(next))) => {
+                if end as usize + 1 == next as usize {
+                    range = Some((start, next));
+                    continue;
+                }
+                if start == end {
+                    values.push(Character::Scalar(start));
+                } else {
+                    values.push(Character::Range(start, end));
+                }
+                range = Some((next, next));
+            }
+            (None, Some(value)) => values.push(value),
+            (Some((start, end)), Some(value)) => {
+                if start == end {
+                    values.push(Character::Scalar(start));
+                } else {
+                    values.push(Character::Range(start, end));
+                }
+                values.push(value);
+            }
+            (Some((start, end)), None) => {
+                if start == end {
+                    values.push(Character::Scalar(start));
+                } else {
+                    values.push(Character::Range(start, end));
+                }
+                break;
+            }
+            (None, None) => break,
         }
-    })
+    }
+    values.into_iter()
 }

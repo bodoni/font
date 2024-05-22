@@ -384,7 +384,7 @@ where
 fn flatten(entries: &BTreeSet<Character>) -> String {
     let mut buffer = String::new();
     for (index, character) in entries.iter().enumerate() {
-        flatter_character(character, &mut buffer, false);
+        flatter_character(character, &mut buffer);
         if index + 1 < entries.len() {
             buffer.push_str(", ");
         }
@@ -392,7 +392,7 @@ fn flatten(entries: &BTreeSet<Character>) -> String {
     buffer
 }
 
-fn flatter_character(value: &Character, buffer: &mut String, inner: bool) {
+fn flatter_character(value: &Character, buffer: &mut String) {
     match value {
         Character::Scalar(value) => {
             if *value as u32 > 0xFF {
@@ -402,38 +402,26 @@ fn flatter_character(value: &Character, buffer: &mut String, inner: bool) {
             }
         }
         Character::Range(start, end) => {
-            if inner {
-                buffer.push('(');
-            }
+            buffer.push('(');
             if *start as u32 > 0xFF {
                 buffer.push_str(&format!("{:0x}", *start as u32));
             } else {
                 buffer.push(*start);
             }
-            if inner {
-                buffer.push_str(", ");
-            }
+            buffer.push_str(", ");
             if *end as u32 > 0xFF {
                 buffer.push_str(&format!("{:0x}", *end as u32));
             } else {
                 buffer.push(*end);
             }
-            if inner {
-                buffer.push(')');
-            }
+            buffer.push(')');
         }
         Character::List(values) => {
-            if inner {
-                buffer.push('[');
-            }
             for (index, other) in values.iter().enumerate() {
-                flatter_character(other, buffer, true);
-                if inner && (index + 1 < values.len()) {
+                flatter_character(other, buffer);
+                if index + 1 < values.len() {
                     buffer.push_str(", ");
                 }
-            }
-            if inner {
-                buffer.push(']');
             }
         }
     }
