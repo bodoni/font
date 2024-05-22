@@ -13,8 +13,7 @@ use crate::formats::opentype::cache::Cache;
 pub enum Character {
     Scalar(char),
     Range(char, char),
-    Ranges(Vec<(char, char)>),
-    List(Vec<char>),
+    List(Vec<Character>),
 }
 
 /// Characters.

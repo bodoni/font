@@ -104,9 +104,9 @@ where
     if values.len() == 1 {
         return Some(Character::Scalar(values[0]));
     }
-    let mut ranges = Vec::new();
     let (mut start, mut end) = (values[0], values[0]);
     let mut iterator = values.iter().skip(1).cloned();
+    let mut values = Vec::new();
     loop {
         match iterator.next() {
             Some(next) => {
@@ -114,25 +114,26 @@ where
                     end = next;
                     continue;
                 }
-                ranges.push((start, end));
+                if start == end {
+                    values.push(Character::Scalar(start));
+                } else {
+                    values.push(Character::Range(start, end));
+                }
                 start = next;
                 end = next;
             }
             _ => {
-                ranges.push((start, end));
+                if start == end {
+                    values.push(Character::Scalar(start));
+                } else {
+                    values.push(Character::Range(start, end));
+                }
                 break;
             }
         }
     }
-    if ranges.len() == 1 {
-        if ranges[0].0 == ranges[0].1 {
-            return Some(Character::Scalar(ranges[0].0));
-        }
-        return Some(Character::Range(ranges[0].0, ranges[0].1));
+    if values.len() == 1 {
+        return values.pop();
     }
-    if 2 * ranges.len() < values.len() {
-        Some(Character::Ranges(ranges))
-    } else {
-        Some(Character::List(values))
-    }
+    Some(Character::List(values))
 }
