@@ -9,7 +9,7 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::characters::{Character, ReverseMapping};
+use crate::formats::opentype::characters::{Character, ReverseMapping as Mapping};
 
 /// Layout features.
 pub type Features = BTreeMap<Type, Value>;
@@ -20,226 +20,269 @@ pub type Type = Feature;
 /// A value.
 pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<Character>>>>;
 
-trait Characters {
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
+enum Glyph {
+    Scalar(GlyphID),
+    Range(GlyphID, GlyphID),
+    Ranges(Vec<(GlyphID, GlyphID)>),
+    List(Vec<GlyphID>),
+}
+
+type Glyphs = BTreeSet<Vec<Glyph>>;
+
+trait ToCharacters<'l> {
+    type Target;
+    type Parameter: 'l;
+
+    fn to_characters(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
+}
+
+trait ToGlyphs {
     #[inline]
-    fn characters(&self, _: &ReverseMapping) -> BTreeSet<Vec<Character>> {
+    fn to_glyphs(&self) -> Glyphs {
         Default::default()
     }
 }
 
-trait Compress {
-    fn compress(self, _: &ReverseMapping) -> Option<Character>;
+impl<'l> ToCharacters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Glyphs>>> {
+    type Target = Features;
+    type Parameter = ();
+
+    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+        self.iter()
+            .map(|(key, value)| (*key, value.to_characters(mapping, ())))
+            .collect()
+    }
 }
 
-impl Characters for opentype::tables::glyph_positioning::Type {}
+impl<'l> ToCharacters<'l> for &BTreeMap<Script, BTreeMap<Language, Glyphs>> {
+    type Target = Value;
+    type Parameter = ();
 
-impl Characters for opentype::tables::glyph_substitution::Type {
-    fn characters(&self, mapping: &ReverseMapping) -> BTreeSet<Vec<Character>> {
+    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+        self.iter()
+            .map(|(key, value)| (*key, value.to_characters(mapping, ())))
+            .collect()
+    }
+}
+
+impl<'l> ToCharacters<'l> for &BTreeMap<Language, Glyphs> {
+    type Target = BTreeMap<Language, BTreeSet<Vec<Character>>>;
+    type Parameter = ();
+
+    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+        self.iter()
+            .map(|(key, value)| (*key, value.to_characters(mapping, ())))
+            .collect()
+    }
+}
+
+impl<'l> ToCharacters<'l> for &Glyphs {
+    type Target = BTreeSet<Vec<Character>>;
+    type Parameter = ();
+
+    fn to_characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+        self.iter()
+            .filter_map(|value| value.to_characters(mapping, self))
+            .collect()
+    }
+}
+
+impl<'l> ToCharacters<'l> for &[Glyph] {
+    type Target = Option<Vec<Character>>;
+    type Parameter = &'l Glyphs;
+
+    fn to_characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
+        self.iter()
+            .map(|value| value.to_characters(mapping, glyphs))
+            .collect()
+    }
+}
+
+impl<'l> ToCharacters<'l> for &Glyph {
+    type Target = Option<Character>;
+    type Parameter = &'l Glyphs;
+
+    fn to_characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
+        match self {
+            Glyph::Scalar(value) => mapping.get(*value).map(Character::Scalar),
+            Glyph::Range(start, end) => to_characters(*start..=*end, mapping, glyphs),
+            Glyph::Ranges(value) => to_characters(
+                value.iter().flat_map(|value| value.0..=value.1),
+                mapping,
+                glyphs,
+            ),
+            Glyph::List(value) => to_characters(value.iter().cloned(), mapping, glyphs),
+        }
+    }
+}
+
+impl ToGlyphs for opentype::tables::glyph_positioning::Type {}
+
+impl ToGlyphs for opentype::tables::glyph_substitution::Type {
+    fn to_glyphs(&self) -> Glyphs {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
-        let map = |glyph_id| mapping.get(glyph_id);
         let mut values = BTreeSet::default();
         match self {
-            Type::SingleSubstitution(SingleSubstitution::Format1(value)) => {
-                values.extend(
-                    uncover(&value.coverage)
-                        .filter_map(map)
-                        .map(Character::Scalar)
-                        .map(vector),
-                );
+            Type::SingleSubstitution(SingleSubstitution::Format1(table)) => {
+                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
             }
-            Type::SingleSubstitution(SingleSubstitution::Format2(value)) => {
-                values.extend(
-                    uncover(&value.coverage)
-                        .filter_map(map)
-                        .map(Character::Scalar)
-                        .map(vector),
-                );
+            Type::SingleSubstitution(SingleSubstitution::Format2(table)) => {
+                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
             }
-            Type::MultipleSubstitution(value) => {
-                values.extend(
-                    uncover(&value.coverage)
-                        .filter_map(map)
-                        .map(Character::Scalar)
-                        .map(vector),
-                );
+            Type::MultipleSubstitution(table) => {
+                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
             }
-            Type::AlternateSubstitution(value) => {
-                values.extend(
-                    uncover(&value.coverage)
-                        .filter_map(map)
-                        .map(Character::Scalar)
-                        .map(vector),
-                );
+            Type::AlternateSubstitution(table) => {
+                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
             }
-            Type::LigatureSubstitution(value) => {
-                values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
+            Type::LigatureSubstitution(table) => {
+                values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
                     |(glyph_id, record)| {
-                        record.records.iter().filter_map(move |record| {
+                        record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(Character::Scalar(mapping.get(glyph_id)?));
-                            for glyph_id in &record.glyph_ids {
-                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            value.push(Glyph::Scalar(glyph_id));
+                            for glyph_id in record.glyph_ids.iter().cloned() {
+                                value.push(Glyph::Scalar(glyph_id));
                             }
-                            Some(value)
+                            value
                         })
                     },
                 ));
             }
-            Type::ContextualSubstitution(Context::Format1(value)) => {
-                values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
+            Type::ContextualSubstitution(Context::Format1(table)) => {
+                values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
                     |(glyph_id, record)| {
-                        record.records.iter().filter_map(move |record| {
+                        record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(Character::Scalar(mapping.get(glyph_id)?));
-                            for glyph_id in &record.glyph_ids {
-                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            value.push(Glyph::Scalar(glyph_id));
+                            for glyph_id in record.glyph_ids.iter().cloned() {
+                                value.push(Glyph::Scalar(glyph_id));
                             }
-                            Some(value)
+                            value
                         })
                     },
                 ));
             }
-            Type::ContextualSubstitution(Context::Format2(value)) => {
-                let (classes, mapping) = unclass(&value.class, mapping);
+            Type::ContextualSubstitution(Context::Format2(table)) => {
+                let (classes, mapping) = unclass(&table.class);
+                let classes = &classes;
                 values.extend(
-                    uncover(&value.coverage)
-                        .filter_map(|glyph_id| mapping.get(&glyph_id))
+                    uncover(&table.coverage)
+                        .filter_map(|glyph_id| mapping.get(&glyph_id).cloned())
                         .collect::<BTreeSet<_>>()
                         .into_iter()
-                        .filter_map(|index| {
-                            value
-                                .records
-                                .get(*index as usize)
-                                .and_then(|record| record.as_ref().map(|record| (index, record)))
+                        .filter_map(|class_index| {
+                            table.records.get(class_index as usize).and_then(|record| {
+                                record.as_ref().map(|record| (class_index, record))
+                            })
                         })
-                        .flat_map(|(index, record)| {
-                            record.records.iter().filter_map(|record| {
+                        .flat_map(|(class_index, record)| {
+                            record.records.iter().filter_map(move |record| {
                                 let mut value = Vec::with_capacity(record.glyph_count as usize);
-                                value.push(classes.get(index)?.clone());
-                                for index in &record.indices {
-                                    value.push(classes.get(index)?.clone());
+                                value.push(classes.get(&class_index)?.clone());
+                                for class_index in &record.indices {
+                                    value.push(classes.get(class_index)?.clone());
                                 }
                                 Some(value)
                             })
                         }),
                 );
             }
-            Type::ContextualSubstitution(Context::Format3(value)) => {
-                if let Some(value) = value
-                    .coverages
-                    .iter()
-                    .map(|coverage| coverage.compress(mapping))
-                    .collect::<Option<Vec<_>>>()
-                {
-                    values.insert(value);
-                }
+            Type::ContextualSubstitution(Context::Format3(table)) => {
+                values.insert(table.coverages.iter().cloned().map(Glyph::from).collect());
             }
-            Type::ChainedContextualSubstitution(ChainedContext::Format1(value)) => {
-                values.extend(uncover(&value.coverage).zip(&value.records).flat_map(
+            Type::ChainedContextualSubstitution(ChainedContext::Format1(table)) => {
+                values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
                     |(glyph_id, record)| {
-                        record.records.iter().filter_map(move |record| {
+                        record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(
                                 record.backward_glyph_count as usize
                                     + record.glyph_count as usize
                                     + record.forward_glyph_count as usize,
                             );
-                            for glyph_id in record.backward_glyph_ids.iter().rev() {
-                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            for glyph_id in record.backward_glyph_ids.iter().rev().cloned() {
+                                value.push(Glyph::Scalar(glyph_id));
                             }
-                            value.push(Character::Scalar(mapping.get(glyph_id)?));
-                            for glyph_id in &record.glyph_ids {
-                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            value.push(Glyph::Scalar(glyph_id));
+                            for glyph_id in record.glyph_ids.iter().cloned() {
+                                value.push(Glyph::Scalar(glyph_id));
                             }
-                            for glyph_id in &record.forward_glyph_ids {
-                                value.push(Character::Scalar(mapping.get(*glyph_id)?));
+                            for glyph_id in record.forward_glyph_ids.iter().cloned() {
+                                value.push(Glyph::Scalar(glyph_id));
                             }
-                            Some(value)
+                            value
                         })
                     },
                 ));
             }
-            Type::ChainedContextualSubstitution(ChainedContext::Format2(value)) => {
-                let (backward_classes, _) = unclass(&value.backward_class, mapping);
-                let (forward_classes, _) = unclass(&value.forward_class, mapping);
-                let (classes, mapping) = unclass(&value.class, mapping);
+            Type::ChainedContextualSubstitution(ChainedContext::Format2(table)) => {
+                let (backward_classes, _) = unclass(&table.backward_class);
+                let backward_classes = &backward_classes;
+
+                let (classes, mapping) = unclass(&table.class);
+                let classes = &classes;
+
+                let (forward_classes, _) = unclass(&table.forward_class);
+                let forward_classes = &forward_classes;
+
                 values.extend(
-                    uncover(&value.coverage)
-                        .filter_map(|glyph_id| mapping.get(&glyph_id))
+                    uncover(&table.coverage)
+                        .filter_map(|glyph_id| mapping.get(&glyph_id).cloned())
                         .collect::<BTreeSet<_>>()
                         .into_iter()
-                        .filter_map(|index| {
-                            value
-                                .records
-                                .get(*index as usize)
-                                .and_then(|record| record.as_ref().map(|record| (index, record)))
+                        .filter_map(|class_index| {
+                            table.records.get(class_index as usize).and_then(|record| {
+                                record.as_ref().map(|record| (class_index, record))
+                            })
                         })
-                        .flat_map(|(index, record)| {
-                            record.records.iter().filter_map(|record| {
+                        .flat_map(|(class_index, record)| {
+                            record.records.iter().filter_map(move |record| {
                                 let mut value = Vec::with_capacity(
                                     record.backward_glyph_count as usize
                                         + record.glyph_count as usize
                                         + record.forward_glyph_count as usize,
                                 );
-                                for index in record.backward_indices.iter().rev() {
-                                    value.push(backward_classes.get(index)?.clone());
+                                for class_index in record.backward_indices.iter().rev() {
+                                    value.push(backward_classes.get(class_index)?.clone());
                                 }
-                                value.push(classes.get(index)?.clone());
-                                for index in &record.indices {
-                                    value.push(classes.get(index)?.clone());
+                                value.push(classes.get(&class_index)?.clone());
+                                for class_index in &record.indices {
+                                    value.push(classes.get(class_index)?.clone());
                                 }
-                                for index in &record.forward_indices {
-                                    value.push(forward_classes.get(index)?.clone());
+                                for class_index in &record.forward_indices {
+                                    value.push(forward_classes.get(class_index)?.clone());
                                 }
                                 Some(value)
                             })
                         }),
                 );
             }
-            Type::ChainedContextualSubstitution(ChainedContext::Format3(value)) => {
-                if let (Some(mut backward_value), Some(value), Some(forward_value)) = (
-                    value
-                        .backward_coverages
-                        .iter()
-                        .rev()
-                        .map(|coverage| coverage.compress(mapping))
-                        .collect::<Option<Vec<_>>>(),
-                    value
-                        .coverages
-                        .iter()
-                        .map(|coverage| coverage.compress(mapping))
-                        .collect::<Option<Vec<_>>>(),
-                    value
-                        .forward_coverages
-                        .iter()
-                        .map(|coverage| coverage.compress(mapping))
-                        .collect::<Option<Vec<_>>>(),
-                ) {
-                    backward_value.extend(value);
-                    backward_value.extend(forward_value);
-                    values.insert(backward_value);
-                }
+            Type::ChainedContextualSubstitution(ChainedContext::Format3(table)) => {
+                let mut value = table
+                    .backward_coverages
+                    .iter()
+                    .cloned()
+                    .rev()
+                    .map(Glyph::from)
+                    .collect::<Vec<_>>();
+                value.extend(table.coverages.iter().cloned().map(Glyph::from));
+                value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
+                values.insert(value);
             }
-            Type::ReverseChainedContextualSubstibution(value) => {
-                if let (Some(mut backward_value), Some(value), Some(forward_value)) = (
-                    value
-                        .backward_coverages
-                        .iter()
-                        .rev()
-                        .map(|coverage| coverage.compress(mapping))
-                        .collect::<Option<Vec<_>>>(),
-                    value.coverage.compress(mapping),
-                    value
-                        .forward_coverages
-                        .iter()
-                        .map(|coverage| coverage.compress(mapping))
-                        .collect::<Option<Vec<_>>>(),
-                ) {
-                    backward_value.push(value);
-                    backward_value.extend(forward_value);
-                    values.insert(backward_value);
-                }
+            Type::ReverseChainedContextualSubstibution(table) => {
+                let mut value = table
+                    .backward_coverages
+                    .iter()
+                    .cloned()
+                    .rev()
+                    .map(Glyph::from)
+                    .collect::<Vec<_>>();
+                value.push(table.coverage.clone().into());
+                value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
+                values.insert(value);
             }
             _ => {}
         }
@@ -247,154 +290,163 @@ impl Characters for opentype::tables::glyph_substitution::Type {
     }
 }
 
-impl Compress for BTreeSet<GlyphID> {
-    fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
-        self.into_iter()
-            .filter_map(|glyph_id| mapping.get(glyph_id))
-            .collect::<Vec<_>>()
-            .compress(mapping)
+impl From<GlyphID> for Glyph {
+    #[inline]
+    fn from(value: GlyphID) -> Self {
+        Self::Scalar(value)
     }
 }
 
-impl Compress for &Coverage {
-    fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
-        match self {
-            Coverage::Format1(value) => value.glyph_ids.compress(mapping),
+impl From<(GlyphID, GlyphID)> for Glyph {
+    #[inline]
+    fn from(value: (GlyphID, GlyphID)) -> Self {
+        Self::Range(value.0, value.1)
+    }
+}
+
+impl From<Vec<GlyphID>> for Glyph {
+    #[inline]
+    fn from(value: Vec<GlyphID>) -> Self {
+        Self::List(value)
+    }
+}
+
+impl From<Vec<(GlyphID, GlyphID)>> for Glyph {
+    #[inline]
+    fn from(value: Vec<(GlyphID, GlyphID)>) -> Self {
+        Self::Ranges(value)
+    }
+}
+
+impl From<Coverage> for Glyph {
+    fn from(value: Coverage) -> Self {
+        match value {
+            Coverage::Format1(value) => value.glyph_ids.into(),
             Coverage::Format2(value) => value
                 .records
-                .iter()
-                .filter_map(|record| {
-                    Some((
-                        mapping.get(record.start_glyph_id)?,
-                        mapping.get(record.end_glyph_id)?,
-                    ))
-                })
+                .into_iter()
+                .map(|record| (record.start_glyph_id, record.end_glyph_id))
                 .collect::<Vec<_>>()
-                .compress(mapping),
-        }
-    }
-}
-
-impl Compress for &[GlyphID] {
-    fn compress(self, mapping: &ReverseMapping) -> Option<Character> {
-        match self.len() {
-            0 => None,
-            1 => Some(Character::Scalar(mapping.get(self[0])?)),
-            _ => self
-                .iter()
-                .filter_map(|glyph_id| mapping.get(*glyph_id))
-                .collect::<Vec<_>>()
-                .compress(mapping),
-        }
-    }
-}
-
-impl Compress for Vec<char> {
-    fn compress(mut self, _: &ReverseMapping) -> Option<Character> {
-        self.sort();
-        match self.len() {
-            0 => None,
-            1 => Some(Character::Scalar(self[0])),
-            _ => Some(Character::List(self)),
-        }
-    }
-}
-
-impl Compress for Vec<(char, char)> {
-    fn compress(mut self, mapping: &ReverseMapping) -> Option<Character> {
-        self.sort();
-        match self.len() {
-            0 => None,
-            1 => self[0].compress(mapping),
-            _ => Some(Character::Ranges(self)),
-        }
-    }
-}
-
-impl Compress for (char, char) {
-    fn compress(self, _: &ReverseMapping) -> Option<Character> {
-        if self.0 == self.1 {
-            Some(Character::Scalar(self.0))
-        } else {
-            Some(Character::Range(self.0, self.1))
+                .into(),
         }
     }
 }
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
-    let mut values = Features::default();
-    let mapping = cache.reverse_mapping()?.clone();
+    let mut values = Default::default();
     if let Some(table) = cache.try_glyph_positioning()? {
-        populate(&mut values, &table.borrow(), &mapping);
+        populate(&mut values, &table.borrow());
     }
     if let Some(table) = cache.try_glyph_substitution()? {
-        populate(&mut values, &table.borrow(), &mapping);
+        populate(&mut values, &table.borrow());
     }
-    Ok(values)
+    let mapping = cache.reverse_mapping()?.clone();
+    Ok(values.to_characters(&mapping, ()))
 }
 
-fn populate<T>(values: &mut Features, table: &Directory<T>, mapping: &ReverseMapping)
-where
-    T: Characters,
+fn populate<T>(
+    values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Glyphs>>>,
+    table: &Directory<T>,
+) where
+    T: ToGlyphs,
 {
     for (i, header) in table.scripts.headers.iter().enumerate() {
         let script = Script::from_tag(&header.tag);
         if let Some(record) = table.scripts.records[i].default_language.as_ref() {
-            for index in record.feature_indices.iter() {
+            for index in record.feature_indices.iter().cloned().map(usize::from) {
                 if let (Some(header), Some(record)) = (
-                    table.features.headers.get(*index as usize),
-                    table.features.records.get(*index as usize),
+                    table.features.headers.get(index),
+                    table.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let characters = record
+                    let glyphs = record
                         .lookup_indices
                         .iter()
-                        .filter_map(|index| table.lookups.records.get(*index as usize))
-                        .flat_map(|record| {
-                            record
-                                .tables
-                                .iter()
-                                .flat_map(|table| table.characters(mapping))
-                        })
+                        .cloned()
+                        .filter_map(|index| table.lookups.records.get(index as usize))
+                        .flat_map(|record| record.tables.iter().flat_map(|table| table.to_glyphs()))
                         .collect::<BTreeSet<_>>();
                     values
                         .entry(feature)
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(Language::Default, characters);
+                        .insert(Language::Default, glyphs);
                 }
             }
         }
         for (j, header) in table.scripts.records[i].language_headers.iter().enumerate() {
             let language = Language::from_tag(&header.tag);
             let record = &table.scripts.records[i].language_records[j];
-            for index in record.feature_indices.iter() {
+            for index in record.feature_indices.iter().cloned().map(usize::from) {
                 if let (Some(header), Some(record)) = (
-                    table.features.headers.get(*index as usize),
-                    table.features.records.get(*index as usize),
+                    table.features.headers.get(index),
+                    table.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let characters = record
+                    let glyphs = record
                         .lookup_indices
                         .iter()
-                        .filter_map(|index| table.lookups.records.get(*index as usize))
-                        .flat_map(|record| {
-                            record
-                                .tables
-                                .iter()
-                                .flat_map(|table| table.characters(mapping))
-                        })
+                        .cloned()
+                        .filter_map(|index| table.lookups.records.get(index as usize))
+                        .flat_map(|record| record.tables.iter().flat_map(|table| table.to_glyphs()))
                         .collect::<BTreeSet<_>>();
                     values
                         .entry(feature)
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(language, characters);
+                        .insert(language, glyphs);
                 }
             }
         }
+    }
+}
+
+fn to_characters<T>(values: T, mapping: &Mapping, _: &Glyphs) -> Option<Character>
+where
+    T: Iterator<Item = GlyphID>,
+{
+    let mut values = values
+        .filter_map(|glyph_id| mapping.get(glyph_id))
+        .collect::<Vec<_>>();
+    values.sort();
+    values.dedup();
+    if values.is_empty() {
+        return None;
+    }
+    if values.len() == 1 {
+        return Some(Character::Scalar(values[0]));
+    }
+    let mut ranges = Vec::new();
+    let (mut start, mut end) = (values[0], values[0]);
+    let mut iterator = values.iter().skip(1).cloned();
+    loop {
+        match iterator.next() {
+            Some(next) => {
+                if end as usize + 1 == next as usize {
+                    continue;
+                }
+                ranges.push((start, end));
+                start = next;
+                end = next;
+            }
+            _ => {
+                ranges.push((start, end));
+                break;
+            }
+        }
+    }
+    if ranges.len() == 1 {
+        if ranges[0].0 == ranges[0].1 {
+            return Some(Character::Scalar(ranges[0].0));
+        }
+        return Some(Character::Range(ranges[0].0, ranges[0].1));
+    }
+    if 2 * ranges.len() < values.len() {
+        Some(Character::Ranges(ranges))
+    } else {
+        Some(Character::List(values))
     }
 }
 
@@ -403,18 +455,15 @@ fn vector<T>(value: T) -> Vec<T> {
     vec![value]
 }
 
-fn unclass(
-    value: &Class,
-    mapping: &ReverseMapping,
-) -> (BTreeMap<u16, Character>, BTreeMap<GlyphID, u16>) {
+fn unclass(value: &Class) -> (BTreeMap<u16, Glyph>, BTreeMap<GlyphID, u16>) {
     let mut forward = BTreeMap::<_, BTreeSet<_>>::default();
     let mut reverse = BTreeMap::default();
     match value {
         Class::Format1(value) => {
             let range = value.start_glyph_id..value.start_glyph_id + value.glyph_count;
-            for (glyph_id, index) in range.zip(value.indices.iter().cloned()) {
-                forward.entry(index).or_default().insert(glyph_id);
-                reverse.insert(glyph_id, index);
+            for (glyph_id, class_index) in range.zip(value.indices.iter().cloned()) {
+                forward.entry(class_index).or_default().insert(glyph_id);
+                reverse.insert(glyph_id, class_index);
             }
         }
         Class::Format2(value) => {
@@ -429,10 +478,11 @@ fn unclass(
     (
         forward
             .into_iter()
-            .filter_map(|(index, glyph_ids)| {
-                glyph_ids
-                    .compress(mapping)
-                    .map(|characters| (index, characters))
+            .map(|(class_index, glyph_ids)| {
+                (
+                    class_index,
+                    glyph_ids.into_iter().collect::<Vec<_>>().into(),
+                )
             })
             .collect(),
         reverse,
