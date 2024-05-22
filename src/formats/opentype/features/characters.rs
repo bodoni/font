@@ -54,10 +54,11 @@ impl<'l> Characters<'l> for &Glyphs {
     type Parameter = ();
 
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
-        self.iter()
-            .filter_map(|value| value.characters(mapping, self))
-            .map(Character::List)
-            .collect()
+        postcompress(
+            self.iter()
+                .filter_map(|value| value.characters(mapping, self)),
+        )
+        .collect()
     }
 }
 
@@ -79,18 +80,18 @@ impl<'l> Characters<'l> for &Glyph {
     fn characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
         match self {
             Glyph::Scalar(value) => mapping.get(*value).map(Character::Scalar),
-            Glyph::Range(start, end) => compress(*start..=*end, mapping, glyphs),
-            Glyph::Ranges(value) => compress(
+            Glyph::Range(start, end) => precompress(*start..=*end, mapping, glyphs),
+            Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
                 mapping,
                 glyphs,
             ),
-            Glyph::List(value) => compress(value.iter().cloned(), mapping, glyphs),
+            Glyph::List(value) => precompress(value.iter().cloned(), mapping, glyphs),
         }
     }
 }
 
-fn compress<T>(values: T, mapping: &Mapping, _: &Glyphs) -> Option<Character>
+fn precompress<T>(values: T, mapping: &Mapping, _: &Glyphs) -> Option<Character>
 where
     T: Iterator<Item = GlyphID>,
 {
@@ -137,4 +138,17 @@ where
         return values.pop();
     }
     Some(Character::List(values))
+}
+
+fn postcompress<T>(values: T) -> impl Iterator<Item = Character>
+where
+    T: Iterator<Item = Vec<Character>>,
+{
+    values.filter_map(|mut values| {
+        match values.len() {
+            0 => None,
+            1 => values.pop(),
+            _ => Some(Character::List(values)),
+        }
+    })
 }
