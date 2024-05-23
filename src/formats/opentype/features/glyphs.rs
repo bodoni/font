@@ -85,12 +85,14 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                 );
             }
             Type::MultipleSubstitution(table) => {
-                values.extend(
-                    uncover(&table.coverage)
-                        .map(Glyph::Scalar)
-                        .map(vector)
-                        .map(double),
-                );
+                values.extend(uncover(&table.coverage).zip(&table.records).map(
+                    |(glyph_id, record)| {
+                        (
+                            vec![glyph_id.into()],
+                            record.glyph_ids.iter().cloned().map(Into::into).collect(),
+                        )
+                    },
+                ));
             }
             Type::AlternateSubstitution(table) => {
                 values.extend(
