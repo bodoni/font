@@ -70,19 +70,18 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
         let mut values = BTreeMap::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(table)) => {
-                values.extend(
-                    uncover(&table.coverage)
-                        .map(Glyph::Scalar)
-                        .map(vector)
-                        .map(double),
-                );
+                values.extend(uncover(&table.coverage).filter_map(|glyph_id| {
+                    let other_id = glyph_id as isize + table.delta_glyph_id as isize;
+                    GlyphID::try_from(other_id)
+                        .ok()
+                        .map(|other_id| (vec![glyph_id.into()], vec![other_id.into()]))
+                }));
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(table)) => {
                 values.extend(
                     uncover(&table.coverage)
-                        .map(Glyph::Scalar)
-                        .map(vector)
-                        .map(double),
+                        .zip(table.glyph_ids.iter().cloned())
+                        .map(|(glyph_id, other_id)| (vec![glyph_id.into()], vec![other_id.into()])),
                 );
             }
             Type::MultipleSubstitution(table) => {
