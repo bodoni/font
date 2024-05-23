@@ -95,12 +95,14 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                 ));
             }
             Type::AlternateSubstitution(table) => {
-                values.extend(
-                    uncover(&table.coverage)
-                        .map(Glyph::Scalar)
-                        .map(vector)
-                        .map(double),
-                );
+                values.extend(uncover(&table.coverage).zip(&table.records).map(
+                    |(glyph_id, record)| {
+                        (
+                            vec![glyph_id.into()],
+                            vec![record.glyph_ids.iter().cloned().collect::<Vec<_>>().into()],
+                        )
+                    },
+                ));
             }
             Type::LigatureSubstitution(table) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
@@ -255,16 +257,6 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
         }
         values
     }
-}
-
-#[inline]
-fn double<T>(value: Vec<T>) -> (Vec<T>, Vec<T>) {
-    (value, Default::default())
-}
-
-#[inline]
-fn vector<T>(value: T) -> Vec<T> {
-    vec![value]
 }
 
 fn unclass(value: &Class) -> (BTreeMap<u16, Glyph>, BTreeMap<GlyphID, u16>) {
