@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use opentype::layout::Directory;
 use opentype::layout::{Class, Coverage};
 use opentype::truetype::GlyphID;
 
@@ -13,7 +14,10 @@ pub enum Glyph {
 
 pub trait Glyphs {
     #[inline]
-    fn glyphs(&self) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
+    fn glyphs(&self, _: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>>
+    where
+        Self: Sized,
+    {
         Default::default()
     }
 }
@@ -63,7 +67,7 @@ impl From<Coverage> for Glyph {
 impl Glyphs for opentype::tables::glyph_positioning::Type {}
 
 impl Glyphs for opentype::tables::glyph_substitution::Type {
-    fn glyphs(&self) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
+    fn glyphs(&self, _: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
@@ -99,7 +103,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         (
                             vec![glyph_id.into()],
-                            vec![record.glyph_ids.iter().cloned().collect::<Vec<_>>().into()],
+                            vec![record.glyph_ids.to_vec().into()],
                         )
                     },
                 ));
@@ -123,9 +127,9 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(Glyph::Scalar(glyph_id));
+                            value.push(glyph_id.into());
                             for glyph_id in record.glyph_ids.iter().cloned() {
-                                value.push(Glyph::Scalar(glyph_id));
+                                value.push(glyph_id.into());
                             }
                             (value, Default::default())
                         })

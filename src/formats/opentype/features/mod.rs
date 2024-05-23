@@ -60,7 +60,9 @@ fn populate<T>(
                         .iter()
                         .cloned()
                         .filter_map(|index| table.lookups.records.get(index as usize))
-                        .flat_map(|record| record.tables.iter().flat_map(|table| table.glyphs()))
+                        .flat_map(|record| {
+                            record.tables.iter().flat_map(|other| other.glyphs(table))
+                        })
                         .collect::<BTreeMap<_, _>>();
                     values
                         .entry(feature)
@@ -85,7 +87,9 @@ fn populate<T>(
                         .iter()
                         .cloned()
                         .filter_map(|index| table.lookups.records.get(index as usize))
-                        .flat_map(|record| record.tables.iter().flat_map(|table| table.glyphs()))
+                        .flat_map(|record| {
+                            record.tables.iter().flat_map(|other| other.glyphs(table))
+                        })
                         .collect::<BTreeMap<_, _>>();
                     values
                         .entry(feature)
