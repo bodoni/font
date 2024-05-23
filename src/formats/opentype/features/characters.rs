@@ -5,7 +5,7 @@ use opentype::truetype::GlyphID;
 
 use crate::formats::opentype::characters::{Character, ReverseMapping as Mapping};
 use crate::formats::opentype::features::glyphs::Glyph;
-use crate::formats::opentype::features::{Features, Value};
+use crate::formats::opentype::features::{self, Value};
 
 pub trait Characters<'l> {
     type Target;
@@ -14,93 +14,95 @@ pub trait Characters<'l> {
     fn characters(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-type Substitution = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
+type Features = BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Substitutions>>>;
 
-impl<'l> Characters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Substitution>>> {
-    type Target = Features;
+type Substitutions = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
+
+impl<'l> Characters<'l> for &Features {
+    type Target = features::Features;
     type Parameter = ();
 
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.characters(mapping, ())))
+            .map(|(key, value)| (*key, value.characters(mapping, self)))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Substitution>> {
+impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Substitutions>> {
     type Target = Value;
-    type Parameter = ();
+    type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.characters(mapping, ())))
+            .map(|(key, value)| (*key, value.characters(mapping, features)))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &BTreeMap<Language, Substitution> {
+impl<'l> Characters<'l> for &BTreeMap<Language, Substitutions> {
     type Target = BTreeMap<Language, Character>;
-    type Parameter = ();
+    type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.characters(mapping, ())))
+            .map(|(key, value)| (*key, value.characters(mapping, features)))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &Substitution {
+impl<'l> Characters<'l> for &Substitutions {
     type Target = Character;
-    type Parameter = ();
+    type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         postcompress(
             self.iter()
-                .filter_map(|(value, _)| value.characters(mapping, self)),
+                .filter_map(|(value, _)| value.characters(mapping, features)),
         )
     }
 }
 
 impl<'l> Characters<'l> for &[Glyph] {
     type Target = Option<Vec<Character>>;
-    type Parameter = &'l Substitution;
+    type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, substitution: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| value.characters(mapping, substitution))
+            .map(|value| value.characters(mapping, features))
             .collect()
     }
 }
 
 impl<'l> Characters<'l> for &Glyph {
     type Target = Option<Character>;
-    type Parameter = &'l Substitution;
+    type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, substitution: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         match self {
-            Glyph::Scalar(value) => map(*value, mapping, substitution).map(Character::Scalar),
-            Glyph::Range(start, end) => precompress(*start..=*end, mapping, substitution),
+            Glyph::Scalar(value) => map(*value, mapping, features).map(Character::Scalar),
+            Glyph::Range(start, end) => precompress(*start..=*end, mapping, features),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
                 mapping,
-                substitution,
+                features,
             ),
-            Glyph::List(value) => precompress(value.iter().cloned(), mapping, substitution),
+            Glyph::List(value) => precompress(value.iter().cloned(), mapping, features),
         }
     }
 }
 
 #[inline]
-fn map(value: GlyphID, mapping: &Mapping, _: &Substitution) -> Option<char> {
+fn map(value: GlyphID, mapping: &Mapping, _: &Features) -> Option<char> {
     mapping.get(value)
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, substitution: &Substitution) -> Option<Character>
+fn precompress<T>(values: T, mapping: &Mapping, features: &Features) -> Option<Character>
 where
     T: Iterator<Item = GlyphID>,
 {
     let values = values
-        .filter_map(|glyph_id| map(glyph_id, mapping, substitution))
+        .filter_map(|glyph_id| map(glyph_id, mapping, features))
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
