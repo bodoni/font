@@ -41,7 +41,7 @@ impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Substitutions>>
 }
 
 impl<'l> Characters<'l> for &BTreeMap<Language, Substitutions> {
-    type Target = BTreeMap<Language, Character>;
+    type Target = BTreeMap<Language, BTreeSet<Character>>;
     type Parameter = &'l Features;
 
     fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
@@ -52,7 +52,7 @@ impl<'l> Characters<'l> for &BTreeMap<Language, Substitutions> {
 }
 
 impl<'l> Characters<'l> for &Substitutions {
-    type Target = Character;
+    type Target = BTreeSet<Character>;
     type Parameter = &'l Features;
 
     fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
@@ -134,7 +134,7 @@ where
     }
 }
 
-fn postcompress<T>(values: T) -> Character
+fn postcompress<T>(values: T) -> BTreeSet<Character>
 where
     T: Iterator<Item = Vec<Character>>,
 {
@@ -176,7 +176,7 @@ where
             (None, None) => break,
         }
     }
-    Character::List(values.into_iter().collect())
+    values
 }
 
 #[inline]

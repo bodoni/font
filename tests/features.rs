@@ -1,6 +1,8 @@
 #[macro_use]
 mod support;
 
+use std::collections::BTreeSet;
+
 use font::opentype::truetype::Tag;
 use font::{Character, Font};
 
@@ -379,9 +381,16 @@ where
         .collect()
 }
 
-fn flatten(value: &Character) -> String {
+fn flatten(values: &BTreeSet<Character>) -> String {
     let mut buffer = String::new();
-    flatten_inner(value, &mut buffer);
+    buffer.push('[');
+    for (index, value) in values.iter().enumerate() {
+        flatten_inner(value, &mut buffer);
+        if index + 1 < values.len() {
+            buffer.push_str(", ");
+        }
+    }
+    buffer.push(']');
     buffer
 }
 
