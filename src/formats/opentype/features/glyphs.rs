@@ -109,11 +109,11 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(Glyph::Scalar(glyph_id));
+                            value.push(glyph_id.into());
                             for glyph_id in record.glyph_ids.iter().cloned() {
-                                value.push(Glyph::Scalar(glyph_id));
+                                value.push(glyph_id.into());
                             }
-                            (value, Default::default())
+                            (value, vec![record.glyph_id.into()])
                         })
                     },
                 ));
