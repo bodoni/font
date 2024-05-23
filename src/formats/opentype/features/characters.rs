@@ -14,7 +14,7 @@ pub trait Characters<'l> {
     fn characters(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-type Glyphs = BTreeSet<Vec<Glyph>>;
+type Glyphs = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
 
 impl<'l> Characters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Glyphs>>> {
     type Target = Features;
@@ -56,7 +56,7 @@ impl<'l> Characters<'l> for &Glyphs {
     fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
         postcompress(
             self.iter()
-                .filter_map(|value| value.characters(mapping, self)),
+                .filter_map(|(value, _)| value.characters(mapping, self)),
         )
     }
 }

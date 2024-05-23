@@ -13,7 +13,7 @@ pub enum Glyph {
 
 pub trait Glyphs {
     #[inline]
-    fn glyphs(&self) -> BTreeSet<Vec<Glyph>> {
+    fn glyphs(&self) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
         Default::default()
     }
 }
@@ -63,23 +63,43 @@ impl From<Coverage> for Glyph {
 impl Glyphs for opentype::tables::glyph_positioning::Type {}
 
 impl Glyphs for opentype::tables::glyph_substitution::Type {
-    fn glyphs(&self) -> BTreeSet<Vec<Glyph>> {
+    fn glyphs(&self) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
-        let mut values = BTreeSet::default();
+        let mut values = BTreeMap::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(table)) => {
-                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
+                values.extend(
+                    uncover(&table.coverage)
+                        .map(Glyph::Scalar)
+                        .map(vector)
+                        .map(double),
+                );
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(table)) => {
-                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
+                values.extend(
+                    uncover(&table.coverage)
+                        .map(Glyph::Scalar)
+                        .map(vector)
+                        .map(double),
+                );
             }
             Type::MultipleSubstitution(table) => {
-                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
+                values.extend(
+                    uncover(&table.coverage)
+                        .map(Glyph::Scalar)
+                        .map(vector)
+                        .map(double),
+                );
             }
             Type::AlternateSubstitution(table) => {
-                values.extend(uncover(&table.coverage).map(Glyph::Scalar).map(vector));
+                values.extend(
+                    uncover(&table.coverage)
+                        .map(Glyph::Scalar)
+                        .map(vector)
+                        .map(double),
+                );
             }
             Type::LigatureSubstitution(table) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
@@ -90,7 +110,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                             for glyph_id in record.glyph_ids.iter().cloned() {
                                 value.push(Glyph::Scalar(glyph_id));
                             }
-                            value
+                            (value, Default::default())
                         })
                     },
                 ));
@@ -104,7 +124,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                             for glyph_id in record.glyph_ids.iter().cloned() {
                                 value.push(Glyph::Scalar(glyph_id));
                             }
-                            value
+                            (value, Default::default())
                         })
                     },
                 ));
@@ -129,13 +149,16 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                                 for class_index in &record.indices {
                                     value.push(classes.get(class_index)?.clone());
                                 }
-                                Some(value)
+                                Some((value, Default::default()))
                             })
                         }),
                 );
             }
             Type::ContextualSubstitution(Context::Format3(table)) => {
-                values.insert(table.coverages.iter().cloned().map(Glyph::from).collect());
+                values.insert(
+                    table.coverages.iter().cloned().map(Glyph::from).collect(),
+                    Default::default(),
+                );
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format1(table)) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
@@ -156,7 +179,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                             for glyph_id in record.forward_glyph_ids.iter().cloned() {
                                 value.push(Glyph::Scalar(glyph_id));
                             }
-                            value
+                            (value, Default::default())
                         })
                     },
                 ));
@@ -198,7 +221,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                                 for class_index in &record.forward_indices {
                                     value.push(forward_classes.get(class_index)?.clone());
                                 }
-                                Some(value)
+                                Some((value, Default::default()))
                             })
                         }),
                 );
@@ -213,7 +236,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     .collect::<Vec<_>>();
                 value.extend(table.coverages.iter().cloned().map(Glyph::from));
                 value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                values.insert(value);
+                values.insert(value, Default::default());
             }
             Type::ReverseChainedContextualSubstibution(table) => {
                 let mut value = table
@@ -225,12 +248,17 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     .collect::<Vec<_>>();
                 value.push(table.coverage.clone().into());
                 value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                values.insert(value);
+                values.insert(value, Default::default());
             }
             _ => {}
         }
         values
     }
+}
+
+#[inline]
+fn double<T>(value: Vec<T>) -> (Vec<T>, Vec<T>) {
+    (value, Default::default())
 }
 
 #[inline]

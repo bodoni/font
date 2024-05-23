@@ -5,7 +5,7 @@ mod glyphs;
 
 pub use opentype::layout::{Language, Script};
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::io::Result;
 
 use opentype::layout::{Directory, Feature};
@@ -38,7 +38,10 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
 
 #[allow(clippy::type_complexity)]
 fn populate<T>(
-    values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, BTreeSet<Vec<Glyph>>>>>,
+    values: &mut BTreeMap<
+        Feature,
+        BTreeMap<Script, BTreeMap<Language, BTreeMap<Vec<Glyph>, Vec<Glyph>>>>,
+    >,
     table: &Directory<T>,
 ) where
     T: Glyphs,
@@ -58,7 +61,7 @@ fn populate<T>(
                         .cloned()
                         .filter_map(|index| table.lookups.records.get(index as usize))
                         .flat_map(|record| record.tables.iter().flat_map(|table| table.glyphs()))
-                        .collect::<BTreeSet<_>>();
+                        .collect::<BTreeMap<_, _>>();
                     values
                         .entry(feature)
                         .or_default()
@@ -83,7 +86,7 @@ fn populate<T>(
                         .cloned()
                         .filter_map(|index| table.lookups.records.get(index as usize))
                         .flat_map(|record| record.tables.iter().flat_map(|table| table.glyphs()))
-                        .collect::<BTreeSet<_>>();
+                        .collect::<BTreeMap<_, _>>();
                     values
                         .entry(feature)
                         .or_default()
