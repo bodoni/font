@@ -117,15 +117,20 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
                     continue;
                 }
             }
-            if start == end {
-                values.push(Character::Scalar(start));
-            } else if start as usize + 1 == end as usize {
-                values.push(Character::Scalar(start));
-                values.push(Character::Scalar(end));
-            } else {
-                values.push(Character::Range(start, end));
-            }
+            push(&mut values, (start, end));
         }
     }
     Ok(values)
+}
+
+#[inline]
+fn push(values: &mut Vec<Character>, (start, end): (char, char)) {
+    if start == end {
+        values.push(Character::Scalar(start));
+    } else if start as usize + 1 == end as usize {
+        values.push(Character::Scalar(start));
+        values.push(Character::Scalar(end));
+    } else {
+        values.push(Character::Range(start, end));
+    }
 }

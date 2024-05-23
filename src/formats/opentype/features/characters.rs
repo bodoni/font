@@ -110,25 +110,11 @@ where
                     range = Some((start, next));
                     continue;
                 }
-                if start == end {
-                    values.insert(Character::Scalar(start));
-                } else if start as usize + 1 == end as usize {
-                    values.insert(Character::Scalar(start));
-                    values.insert(Character::Scalar(end));
-                } else {
-                    values.insert(Character::Range(start, end));
-                }
+                insert(&mut values, (start, end));
                 range = Some((next, next));
             }
             (Some((start, end)), None) => {
-                if start == end {
-                    values.insert(Character::Scalar(start));
-                } else if start as usize + 1 == end as usize {
-                    values.insert(Character::Scalar(start));
-                    values.insert(Character::Scalar(end));
-                } else {
-                    values.insert(Character::Range(start, end));
-                }
+                insert(&mut values, (start, end));
                 break;
             }
             (None, None) => break,
@@ -165,44 +151,35 @@ where
                     range = Some((start, next));
                     continue;
                 }
-                if start == end {
-                    values.insert(Character::Scalar(start));
-                } else if start as usize + 1 == end as usize {
-                    values.insert(Character::Scalar(start));
-                    values.insert(Character::Scalar(end));
-                } else {
-                    values.insert(Character::Range(start, end));
-                }
+                insert(&mut values, (start, end));
                 range = Some((next, next));
             }
             (None, Some(value)) => {
                 values.insert(value);
             }
             (Some((start, end)), Some(value)) => {
-                if start == end {
-                    values.insert(Character::Scalar(start));
-                } else if start as usize + 1 == end as usize {
-                    values.insert(Character::Scalar(start));
-                    values.insert(Character::Scalar(end));
-                } else {
-                    values.insert(Character::Range(start, end));
-                }
+                insert(&mut values, (start, end));
                 values.insert(value);
                 range = None;
             }
             (Some((start, end)), None) => {
-                if start == end {
-                    values.insert(Character::Scalar(start));
-                } else if start as usize + 1 == end as usize {
-                    values.insert(Character::Scalar(start));
-                    values.insert(Character::Scalar(end));
-                } else {
-                    values.insert(Character::Range(start, end));
-                }
+                insert(&mut values, (start, end));
                 break;
             }
             (None, None) => break,
         }
     }
     Character::Set(values)
+}
+
+#[inline]
+fn insert(values: &mut BTreeSet<Character>, (start, end): (char, char)) {
+    if start == end {
+        values.insert(Character::Scalar(start));
+    } else if start as usize + 1 == end as usize {
+        values.insert(Character::Scalar(start));
+        values.insert(Character::Scalar(end));
+    } else {
+        values.insert(Character::Range(start, end));
+    }
 }
