@@ -83,7 +83,7 @@ fn crimson_text() {
             ("liga", "latn", "TAT ", "[[f, f]]"),
             ("liga", "latn", "TRK ", "[[f, f]]"),
             ("locl", "latn", "AZE ", "[i]"),
-            ("locl", "latn", "CAT ", "[[L, \u{b7}, L], [l, \u{b7}, l]]"),
+            ("locl", "latn", "CAT ", "[[L, ·, L], [l, ·, l]]"),
             ("locl", "latn", "CRT ", "[i]"),
             ("locl", "latn", "KAZ ", "[i]"),
             ("locl", "latn", "MOL ", "[15e, 15f, 162, 163]"),
