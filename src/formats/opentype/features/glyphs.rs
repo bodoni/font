@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use opentype::layout::Directory;
-use opentype::layout::{Class, Coverage};
+use opentype::layout::context::LookupRecord;
+use opentype::layout::{Class, Coverage, Directory};
 use opentype::truetype::GlyphID;
 
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
@@ -12,13 +12,22 @@ pub enum Glyph {
     List(Vec<GlyphID>),
 }
 
-pub trait Glyphs {
+pub trait Glyphs: Sized {
     #[inline]
-    fn glyphs(&self, _: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>>
+    fn extract(&self, _: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>>
     where
         Self: Sized,
     {
         Default::default()
+    }
+
+    #[inline]
+    fn expand(
+        value: Vec<Glyph>,
+        _: &[LookupRecord],
+        _: &Directory<Self>,
+    ) -> (Vec<Glyph>, Vec<Glyph>) {
+        (value, Default::default())
     }
 }
 
@@ -67,7 +76,7 @@ impl From<Coverage> for Glyph {
 impl Glyphs for opentype::tables::glyph_positioning::Type {}
 
 impl Glyphs for opentype::tables::glyph_substitution::Type {
-    fn glyphs(&self, _: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
+    fn extract(&self, directory: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
@@ -127,7 +136,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(glyph_id.into());
                             value.extend(record.glyph_ids.iter().cloned().map(Into::into));
-                            (value, Default::default())
+                            Self::expand(value, &record.records, directory)
                         })
                     },
                 ));
@@ -152,16 +161,15 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                                 for class_index in &record.indices {
                                     value.push(classes.get(class_index)?.clone());
                                 }
-                                Some((value, Default::default()))
+                                Some(Self::expand(value, &record.records, directory))
                             })
                         }),
                 );
             }
             Type::ContextualSubstitution(Context::Format3(table)) => {
-                values.insert(
-                    table.coverages.iter().cloned().map(Glyph::from).collect(),
-                    Default::default(),
-                );
+                let value = table.coverages.iter().cloned().map(Glyph::from).collect();
+                let value = Self::expand(value, &table.records, directory);
+                values.insert(value.0, value.1);
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format1(table)) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
@@ -183,7 +191,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                             value.push(glyph_id.into());
                             value.extend(record.glyph_ids.iter().cloned().map(Into::into));
                             value.extend(record.forward_glyph_ids.iter().cloned().map(Into::into));
-                            (value, Default::default())
+                            Self::expand(value, &record.records, directory)
                         })
                     },
                 ));
@@ -225,7 +233,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                                 for class_index in &record.forward_indices {
                                     value.push(forward_classes.get(class_index)?.clone());
                                 }
-                                Some((value, Default::default()))
+                                Some(Self::expand(value, &record.records, directory))
                             })
                         }),
                 );
@@ -240,7 +248,8 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     .collect::<Vec<_>>();
                 value.extend(table.coverages.iter().cloned().map(Glyph::from));
                 value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                values.insert(value, Default::default());
+                let value = Self::expand(value, &table.records, directory);
+                values.insert(value.0, value.1);
             }
             Type::ReverseChainedContextualSubstibution(table) => {
                 let mut value = table
@@ -252,7 +261,10 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                     .collect::<Vec<_>>();
                 value.push(table.coverage.clone().into());
                 value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                values.insert(value, Default::default());
+                values.insert(
+                    value,
+                    table.glyph_ids.iter().cloned().map(Into::into).collect(),
+                );
             }
             _ => {}
         }
