@@ -177,14 +177,14 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                                     + record.forward_glyph_count as usize,
                             );
                             for glyph_id in record.backward_glyph_ids.iter().rev().cloned() {
-                                value.push(Glyph::Scalar(glyph_id));
+                                value.push(glyph_id.into());
                             }
-                            value.push(Glyph::Scalar(glyph_id));
+                            value.push(glyph_id.into());
                             for glyph_id in record.glyph_ids.iter().cloned() {
-                                value.push(Glyph::Scalar(glyph_id));
+                                value.push(glyph_id.into());
                             }
                             for glyph_id in record.forward_glyph_ids.iter().cloned() {
-                                value.push(Glyph::Scalar(glyph_id));
+                                value.push(glyph_id.into());
                             }
                             (value, Default::default())
                         })
