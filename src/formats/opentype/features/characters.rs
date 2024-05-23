@@ -78,7 +78,7 @@ impl<'l> Characters<'l> for &Glyph {
 
     fn characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
         match self {
-            Glyph::Scalar(value) => mapping.get(*value).map(Character::Scalar),
+            Glyph::Scalar(value) => map(*value, mapping, glyphs).map(Character::Scalar),
             Glyph::Range(start, end) => precompress(*start..=*end, mapping, glyphs),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
@@ -90,12 +90,17 @@ impl<'l> Characters<'l> for &Glyph {
     }
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, _: &Glyphs) -> Option<Character>
+#[inline]
+fn map(value: GlyphID, mapping: &Mapping, _: &Glyphs) -> Option<char> {
+    mapping.get(value)
+}
+
+fn precompress<T>(values: T, mapping: &Mapping, glyphs: &Glyphs) -> Option<Character>
 where
     T: Iterator<Item = GlyphID>,
 {
     let values = values
-        .filter_map(|glyph_id| mapping.get(glyph_id))
+        .filter_map(|glyph_id| map(glyph_id, mapping, glyphs))
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
