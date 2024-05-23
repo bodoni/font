@@ -3,9 +3,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use opentype::layout::{Feature, Language, Script};
 use opentype::truetype::GlyphID;
 
-use super::{Features, Value};
 use crate::formats::opentype::characters::{Character, ReverseMapping as Mapping};
 use crate::formats::opentype::features::glyphs::Glyph;
+use crate::formats::opentype::features::{Features, Value};
 
 pub trait Characters<'l> {
     type Target;
