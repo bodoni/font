@@ -114,9 +114,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                         record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(glyph_id.into());
-                            for glyph_id in record.glyph_ids.iter().cloned() {
-                                value.push(glyph_id.into());
-                            }
+                            value.extend(record.glyph_ids.iter().cloned().map(Into::into));
                             (value, vec![record.glyph_id.into()])
                         })
                     },
@@ -128,9 +126,7 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                         record.records.iter().map(move |record| {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(glyph_id.into());
-                            for glyph_id in record.glyph_ids.iter().cloned() {
-                                value.push(glyph_id.into());
-                            }
+                            value.extend(record.glyph_ids.iter().cloned().map(Into::into));
                             (value, Default::default())
                         })
                     },
@@ -176,16 +172,17 @@ impl Glyphs for opentype::tables::glyph_substitution::Type {
                                     + record.glyph_count as usize
                                     + record.forward_glyph_count as usize,
                             );
-                            for glyph_id in record.backward_glyph_ids.iter().rev().cloned() {
-                                value.push(glyph_id.into());
-                            }
+                            value.extend(
+                                record
+                                    .backward_glyph_ids
+                                    .iter()
+                                    .rev()
+                                    .cloned()
+                                    .map(Into::into),
+                            );
                             value.push(glyph_id.into());
-                            for glyph_id in record.glyph_ids.iter().cloned() {
-                                value.push(glyph_id.into());
-                            }
-                            for glyph_id in record.forward_glyph_ids.iter().cloned() {
-                                value.push(glyph_id.into());
-                            }
+                            value.extend(record.glyph_ids.iter().cloned().map(Into::into));
+                            value.extend(record.forward_glyph_ids.iter().cloned().map(Into::into));
                             (value, Default::default())
                         })
                     },
