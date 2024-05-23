@@ -13,8 +13,8 @@ use crate::formats::opentype::cache::Cache;
 pub enum Character {
     Scalar(char),
     Range(char, char),
+    Inline(char, char),
     List(Vec<Character>),
-    Set(BTreeSet<Character>),
 }
 
 /// Characters.
@@ -29,8 +29,8 @@ impl Character {
         match self {
             Self::Scalar(value) => Some(*value),
             Self::Range(value, _) => Some(*value),
+            Self::Inline(value, _) => Some(*value),
             Self::List(value) => value.first().and_then(Character::first),
-            Self::Set(value) => value.first().and_then(Character::first),
         }
     }
 }
@@ -109,28 +109,28 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
             if let Some(value) = values.last_mut() {
                 let (first, last) = match value {
                     Character::Scalar(first) => (*first, *first),
-                    Character::Range(first, last) => (*first, *last),
+                    Character::Inline(first, last) => (*first, *last),
                     _ => unreachable!(),
                 };
                 if last as usize + 1 == start as usize {
-                    *value = Character::Range(first, end);
+                    *value = Character::Inline(first, end);
                     continue;
                 }
             }
-            push(&mut values, (start, end));
+            inline(&mut values, (start, end));
         }
     }
     Ok(values)
 }
 
 #[inline]
-fn push(values: &mut Vec<Character>, (start, end): (char, char)) {
+fn inline(values: &mut Vec<Character>, (start, end): (char, char)) {
     if start == end {
         values.push(Character::Scalar(start));
     } else if start as usize + 1 == end as usize {
         values.push(Character::Scalar(start));
         values.push(Character::Scalar(end));
     } else {
-        values.push(Character::Range(start, end));
+        values.push(Character::Inline(start, end));
     }
 }

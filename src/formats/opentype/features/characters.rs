@@ -123,7 +123,7 @@ where
     match values.len() {
         0 => None,
         1 => values.first().cloned(),
-        _ => Some(Character::Set(values)),
+        _ => Some(Character::List(values.into_iter().collect())),
     }
 }
 
@@ -151,25 +151,37 @@ where
                     range = Some((start, next));
                     continue;
                 }
-                insert(&mut values, (start, end));
+                inline(&mut values, (start, end));
                 range = Some((next, next));
             }
             (None, Some(value)) => {
                 values.insert(value);
             }
             (Some((start, end)), Some(value)) => {
-                insert(&mut values, (start, end));
+                inline(&mut values, (start, end));
                 values.insert(value);
                 range = None;
             }
             (Some((start, end)), None) => {
-                insert(&mut values, (start, end));
+                inline(&mut values, (start, end));
                 break;
             }
             (None, None) => break,
         }
     }
-    Character::Set(values)
+    Character::List(values.into_iter().collect())
+}
+
+#[inline]
+fn inline(values: &mut BTreeSet<Character>, (start, end): (char, char)) {
+    if start == end {
+        values.insert(Character::Scalar(start));
+    } else if start as usize + 1 == end as usize {
+        values.insert(Character::Scalar(start));
+        values.insert(Character::Scalar(end));
+    } else {
+        values.insert(Character::Inline(start, end));
+    }
 }
 
 #[inline]
