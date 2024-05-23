@@ -14,9 +14,9 @@ pub trait Characters<'l> {
     fn characters(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-type Glyphs = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
+type Substitution = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
 
-impl<'l> Characters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Glyphs>>> {
+impl<'l> Characters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Substitution>>> {
     type Target = Features;
     type Parameter = ();
 
@@ -27,7 +27,7 @@ impl<'l> Characters<'l> for &BTreeMap<Feature, BTreeMap<Script, BTreeMap<Languag
     }
 }
 
-impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Glyphs>> {
+impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Substitution>> {
     type Target = Value;
     type Parameter = ();
 
@@ -38,7 +38,7 @@ impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Glyphs>> {
     }
 }
 
-impl<'l> Characters<'l> for &BTreeMap<Language, Glyphs> {
+impl<'l> Characters<'l> for &BTreeMap<Language, Substitution> {
     type Target = BTreeMap<Language, Character>;
     type Parameter = ();
 
@@ -49,7 +49,7 @@ impl<'l> Characters<'l> for &BTreeMap<Language, Glyphs> {
     }
 }
 
-impl<'l> Characters<'l> for &Glyphs {
+impl<'l> Characters<'l> for &Substitution {
     type Target = Character;
     type Parameter = ();
 
@@ -63,44 +63,44 @@ impl<'l> Characters<'l> for &Glyphs {
 
 impl<'l> Characters<'l> for &[Glyph] {
     type Target = Option<Vec<Character>>;
-    type Parameter = &'l Glyphs;
+    type Parameter = &'l Substitution;
 
-    fn characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, substitution: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| value.characters(mapping, glyphs))
+            .map(|value| value.characters(mapping, substitution))
             .collect()
     }
 }
 
 impl<'l> Characters<'l> for &Glyph {
     type Target = Option<Character>;
-    type Parameter = &'l Glyphs;
+    type Parameter = &'l Substitution;
 
-    fn characters(self, mapping: &Mapping, glyphs: Self::Parameter) -> Self::Target {
+    fn characters(self, mapping: &Mapping, substitution: Self::Parameter) -> Self::Target {
         match self {
-            Glyph::Scalar(value) => map(*value, mapping, glyphs).map(Character::Scalar),
-            Glyph::Range(start, end) => precompress(*start..=*end, mapping, glyphs),
+            Glyph::Scalar(value) => map(*value, mapping, substitution).map(Character::Scalar),
+            Glyph::Range(start, end) => precompress(*start..=*end, mapping, substitution),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
                 mapping,
-                glyphs,
+                substitution,
             ),
-            Glyph::List(value) => precompress(value.iter().cloned(), mapping, glyphs),
+            Glyph::List(value) => precompress(value.iter().cloned(), mapping, substitution),
         }
     }
 }
 
 #[inline]
-fn map(value: GlyphID, mapping: &Mapping, _: &Glyphs) -> Option<char> {
+fn map(value: GlyphID, mapping: &Mapping, _: &Substitution) -> Option<char> {
     mapping.get(value)
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, glyphs: &Glyphs) -> Option<Character>
+fn precompress<T>(values: T, mapping: &Mapping, substitution: &Substitution) -> Option<Character>
 where
     T: Iterator<Item = GlyphID>,
 {
     let values = values
-        .filter_map(|glyph_id| map(glyph_id, mapping, glyphs))
+        .filter_map(|glyph_id| map(glyph_id, mapping, substitution))
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
