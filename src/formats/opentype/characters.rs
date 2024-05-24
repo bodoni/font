@@ -10,7 +10,7 @@ use crate::formats::opentype::cache::Cache;
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Character {
     Single(char),
-    Range(char, char),
+    Range((char, char)),
 }
 
 /// Unicode characters.
@@ -37,10 +37,10 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
             if let Some(value) = values.last_mut() {
                 let (first, last) = match value {
                     Character::Single(first) => (*first, *first),
-                    Character::Range(first, last) => (*first, *last),
+                    Character::Range((first, last)) => (*first, *last),
                 };
                 if last as usize + 1 == start as usize {
-                    *value = Character::Range(first, end);
+                    *value = Character::Range((first, end));
                     continue;
                 }
             }
@@ -50,7 +50,7 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
                 values.push(Character::Single(start));
                 values.push(Character::Single(end));
             } else {
-                values.push(Character::Range(start, end));
+                values.push(Character::Range((start, end)));
             }
         }
     }

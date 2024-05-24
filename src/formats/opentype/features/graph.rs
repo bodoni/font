@@ -7,7 +7,7 @@ use opentype::truetype::GlyphID;
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Glyph {
     Single(GlyphID),
-    Range(GlyphID, GlyphID),
+    Range((GlyphID, GlyphID)),
     Ranges(Vec<(GlyphID, GlyphID)>),
     List(Vec<GlyphID>),
 }
@@ -43,7 +43,7 @@ impl From<GlyphID> for Glyph {
 impl From<(GlyphID, GlyphID)> for Glyph {
     #[inline]
     fn from(value: (GlyphID, GlyphID)) -> Self {
-        Self::Range(value.0, value.1)
+        Self::Range(value)
     }
 }
 

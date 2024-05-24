@@ -82,7 +82,7 @@ impl<'l> Transform<'l> for &Glyph {
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         match self {
             Glyph::Single(value) => map(*value, mapping, features).map(Position::Single),
-            Glyph::Range(start, end) => precompress(*start..=*end, mapping, features),
+            Glyph::Range((start, end)) => precompress(*start..=*end, mapping, features),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
                 mapping,
@@ -188,7 +188,7 @@ fn position(values: &mut BTreeSet<Position>, (start, end): (char, char)) {
         values.insert(Position::Single(start));
         values.insert(Position::Single(end));
     } else {
-        values.insert(Position::Range(start, end));
+        values.insert(Position::Range((start, end)));
     }
 }
 
@@ -200,6 +200,6 @@ fn sequence(values: &mut BTreeSet<Sequence>, (start, end): (char, char)) {
         values.insert(Sequence::Single(Position::Single(start)));
         values.insert(Sequence::Single(Position::Single(end)));
     } else {
-        values.insert(Sequence::Range(start, end));
+        values.insert(Sequence::Range((start, end)));
     }
 }
