@@ -1,7 +1,7 @@
 #[macro_use]
 mod support;
 
-use font::Character;
+use font::characters::Character;
 
 use crate::support::{setup, Fixture};
 
@@ -11,9 +11,8 @@ fn adobe_blank() {
     let values = ok!(file[0].characters())
         .into_iter()
         .map(|character| match character {
-            Character::Scalar(value) => (value as u32).to_string(),
-            Character::Inline(start, end) => format!("{}–{}", start as u32, end as u32),
-            _ => unreachable!(),
+            Character::Single(value) => (value as u32).to_string(),
+            Character::Range(start, end) => format!("{}–{}", start as u32, end as u32),
         })
         .collect::<Vec<_>>();
     assert_eq!(

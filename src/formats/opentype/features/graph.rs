@@ -6,15 +6,17 @@ use opentype::truetype::GlyphID;
 
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Glyph {
-    Scalar(GlyphID),
+    Single(GlyphID),
     Range(GlyphID, GlyphID),
     Ranges(Vec<(GlyphID, GlyphID)>),
     List(Vec<GlyphID>),
 }
 
-pub trait Glyphs: Sized {
+pub type Graph = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
+
+pub trait Table: Sized {
     #[inline]
-    fn extract(&self, _: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>>
+    fn extract(&self, _: &Directory<Self>) -> Graph
     where
         Self: Sized,
     {
@@ -34,7 +36,7 @@ pub trait Glyphs: Sized {
 impl From<GlyphID> for Glyph {
     #[inline]
     fn from(value: GlyphID) -> Self {
-        Self::Scalar(value)
+        Self::Single(value)
     }
 }
 
@@ -73,10 +75,10 @@ impl From<Coverage> for Glyph {
     }
 }
 
-impl Glyphs for opentype::tables::glyph_positioning::Type {}
+impl Table for opentype::tables::glyph_positioning::Type {}
 
-impl Glyphs for opentype::tables::glyph_substitution::Type {
-    fn extract(&self, directory: &Directory<Self>) -> BTreeMap<Vec<Glyph>, Vec<Glyph>> {
+impl Table for opentype::tables::glyph_substitution::Type {
+    fn extract(&self, directory: &Directory<Self>) -> Graph {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 

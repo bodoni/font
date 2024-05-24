@@ -4,7 +4,7 @@ use opentype::truetype::tables::glyph_data::{
     self, CompositeDescription, GlyphData, SimpleDescription,
 };
 
-use crate::formats::opentype::characters::Mapping;
+use crate::formats::opentype::mapping::Forward as Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;

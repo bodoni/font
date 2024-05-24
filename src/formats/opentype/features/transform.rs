@@ -3,84 +3,85 @@ use std::collections::{BTreeMap, BTreeSet};
 use opentype::layout::{Feature, Language, Script};
 use opentype::truetype::GlyphID;
 
-use crate::formats::opentype::characters::{Character, ReverseMapping as Mapping};
-use crate::formats::opentype::features::glyphs::Glyph;
-use crate::formats::opentype::features::{self, Value};
+use crate::formats::opentype::features;
+use crate::formats::opentype::features::graph::{Glyph, Graph};
+use crate::formats::opentype::features::sequence::{Position, Sequence};
+use crate::formats::opentype::mapping::Reverse as Mapping;
 
-pub trait Characters<'l> {
+pub trait Transform<'l> {
     type Target;
     type Parameter: 'l;
 
-    fn characters(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
+    fn transform(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-type Features = BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Substitutions>>>;
+type Features = BTreeMap<Feature, Value>;
 
-type Substitutions = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
+type Value = BTreeMap<Script, BTreeMap<Language, Graph>>;
 
-impl<'l> Characters<'l> for &Features {
+impl<'l> Transform<'l> for &Features {
     type Target = features::Features;
     type Parameter = ();
 
-    fn characters(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.characters(mapping, self)))
+            .map(|(key, value)| (*key, value.transform(mapping, self)))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &BTreeMap<Script, BTreeMap<Language, Substitutions>> {
-    type Target = Value;
+impl<'l> Transform<'l> for &Value {
+    type Target = features::Value;
     type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.characters(mapping, features)))
+            .map(|(key, value)| (*key, value.transform(mapping, features)))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &BTreeMap<Language, Substitutions> {
-    type Target = BTreeMap<Language, BTreeSet<Character>>;
+impl<'l> Transform<'l> for &BTreeMap<Language, Graph> {
+    type Target = BTreeMap<Language, BTreeSet<Sequence>>;
     type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.characters(mapping, features)))
+            .map(|(key, value)| (*key, value.transform(mapping, features)))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &Substitutions {
-    type Target = BTreeSet<Character>;
+impl<'l> Transform<'l> for &Graph {
+    type Target = BTreeSet<Sequence>;
     type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         postcompress(
             self.iter()
-                .filter_map(|(value, _)| value.characters(mapping, features)),
+                .filter_map(|(value, _)| value.transform(mapping, features)),
         )
     }
 }
 
-impl<'l> Characters<'l> for &[Glyph] {
-    type Target = Option<Vec<Character>>;
+impl<'l> Transform<'l> for &[Glyph] {
+    type Target = Option<Vec<Position>>;
     type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| value.characters(mapping, features))
+            .map(|value| value.transform(mapping, features))
             .collect()
     }
 }
 
-impl<'l> Characters<'l> for &Glyph {
-    type Target = Option<Character>;
+impl<'l> Transform<'l> for &Glyph {
+    type Target = Option<Position>;
     type Parameter = &'l Features;
 
-    fn characters(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         match self {
-            Glyph::Scalar(value) => map(*value, mapping, features).map(Character::Scalar),
+            Glyph::Single(value) => map(*value, mapping, features).map(Position::Single),
             Glyph::Range(start, end) => precompress(*start..=*end, mapping, features),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
@@ -97,7 +98,7 @@ fn map(value: GlyphID, mapping: &Mapping, _: &Features) -> Option<char> {
     mapping.get(value)
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, features: &Features) -> Option<Character>
+fn precompress<T>(values: T, mapping: &Mapping, features: &Features) -> Option<Position>
 where
     T: Iterator<Item = GlyphID>,
 {
@@ -117,11 +118,11 @@ where
                     range = Some((start, next));
                     continue;
                 }
-                insert(&mut values, (start, end));
+                position(&mut values, (start, end));
                 range = Some((next, next));
             }
             (Some((start, end)), None) => {
-                insert(&mut values, (start, end));
+                position(&mut values, (start, end));
                 break;
             }
             (None, None) => break,
@@ -130,19 +131,19 @@ where
     match values.len() {
         0 => None,
         1 => values.first().cloned(),
-        _ => Some(Character::List(values.into_iter().collect())),
+        _ => Some(Position::Set(values)),
     }
 }
 
-fn postcompress<T>(values: T) -> BTreeSet<Character>
+fn postcompress<T>(values: T) -> BTreeSet<Sequence>
 where
-    T: Iterator<Item = Vec<Character>>,
+    T: Iterator<Item = Vec<Position>>,
 {
     let values = values
         .filter_map(|mut values| match values.len() {
             0 => None,
-            1 => values.pop(),
-            _ => Some(Character::List(values)),
+            1 => values.pop().map(Sequence::Single),
+            _ => Some(Sequence::List(values)),
         })
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
@@ -150,27 +151,27 @@ where
     let mut range = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some(Character::Scalar(next))) => {
+            (None, Some(Sequence::Single(Position::Single(next)))) => {
                 range = Some((next, next));
             }
-            (Some((start, end)), Some(Character::Scalar(next))) => {
+            (Some((start, end)), Some(Sequence::Single(Position::Single(next)))) => {
                 if end as usize + 1 == next as usize {
                     range = Some((start, next));
                     continue;
                 }
-                inline(&mut values, (start, end));
+                sequence(&mut values, (start, end));
                 range = Some((next, next));
             }
             (None, Some(value)) => {
                 values.insert(value);
             }
             (Some((start, end)), Some(value)) => {
-                inline(&mut values, (start, end));
+                sequence(&mut values, (start, end));
                 values.insert(value);
                 range = None;
             }
             (Some((start, end)), None) => {
-                inline(&mut values, (start, end));
+                sequence(&mut values, (start, end));
                 break;
             }
             (None, None) => break,
@@ -180,25 +181,25 @@ where
 }
 
 #[inline]
-fn inline(values: &mut BTreeSet<Character>, (start, end): (char, char)) {
+fn position(values: &mut BTreeSet<Position>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Character::Scalar(start));
+        values.insert(Position::Single(start));
     } else if start as usize + 1 == end as usize {
-        values.insert(Character::Scalar(start));
-        values.insert(Character::Scalar(end));
+        values.insert(Position::Single(start));
+        values.insert(Position::Single(end));
     } else {
-        values.insert(Character::Inline(start, end));
+        values.insert(Position::Range(start, end));
     }
 }
 
 #[inline]
-fn insert(values: &mut BTreeSet<Character>, (start, end): (char, char)) {
+fn sequence(values: &mut BTreeSet<Sequence>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Character::Scalar(start));
+        values.insert(Sequence::Single(Position::Single(start)));
     } else if start as usize + 1 == end as usize {
-        values.insert(Character::Scalar(start));
-        values.insert(Character::Scalar(end));
+        values.insert(Sequence::Single(Position::Single(start)));
+        values.insert(Sequence::Single(Position::Single(end)));
     } else {
-        values.insert(Character::Range(start, end));
+        values.insert(Sequence::Range(start, end));
     }
 }

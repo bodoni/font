@@ -3,8 +3,9 @@ mod support;
 
 use std::collections::BTreeSet;
 
+use font::features::{Position, Sequence};
 use font::opentype::truetype::Tag;
-use font::{Character, Font};
+use font::Font;
 
 use crate::support::{setup, Fixture};
 
@@ -368,12 +369,12 @@ where
         .into_iter()
         .flat_map(|(feature, value)| {
             value.into_iter().flat_map(move |(script, value)| {
-                value.into_iter().map(move |(language, character)| {
+                value.into_iter().map(move |(language, sequences)| {
                     (
                         ok!(Tag::from(feature.clone()).as_str()).to_string(),
                         ok!(Tag::from(script.clone()).as_str()).to_string(),
                         ok!(Tag::from(language).as_str()).to_string(),
-                        flatten(&character),
+                        flatten(&sequences),
                     )
                 })
             })
@@ -381,11 +382,11 @@ where
         .collect()
 }
 
-fn flatten(values: &BTreeSet<Character>) -> String {
+fn flatten(values: &BTreeSet<Sequence>) -> String {
     let mut buffer = String::new();
     buffer.push('[');
     for (index, value) in values.iter().enumerate() {
-        flatten_inner(value, &mut buffer);
+        flatten_sequence(value, &mut buffer);
         if index + 1 < values.len() {
             buffer.push_str(", ");
         }
@@ -394,25 +395,43 @@ fn flatten(values: &BTreeSet<Character>) -> String {
     buffer
 }
 
-fn flatten_inner(value: &Character, buffer: &mut String) {
+fn flatten_sequence(value: &Sequence, buffer: &mut String) {
     match value {
-        Character::Scalar(value) => {
-            buffer.push_str(&escape(*value));
+        Sequence::Single(value) => {
+            flatten_position(value, buffer);
         }
-        Character::Range(start, end) => {
-            buffer.push_str(&escape(*start));
-            buffer.push('–');
-            buffer.push_str(&escape(*end));
-        }
-        Character::Inline(start, end) => {
+        Sequence::Range(start, end) => {
             buffer.push_str(&escape(*start));
             buffer.push_str(", …, ");
             buffer.push_str(&escape(*end));
         }
-        Character::List(values) => {
+        Sequence::List(values) => {
             buffer.push('[');
             for (index, other) in values.iter().enumerate() {
-                flatten_inner(other, buffer);
+                flatten_position(other, buffer);
+                if index + 1 < values.len() {
+                    buffer.push_str(", ");
+                }
+            }
+            buffer.push(']');
+        }
+    }
+}
+
+fn flatten_position(value: &Position, buffer: &mut String) {
+    match value {
+        Position::Single(value) => {
+            buffer.push_str(&escape(*value));
+        }
+        Position::Range(start, end) => {
+            buffer.push_str(&escape(*start));
+            buffer.push('–');
+            buffer.push_str(&escape(*end));
+        }
+        Position::Set(values) => {
+            buffer.push('[');
+            for (index, other) in values.iter().enumerate() {
+                flatten_position(other, buffer);
                 if index + 1 < values.len() {
                     buffer.push_str(", ");
                 }

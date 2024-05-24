@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use opentype;
 
-use crate::formats::opentype::characters::{Mapping, ReverseMapping};
+use crate::formats::opentype::mapping;
 use crate::formats::opentype::metrics::Metrics;
 
 pub type Reference<T> = Rc<RefCell<T>>;
@@ -21,9 +21,9 @@ macro_rules! cache(
                     tape,
                     backend,
 
-                    mapping: Default::default(),
-                    metrics: Default::default(),
+                    forward_mapping: Default::default(),
                     reverse_mapping: Default::default(),
+                    metrics: Default::default(),
 
                     $($field: Default::default(),)+
                 }
@@ -37,9 +37,9 @@ macro_rules! cache(
             pub tape: Reference<T>,
             pub backend: opentype::Font,
 
-            mapping: Option<Rc<Mapping>>,
+            forward_mapping: Option<Rc<mapping::Forward>>,
+            reverse_mapping: Option<Rc<mapping::Reverse>>,
             metrics: Option<Rc<Metrics>>,
-            reverse_mapping: Option<Rc<ReverseMapping>>,
 
             $(pub $field: Option<Reference<$type>>,)+
         }
@@ -178,12 +178,20 @@ cache! {
 }
 
 impl<T: crate::Read> Cache<T> {
-    pub fn mapping(&mut self) -> Result<&Rc<Mapping>> {
-        if self.mapping.is_none() {
-            let value = Mapping::new(&self.character_mapping()?.borrow())?;
-            self.mapping = Some(Rc::new(value));
+    pub fn forward_mapping(&mut self) -> Result<&Rc<mapping::Forward>> {
+        if self.forward_mapping.is_none() {
+            let value = mapping::Forward::new(&self.character_mapping()?.borrow())?;
+            self.forward_mapping = Some(Rc::new(value));
         }
-        Ok(self.mapping.as_ref().unwrap())
+        Ok(self.forward_mapping.as_ref().unwrap())
+    }
+
+    pub fn reverse_mapping(&mut self) -> Result<&Rc<mapping::Reverse>> {
+        if self.reverse_mapping.is_none() {
+            let value = mapping::Reverse::new(&self.forward_mapping()?.clone());
+            self.reverse_mapping = Some(Rc::new(value));
+        }
+        Ok(self.reverse_mapping.as_ref().unwrap())
     }
 
     pub fn metrics(&mut self) -> Result<&Rc<Metrics>> {
@@ -192,13 +200,5 @@ impl<T: crate::Read> Cache<T> {
             self.metrics = Some(Rc::new(value));
         }
         Ok(self.metrics.as_ref().unwrap())
-    }
-
-    pub fn reverse_mapping(&mut self) -> Result<&Rc<ReverseMapping>> {
-        if self.reverse_mapping.is_none() {
-            let value = ReverseMapping::new(&self.mapping()?.clone());
-            self.reverse_mapping = Some(Rc::new(value));
-        }
-        Ok(self.reverse_mapping.as_ref().unwrap())
     }
 }

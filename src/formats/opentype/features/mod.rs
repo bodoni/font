@@ -1,9 +1,12 @@
 //! Layout features.
 
-mod characters;
-mod glyphs;
+mod graph;
+mod sequence;
+mod transform;
 
 pub use opentype::layout::{Language, Script};
+
+pub use sequence::{Position, Sequence};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;
@@ -11,9 +14,8 @@ use std::io::Result;
 use opentype::layout::{Directory, Feature};
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::characters::Character;
-use crate::formats::opentype::features::characters::Characters;
-use crate::formats::opentype::features::glyphs::{Glyph, Glyphs};
+use crate::formats::opentype::features::graph::{Graph, Table};
+use crate::formats::opentype::features::transform::Transform;
 
 /// Layout features.
 pub type Features = BTreeMap<Type, Value>;
@@ -22,7 +24,7 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Character>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Sequence>>>;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Default::default();
@@ -33,35 +35,35 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
         populate(&mut values, &table.borrow());
     }
     let mapping = cache.reverse_mapping()?.clone();
-    Ok(values.characters(&mapping, ()))
+    Ok(values.transform(&mapping, ()))
 }
 
 #[allow(clippy::type_complexity)]
 fn populate<T>(
-    values: &mut BTreeMap<
-        Feature,
-        BTreeMap<Script, BTreeMap<Language, BTreeMap<Vec<Glyph>, Vec<Glyph>>>>,
-    >,
-    table: &Directory<T>,
+    values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Graph>>>,
+    directory: &Directory<T>,
 ) where
-    T: Glyphs,
+    T: Table,
 {
-    for (i, header) in table.scripts.headers.iter().enumerate() {
+    for (i, header) in directory.scripts.headers.iter().enumerate() {
         let script = Script::from_tag(&header.tag);
-        if let Some(record) = table.scripts.records[i].default_language.as_ref() {
+        if let Some(record) = directory.scripts.records[i].default_language.as_ref() {
             for index in record.feature_indices.iter().cloned().map(usize::from) {
                 if let (Some(header), Some(record)) = (
-                    table.features.headers.get(index),
-                    table.features.records.get(index),
+                    directory.features.headers.get(index),
+                    directory.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
                     let glyphs = record
                         .lookup_indices
                         .iter()
                         .cloned()
-                        .filter_map(|index| table.lookups.records.get(index as usize))
+                        .filter_map(|index| directory.lookups.records.get(index as usize))
                         .flat_map(|record| {
-                            record.tables.iter().flat_map(|other| other.extract(table))
+                            record
+                                .tables
+                                .iter()
+                                .flat_map(|table| table.extract(directory))
                         })
                         .collect::<BTreeMap<_, _>>();
                     values
@@ -73,22 +75,29 @@ fn populate<T>(
                 }
             }
         }
-        for (j, header) in table.scripts.records[i].language_headers.iter().enumerate() {
+        for (j, header) in directory.scripts.records[i]
+            .language_headers
+            .iter()
+            .enumerate()
+        {
             let language = Language::from_tag(&header.tag);
-            let record = &table.scripts.records[i].language_records[j];
+            let record = &directory.scripts.records[i].language_records[j];
             for index in record.feature_indices.iter().cloned().map(usize::from) {
                 if let (Some(header), Some(record)) = (
-                    table.features.headers.get(index),
-                    table.features.records.get(index),
+                    directory.features.headers.get(index),
+                    directory.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
                     let glyphs = record
                         .lookup_indices
                         .iter()
                         .cloned()
-                        .filter_map(|index| table.lookups.records.get(index as usize))
+                        .filter_map(|index| directory.lookups.records.get(index as usize))
                         .flat_map(|record| {
-                            record.tables.iter().flat_map(|other| other.extract(table))
+                            record
+                                .tables
+                                .iter()
+                                .flat_map(|table| table.extract(directory))
                         })
                         .collect::<BTreeMap<_, _>>();
                     values

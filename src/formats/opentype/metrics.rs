@@ -1,5 +1,3 @@
-//! Metrics.
-
 use std::io::Result;
 
 use opentype::truetype::tables::HorizontalMetrics;
@@ -8,7 +6,6 @@ use opentype::truetype::GlyphID;
 use crate::formats::opentype::cache::{Cache, Reference};
 use crate::Number;
 
-/// Metrics.
 pub struct Metrics {
     horizontal_metrics: Reference<HorizontalMetrics>,
 }
@@ -26,7 +23,7 @@ impl Metrics {
     }
 }
 
-pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
+pub fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
     use opentype::truetype::tables::WindowsMetrics;
 
     let font_header = cache.font_header()?.clone();

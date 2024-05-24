@@ -60,7 +60,7 @@ impl<T: crate::Read> crate::font::Case for Font<T> {
 
     fn glyph(&mut self, character: char) -> Result<Option<crate::Glyph>> {
         let mut cache = self.cache.borrow_mut();
-        let mapping = cache.mapping()?.clone();
+        let mapping = cache.forward_mapping()?.clone();
         let metrics = cache.metrics()?.clone();
         match self.index {
             (true, _) => {

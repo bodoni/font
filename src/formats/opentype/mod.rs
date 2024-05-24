@@ -3,14 +3,15 @@
 pub mod axes;
 pub mod characters;
 pub mod features;
-pub mod metrics;
 pub mod names;
 pub mod palettes;
 pub mod tables;
 
 pub(crate) mod cache;
+pub(crate) mod metrics;
 
 mod font;
+mod mapping;
 mod postscript;
 mod truetype;
 

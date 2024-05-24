@@ -3,7 +3,7 @@ use std::io::Result;
 use opentype::postscript::compact1::FontSet;
 use opentype::postscript::type2::Program;
 
-use crate::formats::opentype::characters::Mapping;
+use crate::formats::opentype::mapping::Forward as Mapping;
 use crate::formats::opentype::metrics::Metrics;
 use crate::glyph::{Builder, Glyph};
 use crate::offset::Offset;
