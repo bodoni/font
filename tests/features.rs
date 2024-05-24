@@ -397,15 +397,10 @@ fn flatten(values: &BTreeSet<Sequence>) -> String {
 
 fn flatten_sequence(value: &Sequence, buffer: &mut String) {
     match value {
-        Sequence::Single(value) => {
+        Sequence::Simple(value) => {
             flatten_position(value, buffer);
         }
-        Sequence::Range((start, end)) => {
-            buffer.push_str(&escape(*start));
-            buffer.push_str(", …, ");
-            buffer.push_str(&escape(*end));
-        }
-        Sequence::List(values) => {
+        Sequence::Single(values) => {
             buffer.push('[');
             for (index, other) in values.iter().enumerate() {
                 flatten_position(other, buffer);
@@ -414,6 +409,11 @@ fn flatten_sequence(value: &Sequence, buffer: &mut String) {
                 }
             }
             buffer.push(']');
+        }
+        Sequence::Range((start, end)) => {
+            buffer.push_str(&escape(*start));
+            buffer.push_str(", …, ");
+            buffer.push_str(&escape(*end));
         }
     }
 }

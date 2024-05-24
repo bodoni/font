@@ -142,8 +142,8 @@ where
     let values = values
         .filter_map(|mut values| match values.len() {
             0 => None,
-            1 => values.pop().map(Sequence::Single),
-            _ => Some(Sequence::List(values)),
+            1 => values.pop().map(Sequence::Simple),
+            _ => Some(Sequence::Single(values)),
         })
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
@@ -151,10 +151,10 @@ where
     let mut range = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some(Sequence::Single(Position::Single(next)))) => {
+            (None, Some(Sequence::Simple(Position::Single(next)))) => {
                 range = Some((next, next));
             }
-            (Some((start, end)), Some(Sequence::Single(Position::Single(next)))) => {
+            (Some((start, end)), Some(Sequence::Simple(Position::Single(next)))) => {
                 if end as usize + 1 == next as usize {
                     range = Some((start, next));
                     continue;
@@ -195,10 +195,10 @@ fn position(values: &mut BTreeSet<Position>, (start, end): (char, char)) {
 #[inline]
 fn sequence(values: &mut BTreeSet<Sequence>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Sequence::Single(Position::Single(start)));
+        values.insert(Sequence::Simple(Position::Single(start)));
     } else if start as usize + 1 == end as usize {
-        values.insert(Sequence::Single(Position::Single(start)));
-        values.insert(Sequence::Single(Position::Single(end)));
+        values.insert(Sequence::Simple(Position::Single(start)));
+        values.insert(Sequence::Simple(Position::Single(end)));
     } else {
         values.insert(Sequence::Range((start, end)));
     }
