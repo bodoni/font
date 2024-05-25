@@ -4,17 +4,15 @@ use std::collections::BTreeSet;
 /// A sample.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Sample {
-    Simple(Position),
-    Single(Vec<Position>),
-    Range((char, char)),
+    Simple(Component),
+    Compound(Vec<BTreeSet<Component>>),
 }
 
-/// A position.
+/// A component.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum Position {
-    Single(char),
+pub enum Component {
+    Scalar(char),
     Range((char, char)),
-    Set(BTreeSet<Position>),
 }
 
 macro_rules! equal(
@@ -28,36 +26,22 @@ impl std::cmp::Ord for Sample {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Self::Simple(one), Self::Simple(other)) => one.cmp(other),
-            (Self::Simple(one), Self::Range(other)) => one.cmp(&Position::Range(*other)),
-            (Self::Simple(one), Self::Single(other)) => equal!(
+            (Self::Simple(one), Self::Compound(other)) => equal!(
                 other
                     .first()
+                    .and_then(|other| other.first())
                     .map(|other| one.cmp(other))
                     .unwrap_or(Ordering::Greater),
                 Less,
             ),
-            (Self::Single(one), Self::Single(other)) => one.cmp(other),
-            (Self::Single(one), Self::Simple(other)) => equal!(
+            (Self::Compound(one), Self::Simple(other)) => equal!(
                 one.first()
+                    .and_then(|one| one.first())
                     .map(|one| one.cmp(other))
                     .unwrap_or(Ordering::Less),
                 Greater,
             ),
-            (Self::Single(one), Self::Range((other, _))) => equal!(
-                one.first()
-                    .map(|one| one.cmp(&Position::Single(*other)))
-                    .unwrap_or(Ordering::Less),
-                Greater,
-            ),
-            (Self::Range(one), Self::Simple(other)) => Position::Range(*one).cmp(other),
-            (Self::Range(one), Self::Range(other)) => one.cmp(other),
-            (Self::Range((one, _)), Self::Single(other)) => equal!(
-                other
-                    .first()
-                    .map(|other| Position::Single(*one).cmp(other))
-                    .unwrap_or(Ordering::Greater),
-                Less,
-            ),
+            (Self::Compound(one), Self::Compound(other)) => one.cmp(other),
         }
     }
 }
@@ -69,45 +53,18 @@ impl std::cmp::PartialOrd for Sample {
     }
 }
 
-impl std::cmp::Ord for Position {
+impl std::cmp::Ord for Component {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
-            (Self::Single(one), Self::Single(other)) => one.cmp(other),
-            (Self::Single(one), Self::Range((other, _))) => equal!(one.cmp(other), Less),
-            (Self::Single(one), Self::Set(other)) => equal!(
-                other
-                    .first()
-                    .map(|other| Position::Single(*one).cmp(other))
-                    .unwrap_or(Ordering::Greater),
-                Less,
-            ),
-            (Self::Range((one, _)), Self::Single(other)) => equal!(one.cmp(other), Greater),
+            (Self::Scalar(one), Self::Scalar(other)) => one.cmp(other),
+            (Self::Scalar(one), Self::Range((other, _))) => equal!(one.cmp(other), Less),
+            (Self::Range((one, _)), Self::Scalar(other)) => equal!(one.cmp(other), Greater),
             (Self::Range(one), Self::Range(other)) => one.cmp(other),
-            (Self::Range((one, _)), Self::Set(other)) => equal!(
-                other
-                    .first()
-                    .map(|other| Position::Single(*one).cmp(other))
-                    .unwrap_or(Ordering::Greater),
-                Less,
-            ),
-            (Self::Set(one), Self::Single(other)) => equal!(
-                one.first()
-                    .map(|one| one.cmp(&Position::Single(*other)))
-                    .unwrap_or(Ordering::Less),
-                Greater,
-            ),
-            (Self::Set(one), Self::Range((other, _))) => equal!(
-                one.first()
-                    .map(|one| one.cmp(&Position::Single(*other)))
-                    .unwrap_or(Ordering::Less),
-                Greater,
-            ),
-            (Self::Set(one), Self::Set(other)) => one.cmp(other),
         }
     }
 }
 
-impl std::cmp::PartialOrd for Position {
+impl std::cmp::PartialOrd for Component {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

@@ -6,7 +6,7 @@ use opentype::truetype::GlyphID;
 
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Glyph {
-    Single(GlyphID),
+    Scalar(GlyphID),
     Range((GlyphID, GlyphID)),
     Ranges(Vec<(GlyphID, GlyphID)>),
     List(Vec<GlyphID>),
@@ -36,7 +36,7 @@ pub trait Table: Sized {
 impl From<GlyphID> for Glyph {
     #[inline]
     fn from(value: GlyphID) -> Self {
-        Self::Single(value)
+        Self::Scalar(value)
     }
 }
 

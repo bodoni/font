@@ -6,7 +6,7 @@ mod transform;
 
 pub use opentype::layout::{Language, Script};
 
-pub use sample::{Position, Sample};
+pub use sample::{Component, Sample};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;

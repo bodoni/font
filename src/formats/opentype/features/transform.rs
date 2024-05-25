@@ -5,7 +5,7 @@ use opentype::truetype::GlyphID;
 
 use crate::formats::opentype::features;
 use crate::formats::opentype::features::graph::{Glyph, Graph};
-use crate::formats::opentype::features::sample::{Position, Sample};
+use crate::formats::opentype::features::sample::{Component, Sample};
 use crate::formats::opentype::mapping::Reverse as Mapping;
 
 pub trait Transform<'l> {
@@ -65,7 +65,7 @@ impl<'l> Transform<'l> for &Graph {
 }
 
 impl<'l> Transform<'l> for &[Glyph] {
-    type Target = Option<Vec<Position>>;
+    type Target = Option<Vec<BTreeSet<Component>>>;
     type Parameter = &'l Features;
 
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
@@ -76,12 +76,12 @@ impl<'l> Transform<'l> for &[Glyph] {
 }
 
 impl<'l> Transform<'l> for &Glyph {
-    type Target = Option<Position>;
+    type Target = Option<BTreeSet<Component>>;
     type Parameter = &'l Features;
 
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
-        match self {
-            Glyph::Single(value) => map(*value, mapping, features).map(Position::Single),
+        let value = match self {
+            Glyph::Scalar(value) => precompress(*value..=*value, mapping, features),
             Glyph::Range((start, end)) => precompress(*start..=*end, mapping, features),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
@@ -89,6 +89,11 @@ impl<'l> Transform<'l> for &Glyph {
                 features,
             ),
             Glyph::List(value) => precompress(value.iter().cloned(), mapping, features),
+        };
+        if !value.is_empty() {
+            Some(value)
+        } else {
+            None
         }
     }
 }
@@ -98,7 +103,7 @@ fn map(value: GlyphID, mapping: &Mapping, _: &Features) -> Option<char> {
     mapping.get(value)
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, features: &Features) -> Option<Position>
+fn precompress<T>(values: T, mapping: &Mapping, features: &Features) -> BTreeSet<Component>
 where
     T: Iterator<Item = GlyphID>,
 {
@@ -118,88 +123,88 @@ where
                     range = Some((start, next));
                     continue;
                 }
-                position(&mut values, (start, end));
+                component(&mut values, (start, end));
                 range = Some((next, next));
             }
             (Some((start, end)), None) => {
-                position(&mut values, (start, end));
+                component(&mut values, (start, end));
                 break;
             }
-            (None, None) => break,
+            (None, None) => {
+                break;
+            }
         }
     }
-    match values.len() {
-        0 => None,
-        1 => values.first().cloned(),
-        _ => Some(Position::Set(values)),
-    }
+    values
 }
 
 fn postcompress<T>(values: T) -> BTreeSet<Sample>
 where
-    T: Iterator<Item = Vec<Position>>,
+    T: Iterator<Item = Vec<BTreeSet<Component>>>,
 {
-    let values = values
-        .filter_map(|mut values| match values.len() {
-            0 => None,
-            1 => values.pop().map(Sample::Simple),
-            _ => Some(Sample::Single(values)),
-        })
-        .collect::<BTreeSet<_>>();
+    let values = values.collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
-    let mut range = None;
+    let mut range: Option<(char, char)> = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some(Sample::Simple(Position::Single(next)))) => {
-                range = Some((next, next));
-            }
-            (Some((start, end)), Some(Sample::Simple(Position::Single(next)))) => {
-                if end as usize + 1 == next as usize {
-                    range = Some((start, next));
-                    continue;
-                }
-                sample(&mut values, (start, end));
-                range = Some((next, next));
-            }
             (None, Some(value)) => {
-                values.insert(value);
+                if value.len() == 1 && value[0].len() == 1 {
+                    if let Some(Component::Scalar(next)) = value[0].first() {
+                        range = Some((*next, *next));
+                        continue;
+                    }
+                }
+                values.insert(Sample::Compound(value));
             }
             (Some((start, end)), Some(value)) => {
+                if value.len() == 1 && value[0].len() == 1 {
+                    if let Some(Component::Scalar(next)) = value[0].first() {
+                        if end as usize + 1 == *next as usize {
+                            range = Some((start, *next));
+                            continue;
+                        }
+                        sample(&mut values, (start, end));
+                        range = Some((*next, *next));
+                        continue;
+                    }
+                }
                 sample(&mut values, (start, end));
-                values.insert(value);
+                values.insert(Sample::Compound(value));
                 range = None;
             }
             (Some((start, end)), None) => {
                 sample(&mut values, (start, end));
                 break;
             }
-            (None, None) => break,
+            (None, None) => {
+                break;
+            }
         }
     }
     values
 }
 
 #[inline]
-fn position(values: &mut BTreeSet<Position>, (start, end): (char, char)) {
+fn component(values: &mut BTreeSet<Component>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Position::Single(start));
+        values.insert(Component::Scalar(start));
     } else if start as usize + 1 == end as usize {
-        values.insert(Position::Single(start));
-        values.insert(Position::Single(end));
+        values.insert(Component::Scalar(start));
+        values.insert(Component::Scalar(end));
     } else {
-        values.insert(Position::Range((start, end)));
+        values.insert(Component::Range((start, end)));
     }
 }
 
 #[inline]
 fn sample(values: &mut BTreeSet<Sample>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Sample::Simple(Position::Single(start)));
+        values.insert(Sample::Simple(Component::Scalar(start)));
     } else if start as usize + 1 == end as usize {
-        values.insert(Sample::Simple(Position::Single(start)));
-        values.insert(Sample::Simple(Position::Single(end)));
+        values.insert(Sample::Simple(Component::Scalar(start)));
+        values.insert(Sample::Simple(Component::Scalar(end)));
     } else {
-        values.insert(Sample::Range((start, end)));
+        values.insert(Sample::Simple(Component::Range((start, end))));
     }
 }
