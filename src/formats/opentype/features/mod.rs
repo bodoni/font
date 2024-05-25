@@ -1,12 +1,12 @@
 //! Layout features.
 
 mod graph;
-mod sequence;
+mod sample;
 mod transform;
 
 pub use opentype::layout::{Language, Script};
 
-pub use sequence::{Position, Sequence};
+pub use sample::{Position, Sample};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Result;
@@ -24,7 +24,7 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Sequence>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Sample>>>;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Default::default();

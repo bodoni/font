@@ -3,7 +3,7 @@ mod support;
 
 use std::collections::BTreeSet;
 
-use font::features::{Position, Sequence};
+use font::features::{Position, Sample};
 use font::opentype::truetype::Tag;
 use font::Font;
 
@@ -382,7 +382,7 @@ where
         .collect()
 }
 
-fn flatten(values: &BTreeSet<Sequence>) -> String {
+fn flatten(values: &BTreeSet<Sample>) -> String {
     let mut buffer = String::new();
     buffer.push('[');
     for (index, value) in values.iter().enumerate() {
@@ -395,12 +395,12 @@ fn flatten(values: &BTreeSet<Sequence>) -> String {
     buffer
 }
 
-fn flatten_sequence(value: &Sequence, buffer: &mut String) {
+fn flatten_sequence(value: &Sample, buffer: &mut String) {
     match value {
-        Sequence::Simple(value) => {
+        Sample::Simple(value) => {
             flatten_position(value, buffer);
         }
-        Sequence::Single(values) => {
+        Sample::Single(values) => {
             buffer.push('[');
             for (index, other) in values.iter().enumerate() {
                 flatten_position(other, buffer);
@@ -410,7 +410,7 @@ fn flatten_sequence(value: &Sequence, buffer: &mut String) {
             }
             buffer.push(']');
         }
-        Sequence::Range((start, end)) => {
+        Sample::Range((start, end)) => {
             buffer.push_str(&escape(*start));
             buffer.push_str(", …, ");
             buffer.push_str(&escape(*end));

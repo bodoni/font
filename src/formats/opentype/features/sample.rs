@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
-/// A sequence.
+/// A sample.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum Sequence {
+pub enum Sample {
     Simple(Position),
     Single(Vec<Position>),
     Range((char, char)),
@@ -24,7 +24,7 @@ macro_rules! equal(
     });
 );
 
-impl std::cmp::Ord for Sequence {
+impl std::cmp::Ord for Sample {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Self::Simple(one), Self::Simple(other)) => one.cmp(other),
@@ -62,7 +62,7 @@ impl std::cmp::Ord for Sequence {
     }
 }
 
-impl std::cmp::PartialOrd for Sequence {
+impl std::cmp::PartialOrd for Sample {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

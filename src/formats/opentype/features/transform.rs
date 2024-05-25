@@ -5,7 +5,7 @@ use opentype::truetype::GlyphID;
 
 use crate::formats::opentype::features;
 use crate::formats::opentype::features::graph::{Glyph, Graph};
-use crate::formats::opentype::features::sequence::{Position, Sequence};
+use crate::formats::opentype::features::sample::{Position, Sample};
 use crate::formats::opentype::mapping::Reverse as Mapping;
 
 pub trait Transform<'l> {
@@ -42,7 +42,7 @@ impl<'l> Transform<'l> for &Value {
 }
 
 impl<'l> Transform<'l> for &BTreeMap<Language, Graph> {
-    type Target = BTreeMap<Language, BTreeSet<Sequence>>;
+    type Target = BTreeMap<Language, BTreeSet<Sample>>;
     type Parameter = &'l Features;
 
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
@@ -53,7 +53,7 @@ impl<'l> Transform<'l> for &BTreeMap<Language, Graph> {
 }
 
 impl<'l> Transform<'l> for &Graph {
-    type Target = BTreeSet<Sequence>;
+    type Target = BTreeSet<Sample>;
     type Parameter = &'l Features;
 
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
@@ -135,15 +135,15 @@ where
     }
 }
 
-fn postcompress<T>(values: T) -> BTreeSet<Sequence>
+fn postcompress<T>(values: T) -> BTreeSet<Sample>
 where
     T: Iterator<Item = Vec<Position>>,
 {
     let values = values
         .filter_map(|mut values| match values.len() {
             0 => None,
-            1 => values.pop().map(Sequence::Simple),
-            _ => Some(Sequence::Single(values)),
+            1 => values.pop().map(Sample::Simple),
+            _ => Some(Sample::Single(values)),
         })
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
@@ -151,27 +151,27 @@ where
     let mut range = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some(Sequence::Simple(Position::Single(next)))) => {
+            (None, Some(Sample::Simple(Position::Single(next)))) => {
                 range = Some((next, next));
             }
-            (Some((start, end)), Some(Sequence::Simple(Position::Single(next)))) => {
+            (Some((start, end)), Some(Sample::Simple(Position::Single(next)))) => {
                 if end as usize + 1 == next as usize {
                     range = Some((start, next));
                     continue;
                 }
-                sequence(&mut values, (start, end));
+                sample(&mut values, (start, end));
                 range = Some((next, next));
             }
             (None, Some(value)) => {
                 values.insert(value);
             }
             (Some((start, end)), Some(value)) => {
-                sequence(&mut values, (start, end));
+                sample(&mut values, (start, end));
                 values.insert(value);
                 range = None;
             }
             (Some((start, end)), None) => {
-                sequence(&mut values, (start, end));
+                sample(&mut values, (start, end));
                 break;
             }
             (None, None) => break,
@@ -193,13 +193,13 @@ fn position(values: &mut BTreeSet<Position>, (start, end): (char, char)) {
 }
 
 #[inline]
-fn sequence(values: &mut BTreeSet<Sequence>, (start, end): (char, char)) {
+fn sample(values: &mut BTreeSet<Sample>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Sequence::Simple(Position::Single(start)));
+        values.insert(Sample::Simple(Position::Single(start)));
     } else if start as usize + 1 == end as usize {
-        values.insert(Sequence::Simple(Position::Single(start)));
-        values.insert(Sequence::Simple(Position::Single(end)));
+        values.insert(Sample::Simple(Position::Single(start)));
+        values.insert(Sample::Simple(Position::Single(end)));
     } else {
-        values.insert(Sequence::Range((start, end)));
+        values.insert(Sample::Range((start, end)));
     }
 }
