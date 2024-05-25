@@ -11,7 +11,7 @@ fn adobe_blank() {
     let values = ok!(file[0].characters())
         .into_iter()
         .map(|character| match character {
-            Character::Single(value) => (value as u32).to_string(),
+            Character::Scalar(value) => (value as u32).to_string(),
             Character::Range((start, end)) => format!("{}–{}", start as u32, end as u32),
         })
         .collect::<Vec<_>>();

@@ -9,7 +9,7 @@ use crate::formats::opentype::cache::Cache;
 /// A Unicode character.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Character {
-    Single(char),
+    Scalar(char),
     Range((char, char)),
 }
 
@@ -36,7 +36,7 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
         if let (Some(start), Some(end)) = (char::from_u32(range.0), char::from_u32(range.1)) {
             if let Some(value) = values.last_mut() {
                 let (first, last) = match value {
-                    Character::Single(first) => (*first, *first),
+                    Character::Scalar(first) => (*first, *first),
                     Character::Range((first, last)) => (*first, *last),
                 };
                 if last as usize + 1 == start as usize {
@@ -45,10 +45,10 @@ fn compress(ranges: Vec<(u32, u32)>) -> Result<Vec<Character>> {
                 }
             }
             if start == end {
-                values.push(Character::Single(start));
+                values.push(Character::Scalar(start));
             } else if start as usize + 1 == end as usize {
-                values.push(Character::Single(start));
-                values.push(Character::Single(end));
+                values.push(Character::Scalar(start));
+                values.push(Character::Scalar(end));
             } else {
                 values.push(Character::Range((start, end)));
             }
