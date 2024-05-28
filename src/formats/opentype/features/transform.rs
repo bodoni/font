@@ -42,7 +42,7 @@ impl<'l> Transform<'l> for &Value {
 }
 
 impl<'l> Transform<'l> for &BTreeMap<Language, Graph> {
-    type Target = BTreeMap<Language, BTreeSet<Sample>>;
+    type Target = BTreeMap<Language, Option<BTreeSet<Sample>>>;
     type Parameter = &'l Features;
 
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
@@ -53,13 +53,13 @@ impl<'l> Transform<'l> for &BTreeMap<Language, Graph> {
 }
 
 impl<'l> Transform<'l> for &Graph {
-    type Target = BTreeSet<Sample>;
+    type Target = Option<BTreeSet<Sample>>;
     type Parameter = &'l Features;
 
     fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
         postcompress(
             self.iter()
-                .filter_map(|(value, _)| value.transform(mapping, features)),
+                .map(|(value, _)| value.transform(mapping, features)),
         )
     }
 }
@@ -138,11 +138,11 @@ where
     values
 }
 
-fn postcompress<T>(values: T) -> BTreeSet<Sample>
+fn postcompress<T>(values: T) -> Option<BTreeSet<Sample>>
 where
-    T: Iterator<Item = Vec<BTreeSet<Component>>>,
+    T: Iterator<Item = Option<Vec<BTreeSet<Component>>>>,
 {
-    let values = values.collect::<BTreeSet<_>>();
+    let values = values.collect::<Option<BTreeSet<_>>>()?;
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
     let mut range: Option<(char, char)> = None;
@@ -182,7 +182,7 @@ where
             }
         }
     }
-    values
+    Some(values)
 }
 
 #[inline]

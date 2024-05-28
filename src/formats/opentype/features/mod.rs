@@ -24,7 +24,7 @@ pub type Features = BTreeMap<Type, Value>;
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, BTreeSet<Sample>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, Option<BTreeSet<Sample>>>>;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     let mut values = Default::default();
@@ -54,7 +54,7 @@ fn populate<T>(
                     directory.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let glyphs = record
+                    let graph = record
                         .lookup_indices
                         .iter()
                         .cloned()
@@ -71,7 +71,7 @@ fn populate<T>(
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(Language::Default, glyphs);
+                        .insert(Language::Default, graph);
                 }
             }
         }
@@ -88,7 +88,7 @@ fn populate<T>(
                     directory.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let glyphs = record
+                    let graph = record
                         .lookup_indices
                         .iter()
                         .cloned()
@@ -105,7 +105,7 @@ fn populate<T>(
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(language, glyphs);
+                        .insert(language, graph);
                 }
             }
         }
