@@ -45,7 +45,7 @@ pub use self::file::File;
 pub use self::font::{Case, Font};
 pub use self::formats::opentype::axes::{self, Axes};
 pub use self::formats::opentype::characters::{self, Characters};
-pub use self::formats::opentype::features::{self, Features};
+pub use self::formats::opentype::features::{self, Directory as Features};
 pub use self::formats::opentype::names::Names;
 pub use self::formats::opentype::palettes::Palettes;
 pub use self::formats::opentype::tables::Tables;

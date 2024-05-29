@@ -165,10 +165,10 @@ fn noto_serif() {
     assert_eq!(
         entries,
         [
+            ("aalt", "DFLT", "DFLT", ""),
             ("aalt", "cyrl", "DFLT", ""),
             ("aalt", "cyrl", "MKD ", ""),
             ("aalt", "cyrl", "SRB ", ""),
-            ("aalt", "DFLT", "DFLT", ""),
             ("aalt", "grek", "APPH", ""),
             ("aalt", "grek", "DFLT", ""),
             ("aalt", "grek", "IPPH", ""),
@@ -181,10 +181,10 @@ fn noto_serif() {
             ("aalt", "latn", "NAV ", ""),
             ("aalt", "latn", "ROM ", ""),
             ("aalt", "thai", "DFLT", ""),
+            ("ccmp", "DFLT", "DFLT", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "cyrl", "DFLT", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "cyrl", "MKD ", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "cyrl", "SRB ", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
-            ("ccmp", "DFLT", "DFLT", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "grek", "APPH", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "grek", "DFLT", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "grek", "IPPH", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
@@ -197,10 +197,10 @@ fn noto_serif() {
             ("ccmp", "latn", "NAV ", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "latn", "ROM ", "[[[i, j], [300–304, 306–308, 30a–30c, 312]]]"),
             ("ccmp", "thai", "DFLT", ""),
+            ("dist", "DFLT", "DFLT", "[]"),
             ("dist", "cyrl", "DFLT", "[]"),
             ("dist", "cyrl", "MKD ", "[]"),
             ("dist", "cyrl", "SRB ", "[]"),
-            ("dist", "DFLT", "DFLT", "[]"),
             ("dist", "grek", "APPH", "[]"),
             ("dist", "grek", "DFLT", "[]"),
             ("dist", "grek", "IPPH", "[]"),
@@ -223,10 +223,10 @@ fn noto_serif() {
             ("kern", "latn", "NAV ", "[]"),
             ("kern", "latn", "ROM ", "[]"),
             ("kern", "thai", "DFLT", "[]"),
+            ("liga", "DFLT", "DFLT", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("liga", "cyrl", "DFLT", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("liga", "cyrl", "MKD ", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("liga", "cyrl", "SRB ", "[[[e24], [e45]], [[e26], [e45]]]"),
-            ("liga", "DFLT", "DFLT", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("liga", "grek", "APPH", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("liga", "grek", "DFLT", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("liga", "grek", "IPPH", "[[[e24], [e45]], [[e26], [e45]]]"),
@@ -241,10 +241,10 @@ fn noto_serif() {
             ("liga", "thai", "DFLT", "[[[e24], [e45]], [[e26], [e45]]]"),
             ("locl", "latn", "MOL ", "[15e, 15f]"),
             ("locl", "latn", "ROM ", "[15e, 15f]"),
+            ("mark", "DFLT", "DFLT", "[]"),
             ("mark", "cyrl", "DFLT", "[]"),
             ("mark", "cyrl", "MKD ", "[]"),
             ("mark", "cyrl", "SRB ", "[]"),
-            ("mark", "DFLT", "DFLT", "[]"),
             ("mark", "grek", "APPH", "[]"),
             ("mark", "grek", "DFLT", "[]"),
             ("mark", "grek", "IPPH", "[]"),
@@ -257,10 +257,10 @@ fn noto_serif() {
             ("mark", "latn", "NAV ", "[]"),
             ("mark", "latn", "ROM ", "[]"),
             ("mark", "thai", "DFLT", "[]"),
+            ("mkmk", "DFLT", "DFLT", "[]"),
             ("mkmk", "cyrl", "DFLT", "[]"),
             ("mkmk", "cyrl", "MKD ", "[]"),
             ("mkmk", "cyrl", "SRB ", "[]"),
-            ("mkmk", "DFLT", "DFLT", "[]"),
             ("mkmk", "grek", "APPH", "[]"),
             ("mkmk", "grek", "DFLT", "[]"),
             ("mkmk", "grek", "IPPH", "[]"),
@@ -273,10 +273,10 @@ fn noto_serif() {
             ("mkmk", "latn", "NAV ", "[]"),
             ("mkmk", "latn", "ROM ", "[]"),
             ("mkmk", "thai", "DFLT", "[]"),
+            ("ordn", "DFLT", "DFLT", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "cyrl", "DFLT", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "cyrl", "MKD ", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "cyrl", "SRB ", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
-            ("ordn", "DFLT", "DFLT", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "grek", "APPH", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "grek", "DFLT", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "grek", "IPPH", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
@@ -289,10 +289,10 @@ fn noto_serif() {
             ("ordn", "latn", "NAV ", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "latn", "ROM ", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
             ("ordn", "thai", "DFLT", "[[[0–9], [A, a]], [[0–9], [O, o]]]"),
+            ("ss01", "DFLT", "DFLT", "[e0d, e10]"),
             ("ss01", "cyrl", "DFLT", "[e0d, e10]"),
             ("ss01", "cyrl", "MKD ", "[e0d, e10]"),
             ("ss01", "cyrl", "SRB ", "[e0d, e10]"),
-            ("ss01", "DFLT", "DFLT", "[e0d, e10]"),
             ("ss01", "grek", "APPH", "[e0d, e10]"),
             ("ss01", "grek", "DFLT", "[e0d, e10]"),
             ("ss01", "grek", "IPPH", "[e0d, e10]"),
@@ -323,42 +323,42 @@ fn qahiri() {
     assert_eq!(
         entries,
         [
-            ("calt", "arab", "DFLT", ""),
             ("calt", "DFLT", "DFLT", ""),
-            ("ccmp", "arab", "DFLT", "[622, …, 626, 628, …, 62c, 62e, 630, 632, 634, 636, 638, 63a, 641, 642, 646, 64a, 671, 679, 67e, 686, 688, 691, 698, 6a2, 6a4, 6a7, 6a9, 6af, 6c1, …, 6c3]"),
+            ("calt", "arab", "DFLT", ""),
             ("ccmp", "DFLT", "DFLT", "[622, …, 626, 628, …, 62c, 62e, 630, 632, 634, 636, 638, 63a, 641, 642, 646, 64a, 671, 679, 67e, 686, 688, 691, 698, 6a2, 6a4, 6a7, 6a9, 6af, 6c1, …, 6c3]"),
-            ("clig", "arab", "DFLT", ""),
+            ("ccmp", "arab", "DFLT", "[622, …, 626, 628, …, 62c, 62e, 630, 632, 634, 636, 638, 63a, 641, 642, 646, 64a, 671, 679, 67e, 686, 688, 691, 698, 6a2, 6a4, 6a7, 6a9, 6af, 6c1, …, 6c3]"),
             ("clig", "DFLT", "DFLT", ""),
-            ("curs", "arab", "DFLT", "[]"),
+            ("clig", "arab", "DFLT", ""),
             ("curs", "DFLT", "DFLT", "[]"),
-            ("dnom", "arab", "DFLT", "[0, …, 9, 660, …, 669, 6f0, …, 6f9]"),
+            ("curs", "arab", "DFLT", "[]"),
             ("dnom", "DFLT", "DFLT", "[0, …, 9, 660, …, 669, 6f0, …, 6f9]"),
-            ("fina", "arab", "DFLT", "[627, 62d, 62f, 631, 633, 635, 637, 639, 643, …, 645, 647, …, 649, 66e, 66f, 6a1, 6ba, 6cc, 6d2, 8bb, …, 8bd]"),
+            ("dnom", "arab", "DFLT", "[0, …, 9, 660, …, 669, 6f0, …, 6f9]"),
             ("fina", "DFLT", "DFLT", "[627, 62d, 62f, 631, 633, 635, 637, 639, 643, …, 645, 647, …, 649, 66e, 66f, 6a1, 6ba, 6cc, 6d2, 8bb, …, 8bd]"),
-            ("init", "arab", "DFLT", "[62d, 633, 635, 637, 639, 643, …, 645, 647, 649, 66e, 66f, 6a1, 6ba, 6cc, 8bb, …, 8bd]"),
+            ("fina", "arab", "DFLT", "[627, 62d, 62f, 631, 633, 635, 637, 639, 643, …, 645, 647, …, 649, 66e, 66f, 6a1, 6ba, 6cc, 6d2, 8bb, …, 8bd]"),
             ("init", "DFLT", "DFLT", "[62d, 633, 635, 637, 639, 643, …, 645, 647, 649, 66e, 66f, 6a1, 6ba, 6cc, 8bb, …, 8bd]"),
-            ("isol", "arab", "DFLT", "[6cc, 8bb, …, 8bd]"),
+            ("init", "arab", "DFLT", "[62d, 633, 635, 637, 639, 643, …, 645, 647, 649, 66e, 66f, 6a1, 6ba, 6cc, 8bb, …, 8bd]"),
             ("isol", "DFLT", "DFLT", "[6cc, 8bb, …, 8bd]"),
-            ("kern", "arab", "DFLT", "[]"),
+            ("isol", "arab", "DFLT", "[6cc, 8bb, …, 8bd]"),
             ("kern", "DFLT", "DFLT", "[]"),
+            ("kern", "arab", "DFLT", "[]"),
             ("locl", "latn", "DFLT", "[20]"),
-            ("mark", "arab", "DFLT", "[]"),
             ("mark", "DFLT", "DFLT", "[]"),
-            ("medi", "arab", "DFLT", "[62d, 633, 635, 637, 639, 643, …, 645, 647, 649, 66e, 66f, 6a1, 6ba, 6cc, 8bb, …, 8bd]"),
+            ("mark", "arab", "DFLT", "[]"),
             ("medi", "DFLT", "DFLT", "[62d, 633, 635, 637, 639, 643, …, 645, 647, 649, 66e, 66f, 6a1, 6ba, 6cc, 8bb, …, 8bd]"),
-            ("numr", "arab", "DFLT", "[0, …, 9, 660, …, 669, 6f0, …, 6f9]"),
+            ("medi", "arab", "DFLT", "[62d, 633, 635, 637, 639, 643, …, 645, 647, 649, 66e, 66f, 6a1, 6ba, 6cc, 8bb, …, 8bd]"),
             ("numr", "DFLT", "DFLT", "[0, …, 9, 660, …, 669, 6f0, …, 6f9]"),
-            ("onum", "arab", "DFLT", "[661, …, 664, 666, 669]"),
+            ("numr", "arab", "DFLT", "[0, …, 9, 660, …, 669, 6f0, …, 6f9]"),
             ("onum", "DFLT", "DFLT", "[661, …, 664, 666, 669]"),
-            ("rclt", "arab", "DFLT", ""),
+            ("onum", "arab", "DFLT", "[661, …, 664, 666, 669]"),
             ("rclt", "DFLT", "DFLT", ""),
-            ("salt", "arab", "DFLT", ""),
+            ("rclt", "arab", "DFLT", ""),
             ("salt", "DFLT", "DFLT", ""),
+            ("salt", "arab", "DFLT", ""),
             ("salt", "latn", "DFLT", "[G, H, K, M, N, P, …, R, U, Y]"),
-            ("ss01", "arab", "DFLT", ""),
             ("ss01", "DFLT", "DFLT", ""),
-            ("ss02", "arab", "DFLT", ""),
+            ("ss01", "arab", "DFLT", ""),
             ("ss02", "DFLT", "DFLT", ""),
+            ("ss02", "arab", "DFLT", ""),
         ],
     );
 }
@@ -367,39 +367,49 @@ fn extract<T>(font: &mut Font<T>) -> Vec<(String, String, String, String)>
 where
     T: font::Read,
 {
-    let (values, samples) = ok!(font.features());
-    let samples = &samples;
-    values
-        .into_iter()
-        .flat_map(|(feature, value)| {
-            value.into_iter().flat_map(move |(script, value)| {
-                value.into_iter().map(move |(language, indices)| {
-                    (
-                        ok!(Tag::from(feature.clone()).as_str()).to_string(),
-                        ok!(Tag::from(script.clone()).as_str()).to_string(),
-                        ok!(Tag::from(language).as_str()).to_string(),
-                        match indices
-                            .iter()
-                            .cloned()
-                            .map(|index| samples[index].as_ref())
-                            .collect::<Option<Vec<_>>>()
-                        {
-                            Some(values) => flatten(
-                                &values
-                                    .into_iter()
-                                    .flat_map(|values| {
-                                        values.iter().flat_map(IntoIterator::into_iter)
-                                    })
+    let directory = ok!(font.features());
+    let mut values = directory
+        .scripts
+        .iter()
+        .flat_map(|(script, indices)| {
+            indices
+                .iter()
+                .cloned()
+                .map(|index| &directory.languages[index])
+                .flat_map(|(language, indices)| {
+                    indices
+                        .iter()
+                        .cloned()
+                        .map(|index| &directory.features[index])
+                        .map(|(feature, indices)| {
+                            (
+                                ok!(Tag::from(feature.clone()).as_str()).to_string(),
+                                ok!(Tag::from(script.clone()).as_str()).to_string(),
+                                ok!(Tag::from(language.clone()).as_str()).to_string(),
+                                match indices
+                                    .iter()
                                     .cloned()
-                                    .collect(),
-                            ),
-                            _ => Default::default(),
-                        },
-                    )
+                                    .map(|index| directory.samples[index].as_ref())
+                                    .collect::<Option<Vec<_>>>()
+                                {
+                                    Some(samples) => flatten(
+                                        &samples
+                                            .into_iter()
+                                            .flat_map(|values| {
+                                                values.iter().flat_map(IntoIterator::into_iter)
+                                            })
+                                            .cloned()
+                                            .collect(),
+                                    ),
+                                    _ => Default::default(),
+                                },
+                            )
+                        })
                 })
-            })
         })
-        .collect()
+        .collect::<Vec<_>>();
+    values.sort();
+    values
 }
 
 fn flatten(values: &BTreeSet<Sample>) -> String {
