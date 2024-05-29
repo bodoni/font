@@ -412,7 +412,11 @@ fn flatten(values: &BTreeSet<Sample>) -> String {
             }
             Sample::Simple(Component::Range((start, end))) => {
                 buffer.push_str(&escape(*start));
-                buffer.push_str(", …, ");
+                if *start as usize + 1 == *end as usize {
+                    buffer.push_str(", ");
+                } else {
+                    buffer.push_str(", …, ");
+                }
                 buffer.push_str(&escape(*end));
             }
             Sample::Compound(positions) => {
@@ -426,7 +430,11 @@ fn flatten(values: &BTreeSet<Sample>) -> String {
                             }
                             Component::Range((start, end)) => {
                                 buffer.push_str(&escape(*start));
-                                buffer.push('–');
+                                if *start as usize + 1 == *end as usize {
+                                    buffer.push_str(", ");
+                                } else {
+                                    buffer.push('–');
+                                }
                                 buffer.push_str(&escape(*end));
                             }
                         }

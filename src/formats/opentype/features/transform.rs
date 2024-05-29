@@ -161,9 +161,6 @@ where
 fn component(values: &mut BTreeSet<Component>, (start, end): (char, char)) {
     if start == end {
         values.insert(Component::Scalar(start));
-    } else if start as usize + 1 == end as usize {
-        values.insert(Component::Scalar(start));
-        values.insert(Component::Scalar(end));
     } else {
         values.insert(Component::Range((start, end)));
     }
@@ -173,9 +170,6 @@ fn component(values: &mut BTreeSet<Component>, (start, end): (char, char)) {
 fn sample(values: &mut BTreeSet<Sample>, (start, end): (char, char)) {
     if start == end {
         values.insert(Sample::Simple(Component::Scalar(start)));
-    } else if start as usize + 1 == end as usize {
-        values.insert(Sample::Simple(Component::Scalar(start)));
-        values.insert(Sample::Simple(Component::Scalar(end)));
     } else {
         values.insert(Sample::Simple(Component::Range((start, end))));
     }
