@@ -1,9 +1,7 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
-use opentype::layout::{Feature, Language, Script};
 use opentype::truetype::GlyphID;
 
-use crate::formats::opentype::features;
 use crate::formats::opentype::features::graph::{Glyph, Graph};
 use crate::formats::opentype::features::sample::{Component, Sample};
 use crate::formats::opentype::mapping::Reverse as Mapping;
@@ -15,80 +13,54 @@ pub trait Transform<'l> {
     fn transform(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-type Features = BTreeMap<Feature, Value>;
+impl<'l> Transform<'l> for &[Graph] {
+    type Target = Option<Vec<BTreeSet<Sample>>>;
+    type Parameter = &'l [Vec<Graph>];
 
-type Value = BTreeMap<Script, BTreeMap<Language, Graph>>;
-
-impl<'l> Transform<'l> for &Features {
-    type Target = features::Features;
-    type Parameter = ();
-
-    fn transform(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|(key, value)| (*key, value.transform(mapping, self)))
-            .collect()
-    }
-}
-
-impl<'l> Transform<'l> for &Value {
-    type Target = features::Value;
-    type Parameter = &'l Features;
-
-    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
-        self.iter()
-            .map(|(key, value)| (*key, value.transform(mapping, features)))
-            .collect()
-    }
-}
-
-impl<'l> Transform<'l> for &BTreeMap<Language, Graph> {
-    type Target = BTreeMap<Language, Option<BTreeSet<Sample>>>;
-    type Parameter = &'l Features;
-
-    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
-        self.iter()
-            .map(|(key, value)| (*key, value.transform(mapping, features)))
+            .map(|value| value.transform(mapping, graphs))
             .collect()
     }
 }
 
 impl<'l> Transform<'l> for &Graph {
     type Target = Option<BTreeSet<Sample>>;
-    type Parameter = &'l Features;
+    type Parameter = &'l [Vec<Graph>];
 
-    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         postcompress(
             self.iter()
-                .map(|(value, _)| value.transform(mapping, features)),
+                .map(|(value, _)| value.transform(mapping, graphs)),
         )
     }
 }
 
 impl<'l> Transform<'l> for &[Glyph] {
     type Target = Option<Vec<BTreeSet<Component>>>;
-    type Parameter = &'l Features;
+    type Parameter = &'l [Vec<Graph>];
 
-    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| value.transform(mapping, features))
+            .map(|value| value.transform(mapping, graphs))
             .collect()
     }
 }
 
 impl<'l> Transform<'l> for &Glyph {
     type Target = Option<BTreeSet<Component>>;
-    type Parameter = &'l Features;
+    type Parameter = &'l [Vec<Graph>];
 
-    fn transform(self, mapping: &Mapping, features: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         let value = match self {
-            Glyph::Scalar(value) => precompress(*value..=*value, mapping, features),
-            Glyph::Range((start, end)) => precompress(*start..=*end, mapping, features),
+            Glyph::Scalar(value) => precompress(*value..=*value, mapping, graphs),
+            Glyph::Range((start, end)) => precompress(*start..=*end, mapping, graphs),
             Glyph::Ranges(value) => precompress(
                 value.iter().flat_map(|value| value.0..=value.1),
                 mapping,
-                features,
+                graphs,
             ),
-            Glyph::List(value) => precompress(value.iter().cloned(), mapping, features),
+            Glyph::List(value) => precompress(value.iter().cloned(), mapping, graphs),
         };
         if !value.is_empty() {
             Some(value)
@@ -99,16 +71,16 @@ impl<'l> Transform<'l> for &Glyph {
 }
 
 #[inline]
-fn map(value: GlyphID, mapping: &Mapping, _: &Features) -> Option<char> {
+fn map(value: GlyphID, mapping: &Mapping, _: &[Vec<Graph>]) -> Option<char> {
     mapping.get(value)
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, features: &Features) -> BTreeSet<Component>
+fn precompress<T>(values: T, mapping: &Mapping, graphs: &[Vec<Graph>]) -> BTreeSet<Component>
 where
     T: Iterator<Item = GlyphID>,
 {
     let values = values
-        .filter_map(|glyph_id| map(glyph_id, mapping, features))
+        .filter_map(|glyph_id| map(glyph_id, mapping, graphs))
         .collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();

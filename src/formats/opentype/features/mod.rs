@@ -18,33 +18,46 @@ use crate::formats::opentype::features::graph::{Graph, Table};
 use crate::formats::opentype::features::transform::Transform;
 
 /// Layout features.
-pub type Features = BTreeMap<Type, Value>;
+pub type Features = (BTreeMap<Type, Value>, Vec<Option<Vec<BTreeSet<Sample>>>>);
 
 /// A type.
 pub type Type = Feature;
 
 /// A value.
-pub type Value = BTreeMap<Script, BTreeMap<Language, Option<BTreeSet<Sample>>>>;
+pub type Value = BTreeMap<Script, BTreeMap<Language, Vec<usize>>>;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
+    let mapping = cache.reverse_mapping()?.clone();
     let mut values = Default::default();
+    let mut samples: Vec<_> = Default::default();
     if let Some(table) = cache.try_glyph_positioning()? {
-        populate(&mut values, &table.borrow());
+        let directory = table.borrow();
+        map(&mut values, &directory, samples.len());
+        let graphs = list(&directory);
+        samples.extend(
+            graphs
+                .iter()
+                .map(|value| value.transform(&mapping, &graphs)),
+        );
     }
     if let Some(table) = cache.try_glyph_substitution()? {
-        populate(&mut values, &table.borrow());
+        let directory = table.borrow();
+        map(&mut values, &directory, samples.len());
+        let graphs = list(&directory);
+        samples.extend(
+            graphs
+                .iter()
+                .map(|value| value.transform(&mapping, &graphs)),
+        );
     }
-    let mapping = cache.reverse_mapping()?.clone();
-    Ok(values.transform(&mapping, ()))
+    Ok((values, samples))
 }
 
-fn populate<T>(
-    values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Graph>>>,
-    directory: &Directory<T>,
-) where
+fn list<T>(directory: &Directory<T>) -> Vec<Vec<Graph>>
+where
     T: Table,
 {
-    let lookups = directory
+    directory
         .lookups
         .records
         .iter()
@@ -52,10 +65,19 @@ fn populate<T>(
             record
                 .tables
                 .iter()
-                .flat_map(|table| table.extract(directory))
-                .collect::<BTreeMap<_, _>>()
+                .map(|table| table.extract(directory))
+                .collect()
         })
-        .collect::<Vec<_>>();
+        .collect()
+}
+
+fn map<T>(
+    values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Vec<usize>>>>,
+    directory: &Directory<T>,
+    offset: usize,
+) where
+    T: Table,
+{
     for (i, header) in directory.scripts.headers.iter().enumerate() {
         let script = Script::from_tag(&header.tag);
         if let Some(record) = directory.scripts.records[i].default_language.as_ref() {
@@ -65,24 +87,19 @@ fn populate<T>(
                     directory.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let graph = record
+                    let indices = record
                         .lookup_indices
                         .iter()
                         .cloned()
                         .map(usize::from)
-                        .filter_map(|index| lookups.get(index))
-                        .flat_map(|lookup| {
-                            lookup
-                                .iter()
-                                .map(|(source, target)| (source.clone(), target.clone()))
-                        })
+                        .map(|value| offset + value)
                         .collect();
                     values
                         .entry(feature)
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(Language::Default, graph);
+                        .insert(Language::Default, indices);
                 }
             }
         }
@@ -99,24 +116,19 @@ fn populate<T>(
                     directory.features.records.get(index),
                 ) {
                     let feature = Feature::from_tag(&header.tag);
-                    let graph = record
+                    let indices = record
                         .lookup_indices
                         .iter()
                         .cloned()
                         .map(usize::from)
-                        .filter_map(|index| lookups.get(index))
-                        .flat_map(|lookup| {
-                            lookup
-                                .iter()
-                                .map(|(source, target)| (source.clone(), target.clone()))
-                        })
+                        .map(|value| offset + value)
                         .collect();
                     values
                         .entry(feature)
                         .or_default()
                         .entry(script)
                         .or_default()
-                        .insert(language, graph);
+                        .insert(language, indices);
                 }
             }
         }

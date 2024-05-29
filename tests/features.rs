@@ -367,16 +367,34 @@ fn extract<T>(font: &mut Font<T>) -> Vec<(String, String, String, String)>
 where
     T: font::Read,
 {
-    ok!(font.features())
+    let (values, samples) = ok!(font.features());
+    let samples = &samples;
+    values
         .into_iter()
         .flat_map(|(feature, value)| {
             value.into_iter().flat_map(move |(script, value)| {
-                value.into_iter().map(move |(language, sequences)| {
+                value.into_iter().map(move |(language, indices)| {
                     (
                         ok!(Tag::from(feature.clone()).as_str()).to_string(),
                         ok!(Tag::from(script.clone()).as_str()).to_string(),
                         ok!(Tag::from(language).as_str()).to_string(),
-                        flatten(&sequences),
+                        match indices
+                            .iter()
+                            .cloned()
+                            .map(|index| samples[index].as_ref())
+                            .collect::<Option<Vec<_>>>()
+                        {
+                            Some(values) => flatten(
+                                &values
+                                    .into_iter()
+                                    .flat_map(|values| {
+                                        values.iter().flat_map(IntoIterator::into_iter)
+                                    })
+                                    .cloned()
+                                    .collect(),
+                            ),
+                            _ => Default::default(),
+                        },
                     )
                 })
             })
@@ -384,12 +402,8 @@ where
         .collect()
 }
 
-fn flatten(values: &Option<BTreeSet<Sample>>) -> String {
+fn flatten(values: &BTreeSet<Sample>) -> String {
     let mut buffer = String::new();
-    let values = match values.as_ref() {
-        Some(value) => value,
-        _ => return buffer,
-    };
     buffer.push('[');
     for (index, value) in values.iter().enumerate() {
         match value {
