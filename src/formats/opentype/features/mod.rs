@@ -45,6 +45,18 @@ fn populate<T>(
 ) where
     T: Table,
 {
+    let lookups = directory
+        .lookups
+        .records
+        .iter()
+        .map(|record| {
+            record
+                .tables
+                .iter()
+                .flat_map(|table| table.extract(directory))
+                .collect::<BTreeMap<_, _>>()
+        })
+        .collect::<Vec<_>>();
     for (i, header) in directory.scripts.headers.iter().enumerate() {
         let script = Script::from_tag(&header.tag);
         if let Some(record) = directory.scripts.records[i].default_language.as_ref() {
@@ -58,14 +70,14 @@ fn populate<T>(
                         .lookup_indices
                         .iter()
                         .cloned()
-                        .filter_map(|index| directory.lookups.records.get(index as usize))
-                        .flat_map(|record| {
-                            record
-                                .tables
+                        .map(usize::from)
+                        .filter_map(|index| lookups.get(index))
+                        .flat_map(|lookup| {
+                            lookup
                                 .iter()
-                                .flat_map(|table| table.extract(directory))
+                                .map(|(source, target)| (source.clone(), target.clone()))
                         })
-                        .collect::<BTreeMap<_, _>>();
+                        .collect();
                     values
                         .entry(feature)
                         .or_default()
@@ -92,14 +104,14 @@ fn populate<T>(
                         .lookup_indices
                         .iter()
                         .cloned()
-                        .filter_map(|index| directory.lookups.records.get(index as usize))
-                        .flat_map(|record| {
-                            record
-                                .tables
+                        .map(usize::from)
+                        .filter_map(|index| lookups.get(index))
+                        .flat_map(|lookup| {
+                            lookup
                                 .iter()
-                                .flat_map(|table| table.extract(directory))
+                                .map(|(source, target)| (source.clone(), target.clone()))
                         })
-                        .collect::<BTreeMap<_, _>>();
+                        .collect();
                     values
                         .entry(feature)
                         .or_default()
