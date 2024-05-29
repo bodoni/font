@@ -38,7 +38,6 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Features> {
     Ok(values.transform(&mapping, ()))
 }
 
-#[allow(clippy::type_complexity)]
 fn populate<T>(
     values: &mut BTreeMap<Feature, BTreeMap<Script, BTreeMap<Language, Graph>>>,
     directory: &Directory<T>,
