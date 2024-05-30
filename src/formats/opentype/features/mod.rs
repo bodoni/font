@@ -34,7 +34,7 @@ pub struct Directory {
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
     let mapping = cache.reverse_mapping()?.clone();
 
-    let mut scripts = (Vec::default(), HashMap::default());
+    let mut scripts = HashMap::default();
     let mut languages = (Vec::default(), HashMap::default());
     let mut features = (Vec::default(), HashMap::default());
     let mut samples = (Vec::default(), HashMap::default());
@@ -61,7 +61,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
         );
     }
 
-    let mut scripts = scripts.0;
+    let mut scripts = scripts.into_iter().collect::<Vec<_>>();
     let mut languages = languages.0;
     let mut features = features.0;
     let mut samples = samples.0;
@@ -69,7 +69,11 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
     sort(&mut samples, &mut features);
     sort(&mut features, &mut languages);
     sort(&mut languages, &mut scripts);
+
     scripts.sort();
+    for (_, indices) in scripts.iter_mut() {
+        indices.sort();
+    }
 
     Ok(Directory {
         scripts,
@@ -83,10 +87,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
 fn process_table<T>(
     directory: &layout::Directory<T>,
     mapping: &Mapping,
-    scripts: &mut (
-        Vec<(Script, Vec<usize>)>,
-        HashMap<(Script, Vec<usize>), usize>,
-    ),
+    scripts: &mut HashMap<Script, Vec<usize>>,
     languages: &mut (
         Vec<(Language, Vec<usize>)>,
         HashMap<(Language, Vec<usize>), usize>,
@@ -99,33 +100,24 @@ fn process_table<T>(
         Vec<Option<Vec<BTreeSet<Sample>>>>,
         HashMap<Option<Vec<BTreeSet<Sample>>>, usize>,
     ),
-) -> Option<Vec<usize>>
+) -> Option<()>
 where
     T: Table,
 {
     let graphs = process_graphs(directory, mapping, samples)?;
-    directory
-        .scripts
-        .headers
-        .iter()
-        .enumerate()
-        .map(|(i, header)| {
-            append(
-                scripts,
-                (
-                    Script::from_tag(&header.tag),
-                    process_script(
-                        directory,
-                        &directory.scripts.records[i],
-                        languages,
-                        features,
-                        &graphs,
-                    )?,
-                ),
-            )
-            .into()
-        })
-        .collect()
+    for (i, header) in directory.scripts.headers.iter().enumerate() {
+        scripts
+            .entry(Script::from_tag(&header.tag))
+            .or_default()
+            .extend(process_script(
+                directory,
+                &directory.scripts.records[i],
+                languages,
+                features,
+                &graphs,
+            )?);
+    }
+    Some(())
 }
 
 #[allow(clippy::type_complexity)]
