@@ -19,6 +19,7 @@ use crate::formats::opentype::features::transform::Transform;
 use crate::formats::opentype::mapping::Reverse as Mapping;
 
 /// A directory.
+#[derive(Clone, Debug, Default)]
 pub struct Directory {
     /// Scripts to languages.
     pub scripts: Vec<(Script, Vec<usize>)>,
