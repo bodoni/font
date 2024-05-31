@@ -104,7 +104,7 @@ fn process_table<T>(
 where
     T: Table,
 {
-    let graphs = process_graphs(directory, mapping, samples)?;
+    let graphs = process_graphs(directory, mapping, samples);
     for (i, header) in directory.scripts.headers.iter().enumerate() {
         scripts
             .entry(Script::from_tag(&header.tag))
@@ -128,11 +128,11 @@ fn process_graphs<T>(
         Vec<Option<Vec<BTreeSet<Sample>>>>,
         HashMap<Option<Vec<BTreeSet<Sample>>>, usize>,
     ),
-) -> Option<Vec<usize>>
+) -> Vec<usize>
 where
     T: Table,
 {
-    let graphs: Vec<Vec<Graph>> = directory
+    let graphs: Vec<Vec<Option<Graph>>> = directory
         .lookups
         .records
         .iter()
@@ -146,9 +146,8 @@ where
         .collect();
     graphs
         .iter()
-        .map(|graph| append(samples, graph.transform(mapping, &graphs)))
-        .collect::<Vec<_>>()
-        .into()
+        .map(|values| append(samples, values.transform(mapping, &graphs)))
+        .collect()
 }
 
 #[allow(clippy::type_complexity)]

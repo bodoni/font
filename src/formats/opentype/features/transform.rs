@@ -13,20 +13,24 @@ pub trait Transform<'l> {
     fn transform(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-impl<'l> Transform<'l> for &[Graph] {
+impl<'l> Transform<'l> for &[Option<Graph>] {
     type Target = Option<Vec<BTreeSet<Sample>>>;
-    type Parameter = &'l [Vec<Graph>];
+    type Parameter = &'l [Vec<Option<Graph>>];
 
     fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| value.transform(mapping, graphs))
+            .map(|value| {
+                value
+                    .as_ref()
+                    .and_then(|value| value.transform(mapping, graphs))
+            })
             .collect()
     }
 }
 
 impl<'l> Transform<'l> for &Graph {
     type Target = Option<BTreeSet<Sample>>;
-    type Parameter = &'l [Vec<Graph>];
+    type Parameter = &'l [Vec<Option<Graph>>];
 
     fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         postcompress(
@@ -38,7 +42,7 @@ impl<'l> Transform<'l> for &Graph {
 
 impl<'l> Transform<'l> for &[Glyph] {
     type Target = Option<Vec<BTreeSet<Component>>>;
-    type Parameter = &'l [Vec<Graph>];
+    type Parameter = &'l [Vec<Option<Graph>>];
 
     fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         self.iter()
@@ -49,7 +53,7 @@ impl<'l> Transform<'l> for &[Glyph] {
 
 impl<'l> Transform<'l> for &Glyph {
     type Target = Option<BTreeSet<Component>>;
-    type Parameter = &'l [Vec<Graph>];
+    type Parameter = &'l [Vec<Option<Graph>>];
 
     fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         let value = match self {
@@ -71,11 +75,15 @@ impl<'l> Transform<'l> for &Glyph {
 }
 
 #[inline]
-fn map(value: GlyphID, mapping: &Mapping, _: &[Vec<Graph>]) -> Option<char> {
+fn map(value: GlyphID, mapping: &Mapping, _: &[Vec<Option<Graph>>]) -> Option<char> {
     mapping.get(value)
 }
 
-fn precompress<T>(values: T, mapping: &Mapping, graphs: &[Vec<Graph>]) -> BTreeSet<Component>
+fn precompress<T>(
+    values: T,
+    mapping: &Mapping,
+    graphs: &[Vec<Option<Graph>>],
+) -> BTreeSet<Component>
 where
     T: Iterator<Item = GlyphID>,
 {

@@ -16,11 +16,11 @@ pub type Graph = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
 
 pub trait Table: Sized {
     #[inline]
-    fn extract(&self, _: &Directory<Self>) -> Graph
+    fn extract(&self, _: &Directory<Self>) -> Option<Graph>
     where
         Self: Sized,
     {
-        Default::default()
+        None
     }
 
     #[inline]
@@ -78,7 +78,7 @@ impl From<Coverage> for Glyph {
 impl Table for opentype::tables::glyph_positioning::Type {}
 
 impl Table for opentype::tables::glyph_substitution::Type {
-    fn extract(&self, directory: &Directory<Self>) -> Graph {
+    fn extract(&self, directory: &Directory<Self>) -> Option<Graph> {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
@@ -157,7 +157,7 @@ impl Table for opentype::tables::glyph_substitution::Type {
                             })
                         })
                         .flat_map(|(class_index, record)| {
-                            record.records.iter().filter_map(move |record| {
+                            record.records.iter().map(move |record| {
                                 let mut value = Vec::with_capacity(record.glyph_count as usize);
                                 value.push(classes.get(&class_index)?.clone());
                                 for class_index in &record.indices {
@@ -165,7 +165,8 @@ impl Table for opentype::tables::glyph_substitution::Type {
                                 }
                                 Some(Self::expand(value, &record.records, directory))
                             })
-                        }),
+                        })
+                        .collect::<Option<Vec<_>>>()?,
                 );
             }
             Type::ContextualSubstitution(Context::Format3(table)) => {
@@ -219,7 +220,7 @@ impl Table for opentype::tables::glyph_substitution::Type {
                             })
                         })
                         .flat_map(|(class_index, record)| {
-                            record.records.iter().filter_map(move |record| {
+                            record.records.iter().map(move |record| {
                                 let mut value = Vec::with_capacity(
                                     record.backward_glyph_count as usize
                                         + record.glyph_count as usize
@@ -237,7 +238,8 @@ impl Table for opentype::tables::glyph_substitution::Type {
                                 }
                                 Some(Self::expand(value, &record.records, directory))
                             })
-                        }),
+                        })
+                        .collect::<Option<Vec<_>>>()?,
                 );
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format3(table)) => {
@@ -270,7 +272,11 @@ impl Table for opentype::tables::glyph_substitution::Type {
             }
             _ => {}
         }
-        values
+        if !values.is_empty() {
+            Some(values)
+        } else {
+            None
+        }
     }
 }
 
