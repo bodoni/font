@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use opentype::truetype::GlyphID;
 
-use crate::formats::opentype::features::graph::{Glyph, Graph};
+use crate::formats::opentype::features::graph::{Glyph, Graph, Source, Target};
 use crate::formats::opentype::features::sample::{Component, Sample};
 use crate::formats::opentype::mapping::Reverse as Mapping;
 
@@ -35,12 +35,12 @@ impl<'l> Transform<'l> for &Graph {
     fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
         postcompress(
             self.iter()
-                .map(|(value, _)| value.transform(mapping, graphs)),
+                .map(|(source, target)| (source.transform(mapping, graphs), target)),
         )
     }
 }
 
-impl<'l> Transform<'l> for &[Glyph] {
+impl<'l> Transform<'l> for &Source {
     type Target = Option<Vec<BTreeSet<Component>>>;
     type Parameter = &'l [Vec<Option<Graph>>];
 
@@ -118,11 +118,13 @@ where
     values
 }
 
-fn postcompress<T>(values: T) -> Option<BTreeSet<Sample>>
+fn postcompress<'l, T>(values: T) -> Option<BTreeSet<Sample>>
 where
-    T: Iterator<Item = Option<Vec<BTreeSet<Component>>>>,
+    T: Iterator<Item = (Option<Vec<BTreeSet<Component>>>, &'l Target)>,
 {
-    let values = values.collect::<Option<BTreeSet<_>>>()?;
+    let values = values
+        .map(|(source, _)| source)
+        .collect::<Option<BTreeSet<_>>>()?;
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
     let mut range: Option<(char, char)> = None;
