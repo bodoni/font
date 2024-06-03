@@ -4,6 +4,18 @@ use opentype::layout::context::LookupRecord;
 use opentype::layout::{Class, Coverage, Directory};
 use opentype::truetype::GlyphID;
 
+pub type Graph = BTreeMap<Source, Target>;
+
+pub type Source = Vec<Glyph>;
+
+#[derive(Default)]
+pub enum Target {
+    #[default]
+    None,
+    Simple(Vec<Glyph>),
+    Alternate(Vec<Glyph>),
+}
+
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Glyph {
     Scalar(GlyphID),
@@ -11,8 +23,6 @@ pub enum Glyph {
     Ranges(Vec<(GlyphID, GlyphID)>),
     List(Vec<GlyphID>),
 }
-
-pub type Graph = BTreeMap<Vec<Glyph>, Vec<Glyph>>;
 
 pub trait Table: Sized {
     #[inline]
@@ -24,11 +34,7 @@ pub trait Table: Sized {
     }
 
     #[inline]
-    fn expand(
-        value: Vec<Glyph>,
-        _: &[LookupRecord],
-        _: &Directory<Self>,
-    ) -> (Vec<Glyph>, Vec<Glyph>) {
+    fn expand(value: Source, _: &[LookupRecord], _: &Directory<Self>) -> (Source, Target) {
         (value, Default::default())
     }
 }
@@ -87,16 +93,18 @@ impl Table for opentype::tables::glyph_substitution::Type {
             Type::SingleSubstitution(SingleSubstitution::Format1(table)) => {
                 values.extend(uncover(&table.coverage).filter_map(|glyph_id| {
                     let other_id = glyph_id as isize + table.delta_glyph_id as isize;
-                    GlyphID::try_from(other_id)
-                        .ok()
-                        .map(|other_id| (vec![glyph_id.into()], vec![other_id.into()]))
+                    GlyphID::try_from(other_id).ok().map(|other_id| {
+                        (vec![glyph_id.into()], Target::Simple(vec![other_id.into()]))
+                    })
                 }));
             }
             Type::SingleSubstitution(SingleSubstitution::Format2(table)) => {
                 values.extend(
                     uncover(&table.coverage)
                         .zip(table.glyph_ids.iter().cloned())
-                        .map(|(glyph_id, other_id)| (vec![glyph_id.into()], vec![other_id.into()])),
+                        .map(|(glyph_id, other_id)| {
+                            (vec![glyph_id.into()], Target::Simple(vec![other_id.into()]))
+                        }),
                 );
             }
             Type::MultipleSubstitution(table) => {
@@ -104,7 +112,9 @@ impl Table for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         (
                             vec![glyph_id.into()],
-                            record.glyph_ids.iter().cloned().map(Into::into).collect(),
+                            Target::Simple(
+                                record.glyph_ids.iter().cloned().map(Into::into).collect(),
+                            ),
                         )
                     },
                 ));
@@ -114,7 +124,7 @@ impl Table for opentype::tables::glyph_substitution::Type {
                     |(glyph_id, record)| {
                         (
                             vec![glyph_id.into()],
-                            vec![record.glyph_ids.to_vec().into()],
+                            Target::Alternate(vec![record.glyph_ids.to_vec().into()]),
                         )
                     },
                 ));
@@ -126,7 +136,7 @@ impl Table for opentype::tables::glyph_substitution::Type {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(glyph_id.into());
                             value.extend(record.glyph_ids.iter().cloned().map(Into::into));
-                            (value, vec![record.glyph_id.into()])
+                            (value, Target::Simple(vec![record.glyph_id.into()]))
                         })
                     },
                 ));
@@ -267,7 +277,7 @@ impl Table for opentype::tables::glyph_substitution::Type {
                 value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
                 values.insert(
                     value,
-                    table.glyph_ids.iter().cloned().map(Into::into).collect(),
+                    Target::Simple(table.glyph_ids.iter().cloned().map(Into::into).collect()),
                 );
             }
             _ => {}
