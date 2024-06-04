@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use opentype::truetype::GlyphID;
 
-use crate::formats::opentype::features::graph::{Glyph, Graph, Source, Target};
+use crate::formats::opentype::features::rules::{Glyph, Rule, Rules};
 use crate::formats::opentype::features::sample::{Component, Sample};
 use crate::formats::opentype::mapping::Reverse as Mapping;
 
@@ -13,59 +13,82 @@ pub trait Transform<'l> {
     fn transform(self, _: &Mapping, _: Self::Parameter) -> Self::Target;
 }
 
-impl<'l> Transform<'l> for &[Option<Graph>] {
+impl<'l> Transform<'l> for &[Option<Rules>] {
     type Target = Option<Vec<BTreeSet<Sample>>>;
-    type Parameter = &'l [Vec<Option<Graph>>];
+    type Parameter = &'l [Vec<Option<Rules>>];
 
-    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
         self.iter()
             .map(|value| {
                 value
                     .as_ref()
-                    .and_then(|value| value.transform(mapping, graphs))
+                    .and_then(|value| value.transform(mapping, rules))
             })
             .collect()
     }
 }
 
-impl<'l> Transform<'l> for &Graph {
+impl<'l> Transform<'l> for &Rules {
     type Target = Option<BTreeSet<Sample>>;
-    type Parameter = &'l [Vec<Option<Graph>>];
+    type Parameter = &'l [Vec<Option<Rules>>];
 
-    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
-        postcompress(self.iter().map(|(source, target)| {
-            source
-                .transform(mapping, graphs)
-                .map(|source| (source, target))
-        }))
+    fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
+        postcompress(self.iter().map(|value| value.transform(mapping, rules)))
     }
 }
 
-impl<'l> Transform<'l> for &Source {
-    type Target = Option<Vec<BTreeSet<Component>>>;
-    type Parameter = &'l [Vec<Option<Graph>>];
+impl<'l> Transform<'l> for &Rule {
+    type Target = Option<Sample>;
+    type Parameter = &'l [Vec<Option<Rules>>];
 
-    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
+        match self {
+            Rule::Simple((source, _)) => source.transform(mapping, rules).map(Sample::Compound),
+            Rule::Alternate((source, target)) if target.len() > 1 => source
+                .transform(mapping, rules)
+                .map(|source| Sample::Alternate((source, target.len()))),
+            Rule::Alternate((source, _)) => [Glyph::from(*source)]
+                .transform(mapping, rules)
+                .map(Sample::Compound),
+        }
+    }
+}
+
+impl<'l> Transform<'l> for &[Glyph] {
+    type Target = Option<Vec<BTreeSet<Component>>>;
+    type Parameter = &'l [Vec<Option<Rules>>];
+
+    fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| value.transform(mapping, graphs))
+            .map(|value| value.transform(mapping, rules))
             .collect()
     }
 }
 
 impl<'l> Transform<'l> for &Glyph {
     type Target = Option<BTreeSet<Component>>;
-    type Parameter = &'l [Vec<Option<Graph>>];
+    type Parameter = &'l [Vec<Option<Rules>>];
 
-    fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
+    fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
         let value = match self {
-            Glyph::Scalar(value) => precompress(*value..=*value, mapping, graphs),
-            Glyph::Range((start, end)) => precompress(*start..=*end, mapping, graphs),
-            Glyph::Ranges(value) => precompress(
-                value.iter().flat_map(|value| value.0..=value.1),
-                mapping,
-                graphs,
+            Glyph::Scalar(value) => precompress(
+                (*value..=*value).filter_map(|glyph_id| glyph_id.transform(mapping, rules)),
             ),
-            Glyph::List(value) => precompress(value.iter().cloned(), mapping, graphs),
+            Glyph::Range((start, end)) => precompress(
+                (*start..=*end).filter_map(|glyph_id| glyph_id.transform(mapping, rules)),
+            ),
+            Glyph::Ranges(value) => precompress(
+                value
+                    .iter()
+                    .flat_map(|value| value.0..=value.1)
+                    .filter_map(|glyph_id| glyph_id.transform(mapping, rules)),
+            ),
+            Glyph::List(value) => precompress(
+                value
+                    .iter()
+                    .cloned()
+                    .filter_map(|glyph_id| glyph_id.transform(mapping, rules)),
+            ),
         };
         if !value.is_empty() {
             Some(value)
@@ -75,22 +98,21 @@ impl<'l> Transform<'l> for &Glyph {
     }
 }
 
-#[inline]
-fn map(value: GlyphID, mapping: &Mapping, _: &[Vec<Option<Graph>>]) -> Option<char> {
-    mapping.get(value)
+impl<'l> Transform<'l> for GlyphID {
+    type Target = Option<char>;
+    type Parameter = &'l [Vec<Option<Rules>>];
+
+    #[inline]
+    fn transform(self, mapping: &Mapping, _: Self::Parameter) -> Self::Target {
+        mapping.get(self)
+    }
 }
 
-fn precompress<T>(
-    values: T,
-    mapping: &Mapping,
-    graphs: &[Vec<Option<Graph>>],
-) -> BTreeSet<Component>
+fn precompress<T>(values: T) -> BTreeSet<Component>
 where
-    T: Iterator<Item = GlyphID>,
+    T: Iterator<Item = char>,
 {
-    let values = values
-        .filter_map(|glyph_id| map(glyph_id, mapping, graphs))
-        .collect::<BTreeSet<_>>();
+    let values = values.collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
     let mut range = None;
@@ -119,9 +141,9 @@ where
     values
 }
 
-fn postcompress<'l, T>(values: T) -> Option<BTreeSet<Sample>>
+fn postcompress<T>(values: T) -> Option<BTreeSet<Sample>>
 where
-    T: Iterator<Item = Option<(Vec<BTreeSet<Component>>, &'l Target)>>,
+    T: Iterator<Item = Option<Sample>>,
 {
     let values = values.collect::<Option<BTreeSet<_>>>()?;
     let mut iterator = values.into_iter();
@@ -129,18 +151,26 @@ where
     let mut range: Option<(char, char)> = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some((source, _))) => {
-                if source.len() == 1 && source[0].len() == 1 {
-                    if let Some(Component::Scalar(next)) = source[0].first() {
+            (None, Some(Sample::Alternate(value))) => {
+                values.insert(Sample::Alternate(value));
+            }
+            (None, Some(Sample::Compound(value))) => {
+                if value.len() == 1 && value[0].len() == 1 {
+                    if let Some(Component::Scalar(next)) = value[0].first() {
                         range = Some((*next, *next));
                         continue;
                     }
                 }
-                values.insert(Sample::Compound(source));
+                values.insert(Sample::Compound(value));
             }
-            (Some((start, end)), Some((source, _))) => {
-                if source.len() == 1 && source[0].len() == 1 {
-                    if let Some(Component::Scalar(next)) = source[0].first() {
+            (Some((start, end)), Some(Sample::Alternate(value))) => {
+                sample(&mut values, (start, end));
+                values.insert(Sample::Alternate(value));
+                range = None;
+            }
+            (Some((start, end)), Some(Sample::Compound(value))) => {
+                if value.len() == 1 && value[0].len() == 1 {
+                    if let Some(Component::Scalar(next)) = value[0].first() {
                         if end as usize + 1 == *next as usize {
                             range = Some((start, *next));
                             continue;
@@ -151,14 +181,14 @@ where
                     }
                 }
                 sample(&mut values, (start, end));
-                values.insert(Sample::Compound(source));
+                values.insert(Sample::Compound(value));
                 range = None;
             }
             (Some((start, end)), None) => {
                 sample(&mut values, (start, end));
                 break;
             }
-            (None, None) => {
+            _ => {
                 break;
             }
         }

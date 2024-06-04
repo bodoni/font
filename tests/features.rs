@@ -354,7 +354,7 @@ fn qahiri() {
             ("rclt", "arab", "DFLT", ""),
             ("salt", "DFLT", "DFLT", ""),
             ("salt", "arab", "DFLT", ""),
-            ("salt", "latn", "DFLT", "[G, H, K, M, N, P, …, R, U, Y]"),
+            ("salt", "latn", "DFLT", "[G (2), H (2), K (2), M (2), N (2), P (2), Q (2), R (3), U (2), Y (2)]"),
             ("ss01", "DFLT", "DFLT", ""),
             ("ss01", "arab", "DFLT", ""),
             ("ss02", "DFLT", "DFLT", ""),

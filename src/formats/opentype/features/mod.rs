@@ -1,6 +1,6 @@
 //! Layout features.
 
-mod graph;
+mod rules;
 mod sample;
 mod transform;
 
@@ -14,7 +14,7 @@ use std::io::Result;
 use opentype::layout;
 
 use crate::formats::opentype::cache::Cache;
-use crate::formats::opentype::features::graph::{Graph, Table};
+use crate::formats::opentype::features::rules::{Rules, Table};
 use crate::formats::opentype::features::transform::Transform;
 use crate::formats::opentype::mapping::Reverse as Mapping;
 
@@ -132,7 +132,7 @@ fn process_graphs<T>(
 where
     T: Table,
 {
-    let graphs: Vec<Vec<Option<Graph>>> = directory
+    let graphs: Vec<Vec<Option<Rules>>> = directory
         .lookups
         .records
         .iter()
