@@ -5,7 +5,7 @@ use std::collections::BTreeSet;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Sample {
     Simple(Component),
-    Alternate((Component, usize)),
+    Alternate((char, usize)),
     Compound(Vec<BTreeSet<Component>>),
 }
 
@@ -27,7 +27,9 @@ impl std::cmp::Ord for Sample {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Self::Simple(one), Self::Simple(other)) => one.cmp(other),
-            (Self::Simple(one), Self::Alternate((other, _))) => equal!(one.cmp(other), Less),
+            (Self::Simple(one), Self::Alternate((other, _))) => {
+                equal!(one.cmp(&Component::Scalar(*other)), Less)
+            }
             (Self::Simple(one), Self::Compound(other)) => equal!(
                 other
                     .first()
@@ -36,13 +38,15 @@ impl std::cmp::Ord for Sample {
                     .unwrap_or(Ordering::Greater),
                 Less,
             ),
-            (Self::Alternate((one, _)), Self::Simple(other)) => equal!(one.cmp(other), Greater),
+            (Self::Alternate((one, _)), Self::Simple(other)) => {
+                equal!(Component::Scalar(*one).cmp(other), Greater)
+            }
             (Self::Alternate(one), Self::Alternate(other)) => one.cmp(other),
             (Self::Alternate((one, _)), Self::Compound(other)) => equal!(
                 other
                     .first()
                     .and_then(|other| other.first())
-                    .map(|other| one.cmp(other))
+                    .map(|other| Component::Scalar(*one).cmp(other))
                     .unwrap_or(Ordering::Greater),
                 Less,
             ),
@@ -56,7 +60,7 @@ impl std::cmp::Ord for Sample {
             (Self::Compound(one), Self::Alternate((other, _))) => equal!(
                 one.first()
                     .and_then(|one| one.first())
-                    .map(|one| one.cmp(other))
+                    .map(|one| one.cmp(&Component::Scalar(*other)))
                     .unwrap_or(Ordering::Less),
                 Greater,
             ),
