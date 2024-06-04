@@ -33,10 +33,11 @@ impl<'l> Transform<'l> for &Graph {
     type Parameter = &'l [Vec<Option<Graph>>];
 
     fn transform(self, mapping: &Mapping, graphs: Self::Parameter) -> Self::Target {
-        postcompress(
-            self.iter()
-                .map(|(source, target)| (source.transform(mapping, graphs), target)),
-        )
+        postcompress(self.iter().map(|(source, target)| {
+            source
+                .transform(mapping, graphs)
+                .map(|source| (source, target))
+        }))
     }
 }
 
@@ -120,28 +121,26 @@ where
 
 fn postcompress<'l, T>(values: T) -> Option<BTreeSet<Sample>>
 where
-    T: Iterator<Item = (Option<Vec<BTreeSet<Component>>>, &'l Target)>,
+    T: Iterator<Item = Option<(Vec<BTreeSet<Component>>, &'l Target)>>,
 {
-    let values = values
-        .map(|(source, _)| source)
-        .collect::<Option<BTreeSet<_>>>()?;
+    let values = values.collect::<Option<BTreeSet<_>>>()?;
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
     let mut range: Option<(char, char)> = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some(value)) => {
-                if value.len() == 1 && value[0].len() == 1 {
-                    if let Some(Component::Scalar(next)) = value[0].first() {
+            (None, Some((source, _))) => {
+                if source.len() == 1 && source[0].len() == 1 {
+                    if let Some(Component::Scalar(next)) = source[0].first() {
                         range = Some((*next, *next));
                         continue;
                     }
                 }
-                values.insert(Sample::Compound(value));
+                values.insert(Sample::Compound(source));
             }
-            (Some((start, end)), Some(value)) => {
-                if value.len() == 1 && value[0].len() == 1 {
-                    if let Some(Component::Scalar(next)) = value[0].first() {
+            (Some((start, end)), Some((source, _))) => {
+                if source.len() == 1 && source[0].len() == 1 {
+                    if let Some(Component::Scalar(next)) = source[0].first() {
                         if end as usize + 1 == *next as usize {
                             range = Some((start, *next));
                             continue;
@@ -152,7 +151,7 @@ where
                     }
                 }
                 sample(&mut values, (start, end));
-                values.insert(Sample::Compound(value));
+                values.insert(Sample::Compound(source));
                 range = None;
             }
             (Some((start, end)), None) => {

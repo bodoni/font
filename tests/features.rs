@@ -417,7 +417,7 @@ fn flatten(values: &BTreeSet<Sample>) -> String {
     buffer.push('[');
     for (index, value) in values.iter().enumerate() {
         match value {
-            Sample::Simple(Component::Scalar(value)) | Sample::Alternate((value, _)) => {
+            Sample::Simple(Component::Scalar(value)) => {
                 buffer.push_str(&escape(*value));
             }
             Sample::Simple(Component::Range((start, end))) => {
@@ -428,6 +428,10 @@ fn flatten(values: &BTreeSet<Sample>) -> String {
                     buffer.push_str(", …, ");
                 }
                 buffer.push_str(&escape(*end));
+            }
+            Sample::Alternate((value, count)) => {
+                buffer.push_str(&escape(*value));
+                buffer.push_str(&format!(" ({count})"));
             }
             Sample::Compound(positions) => {
                 buffer.push('[');

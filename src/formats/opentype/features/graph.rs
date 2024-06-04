@@ -8,7 +8,7 @@ pub type Graph = BTreeMap<Source, Target>;
 
 pub type Source = Vec<Glyph>;
 
-#[derive(Default)]
+#[derive(Default, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Target {
     #[default]
     None,
