@@ -433,7 +433,7 @@ fn flatten(values: &BTreeSet<Sample>) -> String {
                 buffer.push_str(&escape(*value));
                 buffer.push_str(&format!(" ({count})"));
             }
-            Sample::Compound(positions) => {
+            Sample::Composite(positions) => {
                 buffer.push('[');
                 for (index, components) in positions.iter().enumerate() {
                     buffer.push('[');

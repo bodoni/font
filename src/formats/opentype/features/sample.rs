@@ -6,7 +6,7 @@ use std::collections::BTreeSet;
 pub enum Sample {
     Simple(Component),
     Alternate((char, usize)),
-    Compound(Vec<BTreeSet<Component>>),
+    Composite(Vec<BTreeSet<Component>>),
 }
 
 /// A component.
@@ -30,7 +30,7 @@ impl std::cmp::Ord for Sample {
             (Self::Simple(one), Self::Alternate((other, _))) => {
                 equal!(one.cmp(&Component::Scalar(*other)), Less)
             }
-            (Self::Simple(one), Self::Compound(other)) => equal!(
+            (Self::Simple(one), Self::Composite(other)) => equal!(
                 other
                     .first()
                     .and_then(|other| other.first())
@@ -42,7 +42,7 @@ impl std::cmp::Ord for Sample {
                 equal!(Component::Scalar(*one).cmp(other), Greater)
             }
             (Self::Alternate(one), Self::Alternate(other)) => one.cmp(other),
-            (Self::Alternate((one, _)), Self::Compound(other)) => equal!(
+            (Self::Alternate((one, _)), Self::Composite(other)) => equal!(
                 other
                     .first()
                     .and_then(|other| other.first())
@@ -50,21 +50,21 @@ impl std::cmp::Ord for Sample {
                     .unwrap_or(Ordering::Greater),
                 Less,
             ),
-            (Self::Compound(one), Self::Simple(other)) => equal!(
+            (Self::Composite(one), Self::Simple(other)) => equal!(
                 one.first()
                     .and_then(|one| one.first())
                     .map(|one| one.cmp(other))
                     .unwrap_or(Ordering::Less),
                 Greater,
             ),
-            (Self::Compound(one), Self::Alternate((other, _))) => equal!(
+            (Self::Composite(one), Self::Alternate((other, _))) => equal!(
                 one.first()
                     .and_then(|one| one.first())
                     .map(|one| one.cmp(&Component::Scalar(*other)))
                     .unwrap_or(Ordering::Less),
                 Greater,
             ),
-            (Self::Compound(one), Self::Compound(other)) => one.cmp(other),
+            (Self::Composite(one), Self::Composite(other)) => one.cmp(other),
         }
     }
 }

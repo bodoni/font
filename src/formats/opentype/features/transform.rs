@@ -43,13 +43,13 @@ impl<'l> Transform<'l> for &Rule {
 
     fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
         match self {
-            Rule::Simple((source, _)) => source.transform(mapping, rules).map(Sample::Compound),
+            Rule::Simple((source, _)) => source.transform(mapping, rules).map(Sample::Composite),
             Rule::Alternate((source, target)) if target.len() > 1 => source
                 .transform(mapping, rules)
                 .map(|source| Sample::Alternate((source, target.len()))),
             Rule::Alternate((source, _)) => [Glyph::from(*source)]
                 .transform(mapping, rules)
-                .map(Sample::Compound),
+                .map(Sample::Composite),
         }
     }
 }
@@ -154,21 +154,21 @@ where
             (None, Some(Sample::Alternate(value))) => {
                 values.insert(Sample::Alternate(value));
             }
-            (None, Some(Sample::Compound(value))) => {
+            (None, Some(Sample::Composite(value))) => {
                 if value.len() == 1 && value[0].len() == 1 {
                     if let Some(Component::Scalar(next)) = value[0].first() {
                         range = Some((*next, *next));
                         continue;
                     }
                 }
-                values.insert(Sample::Compound(value));
+                values.insert(Sample::Composite(value));
             }
             (Some((start, end)), Some(Sample::Alternate(value))) => {
                 sample(&mut values, (start, end));
                 values.insert(Sample::Alternate(value));
                 range = None;
             }
-            (Some((start, end)), Some(Sample::Compound(value))) => {
+            (Some((start, end)), Some(Sample::Composite(value))) => {
                 if value.len() == 1 && value[0].len() == 1 {
                     if let Some(Component::Scalar(next)) = value[0].first() {
                         if end as usize + 1 == *next as usize {
@@ -181,7 +181,7 @@ where
                     }
                 }
                 sample(&mut values, (start, end));
-                values.insert(Sample::Compound(value));
+                values.insert(Sample::Composite(value));
                 range = None;
             }
             (Some((start, end)), None) => {
