@@ -16,12 +16,12 @@ fn crimson_text() {
     let entries = extract(&mut file[0]);
     let entries = entries
         .iter()
-        .map(|(feature, script, language, samples)| {
+        .map(|(feature, script, language, lookups)| {
             (
                 &**feature,
                 &**script,
                 &**language,
-                samples.iter().map(Deref::deref).collect::<Vec<_>>(),
+                lookups.iter().map(Deref::deref).collect::<Vec<_>>(),
             )
         })
         .collect::<Vec<_>>();
@@ -1067,12 +1067,12 @@ fn noto_serif() {
     let entries = extract(&mut file[0]);
     let entries = entries
         .iter()
-        .map(|(feature, script, language, samples)| {
+        .map(|(feature, script, language, lookups)| {
             (
                 &**feature,
                 &**script,
                 &**language,
-                samples.iter().map(Deref::deref).collect::<Vec<_>>(),
+                lookups.iter().map(Deref::deref).collect::<Vec<_>>(),
             )
         })
         .collect::<Vec<_>>();
@@ -2268,12 +2268,12 @@ fn qahiri() {
     let entries = extract(&mut file[0]);
     let entries = entries
         .iter()
-        .map(|(feature, script, language, samples)| {
+        .map(|(feature, script, language, lookups)| {
             (
                 &**feature,
                 &**script,
                 &**language,
-                samples.iter().map(Deref::deref).collect::<Vec<_>>(),
+                lookups.iter().map(Deref::deref).collect::<Vec<_>>(),
             )
         })
         .collect::<Vec<_>>();
@@ -2626,7 +2626,7 @@ where
                                     .iter()
                                     .cloned()
                                     .map(|index| {
-                                        join(directory.samples[index].iter().map(|values| {
+                                        join(directory.lookups[index].iter().map(|values| {
                                             values.as_ref().map(flatten).unwrap_or("?".to_string())
                                         }))
                                     })

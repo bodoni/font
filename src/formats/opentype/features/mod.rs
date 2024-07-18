@@ -25,10 +25,10 @@ pub struct Directory {
     pub scripts: Vec<(Script, Vec<usize>)>,
     /// Languages to features.
     pub languages: Vec<(Language, Vec<usize>)>,
-    /// Features to samples.
+    /// Features to lookups.
     pub features: Vec<(Feature, Vec<usize>)>,
-    /// Samples.
-    pub samples: Vec<Vec<Option<BTreeSet<Sample>>>>,
+    /// Lookups.
+    pub lookups: Vec<Vec<Option<BTreeSet<Sample>>>>,
 }
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
@@ -37,7 +37,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
     let mut scripts = HashMap::default();
     let mut languages = (Vec::default(), HashMap::default());
     let mut features = (Vec::default(), HashMap::default());
-    let mut samples = (Vec::default(), HashMap::default());
+    let mut lookups = (Vec::default(), HashMap::default());
 
     if let Some(table) = cache.try_glyph_positioning()? {
         let _ = process_table(
@@ -46,7 +46,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
             &mut scripts,
             &mut languages,
             &mut features,
-            &mut samples,
+            &mut lookups,
         );
     }
 
@@ -57,16 +57,16 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
             &mut scripts,
             &mut languages,
             &mut features,
-            &mut samples,
+            &mut lookups,
         );
     }
 
     let mut scripts = scripts.into_iter().collect::<Vec<_>>();
     let mut languages = languages.0;
     let mut features = features.0;
-    let mut samples = samples.0;
+    let mut lookups = lookups.0;
 
-    sort(&mut samples, &mut features);
+    sort(&mut lookups, &mut features);
     sort(&mut features, &mut languages);
     sort(&mut languages, &mut scripts);
 
@@ -79,7 +79,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
         scripts,
         languages,
         features,
-        samples,
+        lookups,
     })
 }
 
@@ -96,7 +96,7 @@ fn process_table<T>(
         Vec<(Feature, Vec<usize>)>,
         HashMap<(Feature, Vec<usize>), usize>,
     ),
-    samples: &mut (
+    lookups: &mut (
         Vec<Vec<Option<BTreeSet<Sample>>>>,
         HashMap<Vec<Option<BTreeSet<Sample>>>, usize>,
     ),
@@ -104,7 +104,7 @@ fn process_table<T>(
 where
     T: Table,
 {
-    let graphs = process_graphs(directory, mapping, samples);
+    let graphs = process_graphs(directory, mapping, lookups);
     for (i, header) in directory.scripts.headers.iter().enumerate() {
         scripts
             .entry(Script::from_tag(&header.tag))
@@ -124,7 +124,7 @@ where
 fn process_graphs<T>(
     directory: &layout::Directory<T>,
     mapping: &Mapping,
-    samples: &mut (
+    lookups: &mut (
         Vec<Vec<Option<BTreeSet<Sample>>>>,
         HashMap<Vec<Option<BTreeSet<Sample>>>, usize>,
     ),
@@ -146,7 +146,7 @@ where
         .collect();
     graphs
         .iter()
-        .map(|values| append(samples, values.transform(mapping, &graphs)))
+        .map(|values| append(lookups, values.transform(mapping, &graphs)))
         .collect()
 }
 
