@@ -146,26 +146,27 @@ impl Table for opentype::tables::glyph_substitution::Type {
                 let (classes, mapping) = unclass(&table.class);
                 let classes = &classes;
                 values.extend(
-                    uncover(&table.coverage)
-                        .filter_map(|glyph_id| mapping.get(&glyph_id).cloned())
-                        .collect::<BTreeSet<_>>()
-                        .into_iter()
-                        .filter_map(|class_index| {
-                            table.records.get(class_index as usize).and_then(|record| {
-                                record.as_ref().map(|record| (class_index, record))
-                            })
+                    deduplicate(
+                        uncover(&table.coverage)
+                            .filter_map(|glyph_id| mapping.get(&glyph_id).cloned()),
+                    )
+                    .filter_map(|class_index| {
+                        table
+                            .records
+                            .get(class_index as usize)
+                            .and_then(|record| record.as_ref().map(|record| (class_index, record)))
+                    })
+                    .flat_map(|(class_index, record)| {
+                        record.records.iter().map(move |record| {
+                            let mut value = Vec::with_capacity(record.glyph_count as usize);
+                            value.push(classes.get(&class_index)?.clone());
+                            for class_index in &record.indices {
+                                value.push(classes.get(class_index)?.clone());
+                            }
+                            Some(Self::expand(value, &record.records, directory))
                         })
-                        .flat_map(|(class_index, record)| {
-                            record.records.iter().map(move |record| {
-                                let mut value = Vec::with_capacity(record.glyph_count as usize);
-                                value.push(classes.get(&class_index)?.clone());
-                                for class_index in &record.indices {
-                                    value.push(classes.get(class_index)?.clone());
-                                }
-                                Some(Self::expand(value, &record.records, directory))
-                            })
-                        })
-                        .collect::<Option<Vec<_>>>()?,
+                    })
+                    .collect::<Option<Vec<_>>>()?,
                 );
             }
             Type::ContextualSubstitution(Context::Format3(table)) => {
@@ -273,6 +274,15 @@ impl Table for opentype::tables::glyph_substitution::Type {
         }
         Some(values)
     }
+}
+
+fn deduplicate<T, U>(values: T) -> impl Iterator<Item = U>
+where
+    T: Iterator<Item = U>,
+    U: std::cmp::Ord + Clone,
+{
+    let mut seen = BTreeSet::new();
+    values.filter(move |value| seen.insert(value.clone()))
 }
 
 fn unclass(value: &Class) -> (BTreeMap<u16, Glyph>, BTreeMap<GlyphID, u16>) {
