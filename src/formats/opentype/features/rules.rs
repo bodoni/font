@@ -209,36 +209,37 @@ impl Table for opentype::tables::glyph_substitution::Type {
                 let forward_classes = &forward_classes;
 
                 values.extend(
-                    uncover(&table.coverage)
-                        .filter_map(|glyph_id| mapping.get(&glyph_id).cloned())
-                        .collect::<BTreeSet<_>>()
-                        .into_iter()
-                        .filter_map(|class_index| {
-                            table.records.get(class_index as usize).and_then(|record| {
-                                record.as_ref().map(|record| (class_index, record))
-                            })
+                    deduplicate(
+                        uncover(&table.coverage)
+                            .filter_map(|glyph_id| mapping.get(&glyph_id).cloned()),
+                    )
+                    .filter_map(|class_index| {
+                        table
+                            .records
+                            .get(class_index as usize)
+                            .and_then(|record| record.as_ref().map(|record| (class_index, record)))
+                    })
+                    .flat_map(|(class_index, record)| {
+                        record.records.iter().map(move |record| {
+                            let mut value = Vec::with_capacity(
+                                record.backward_glyph_count as usize
+                                    + record.glyph_count as usize
+                                    + record.forward_glyph_count as usize,
+                            );
+                            for class_index in record.backward_indices.iter().rev() {
+                                value.push(backward_classes.get(class_index)?.clone());
+                            }
+                            value.push(classes.get(&class_index)?.clone());
+                            for class_index in &record.indices {
+                                value.push(classes.get(class_index)?.clone());
+                            }
+                            for class_index in &record.forward_indices {
+                                value.push(forward_classes.get(class_index)?.clone());
+                            }
+                            Some(Self::expand(value, &record.records, directory))
                         })
-                        .flat_map(|(class_index, record)| {
-                            record.records.iter().map(move |record| {
-                                let mut value = Vec::with_capacity(
-                                    record.backward_glyph_count as usize
-                                        + record.glyph_count as usize
-                                        + record.forward_glyph_count as usize,
-                                );
-                                for class_index in record.backward_indices.iter().rev() {
-                                    value.push(backward_classes.get(class_index)?.clone());
-                                }
-                                value.push(classes.get(&class_index)?.clone());
-                                for class_index in &record.indices {
-                                    value.push(classes.get(class_index)?.clone());
-                                }
-                                for class_index in &record.forward_indices {
-                                    value.push(forward_classes.get(class_index)?.clone());
-                                }
-                                Some(Self::expand(value, &record.records, directory))
-                            })
-                        })
-                        .collect::<Option<Vec<_>>>()?,
+                    })
+                    .collect::<Option<Vec<_>>>()?,
                 );
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format3(table)) => {
