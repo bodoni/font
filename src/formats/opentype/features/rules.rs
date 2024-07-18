@@ -84,7 +84,7 @@ impl Table for opentype::tables::glyph_substitution::Type {
         use opentype::layout::{ChainedContext, Context};
         use opentype::tables::glyph_substitution::{SingleSubstitution, Type};
 
-        let mut values = BTreeSet::default();
+        let mut values = Rules::default();
         match self {
             Type::SingleSubstitution(SingleSubstitution::Format1(table)) => {
                 values.extend(uncover(&table.coverage).filter_map(|glyph_id| {
