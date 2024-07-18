@@ -28,8 +28,11 @@ pub struct Directory {
     /// Features to lookups.
     pub features: Vec<(Feature, Vec<usize>)>,
     /// Lookups.
-    pub lookups: Vec<Vec<Option<BTreeSet<Option<Sample>>>>>,
+    pub lookups: Vec<Lookup>,
 }
+
+/// A lookup.
+pub type Lookup = Vec<Option<BTreeSet<Option<Sample>>>>;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
     let mapping = cache.reverse_mapping()?.clone();
