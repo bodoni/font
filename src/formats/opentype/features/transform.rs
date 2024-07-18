@@ -14,7 +14,7 @@ pub trait Transform<'l> {
 }
 
 impl<'l> Transform<'l> for &[Option<Rules>] {
-    type Target = Option<Vec<BTreeSet<Sample>>>;
+    type Target = Vec<Option<BTreeSet<Sample>>>;
     type Parameter = &'l [Vec<Option<Rules>>];
 
     fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {

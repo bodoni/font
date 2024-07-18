@@ -267,13 +267,11 @@ impl Table for opentype::tables::glyph_substitution::Type {
                     table.glyph_ids.iter().cloned().map(Into::into).collect(),
                 )));
             }
-            _ => {}
+            _ => {
+                return None;
+            }
         }
-        if !values.is_empty() {
-            Some(values)
-        } else {
-            None
-        }
+        Some(values)
     }
 }
 
