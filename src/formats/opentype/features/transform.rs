@@ -14,22 +14,18 @@ pub trait Transform<'l> {
 }
 
 impl<'l> Transform<'l> for &[Option<Rules>] {
-    type Target = Vec<Option<BTreeSet<Sample>>>;
+    type Target = Vec<Option<BTreeSet<Option<Sample>>>>;
     type Parameter = &'l [Vec<Option<Rules>>];
 
     fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
         self.iter()
-            .map(|value| {
-                value
-                    .as_ref()
-                    .and_then(|value| value.transform(mapping, rules))
-            })
+            .map(|value| value.as_ref().map(|value| value.transform(mapping, rules)))
             .collect()
     }
 }
 
 impl<'l> Transform<'l> for &Rules {
-    type Target = Option<BTreeSet<Sample>>;
+    type Target = BTreeSet<Option<Sample>>;
     type Parameter = &'l [Vec<Option<Rules>>];
 
     fn transform(self, mapping: &Mapping, rules: Self::Parameter) -> Self::Target {
@@ -141,34 +137,37 @@ where
     values
 }
 
-fn postcompress<T>(values: T) -> Option<BTreeSet<Sample>>
+fn postcompress<T>(values: T) -> BTreeSet<Option<Sample>>
 where
     T: Iterator<Item = Option<Sample>>,
 {
-    let values = values.collect::<Option<BTreeSet<_>>>()?;
+    let values = values.collect::<BTreeSet<_>>();
     let mut iterator = values.into_iter();
     let mut values = BTreeSet::new();
     let mut range: Option<(char, char)> = None;
     loop {
         match (range, iterator.next()) {
-            (None, Some(Sample::Alternate(value))) => {
-                values.insert(Sample::Alternate(value));
+            (None, Some(None)) => {
+                values.insert(None);
             }
-            (None, Some(Sample::Composite(value))) => {
+            (None, Some(Some(Sample::Alternate(value)))) => {
+                values.insert(Sample::Alternate(value).into());
+            }
+            (None, Some(Some(Sample::Composite(value)))) => {
                 if value.len() == 1 && value[0].len() == 1 {
                     if let Some(Component::Scalar(next)) = value[0].first() {
                         range = Some((*next, *next));
                         continue;
                     }
                 }
-                values.insert(Sample::Composite(value));
+                values.insert(Sample::Composite(value).into());
             }
-            (Some((start, end)), Some(Sample::Alternate(value))) => {
+            (Some((start, end)), Some(Some(Sample::Alternate(value)))) => {
                 sample(&mut values, (start, end));
-                values.insert(Sample::Alternate(value));
+                values.insert(Sample::Alternate(value).into());
                 range = None;
             }
-            (Some((start, end)), Some(Sample::Composite(value))) => {
+            (Some((start, end)), Some(Some(Sample::Composite(value)))) => {
                 if value.len() == 1 && value[0].len() == 1 {
                     if let Some(Component::Scalar(next)) = value[0].first() {
                         if end as usize + 1 == *next as usize {
@@ -181,7 +180,7 @@ where
                     }
                 }
                 sample(&mut values, (start, end));
-                values.insert(Sample::Composite(value));
+                values.insert(Sample::Composite(value).into());
                 range = None;
             }
             (Some((start, end)), None) => {
@@ -193,7 +192,7 @@ where
             }
         }
     }
-    Some(values)
+    values
 }
 
 #[inline]
@@ -206,10 +205,10 @@ fn component(values: &mut BTreeSet<Component>, (start, end): (char, char)) {
 }
 
 #[inline]
-fn sample(values: &mut BTreeSet<Sample>, (start, end): (char, char)) {
+fn sample(values: &mut BTreeSet<Option<Sample>>, (start, end): (char, char)) {
     if start == end {
-        values.insert(Sample::Simple(Component::Scalar(start)));
+        values.insert(Sample::Simple(Component::Scalar(start)).into());
     } else {
-        values.insert(Sample::Simple(Component::Range((start, end))));
+        values.insert(Sample::Simple(Component::Range((start, end))).into());
     }
 }

@@ -28,7 +28,7 @@ pub struct Directory {
     /// Features to lookups.
     pub features: Vec<(Feature, Vec<usize>)>,
     /// Lookups.
-    pub lookups: Vec<Vec<Option<BTreeSet<Sample>>>>,
+    pub lookups: Vec<Vec<Option<BTreeSet<Option<Sample>>>>>,
 }
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Directory> {
@@ -97,8 +97,8 @@ fn process_table<T>(
         HashMap<(Feature, Vec<usize>), usize>,
     ),
     lookups: &mut (
-        Vec<Vec<Option<BTreeSet<Sample>>>>,
-        HashMap<Vec<Option<BTreeSet<Sample>>>, usize>,
+        Vec<Vec<Option<BTreeSet<Option<Sample>>>>>,
+        HashMap<Vec<Option<BTreeSet<Option<Sample>>>>, usize>,
     ),
 ) -> Option<()>
 where
@@ -125,8 +125,8 @@ fn process_graphs<T>(
     directory: &layout::Directory<T>,
     mapping: &Mapping,
     lookups: &mut (
-        Vec<Vec<Option<BTreeSet<Sample>>>>,
-        HashMap<Vec<Option<BTreeSet<Sample>>>, usize>,
+        Vec<Vec<Option<BTreeSet<Option<Sample>>>>>,
+        HashMap<Vec<Option<BTreeSet<Option<Sample>>>>, usize>,
     ),
 ) -> Vec<usize>
 where
