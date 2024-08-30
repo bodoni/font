@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use opentype::layout::context::LookupRecord;
+use opentype::layout::context::Action;
 use opentype::layout::{Class, Coverage, Directory};
 use opentype::truetype::GlyphID;
 
@@ -30,7 +30,7 @@ pub trait Table: Sized {
     }
 
     #[inline]
-    fn expand(value: Vec<Glyph>, _: &[LookupRecord], _: &Directory<Self>) -> Rule {
+    fn expand(value: Vec<Glyph>, _: &[Action], _: &Directory<Self>) -> Rule {
         Rule::Simple((value, Default::default()))
     }
 }
@@ -133,12 +133,16 @@ impl Table for opentype::tables::glyph_substitution::Type {
             Type::ContextualSubstitution(Context::Format1(table)) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
                     |(glyph_id, record)| {
-                        record.records.iter().map(move |record| {
-                            let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(glyph_id.into());
-                            value.extend(record.glyph_ids.iter().cloned().map(Into::into));
-                            Self::expand(value, &record.records, directory)
-                        })
+                        record
+                            .records
+                            .iter()
+                            .filter(|record| record.action_count > 0)
+                            .map(move |record| {
+                                let mut value = Vec::with_capacity(record.glyph_count as usize);
+                                value.push(glyph_id.into());
+                                value.extend(record.glyph_ids.iter().cloned().map(Into::into));
+                                Self::expand(value, &record.actions, directory)
+                            })
                     },
                 ));
             }
@@ -157,44 +161,56 @@ impl Table for opentype::tables::glyph_substitution::Type {
                             .and_then(|record| record.as_ref().map(|record| (class_index, record)))
                     })
                     .flat_map(|(class_index, record)| {
-                        record.records.iter().map(move |record| {
-                            let mut value = Vec::with_capacity(record.glyph_count as usize);
-                            value.push(classes.get(&class_index)?.clone());
-                            for class_index in &record.indices {
-                                value.push(classes.get(class_index)?.clone());
-                            }
-                            Some(Self::expand(value, &record.records, directory))
-                        })
+                        record
+                            .records
+                            .iter()
+                            .filter(|record| record.action_count > 0)
+                            .map(move |record| {
+                                let mut value = Vec::with_capacity(record.glyph_count as usize);
+                                value.push(classes.get(&class_index)?.clone());
+                                for class_index in &record.indices {
+                                    value.push(classes.get(class_index)?.clone());
+                                }
+                                Some(Self::expand(value, &record.actions, directory))
+                            })
                     })
                     .collect::<Option<Vec<_>>>()?,
                 );
             }
             Type::ContextualSubstitution(Context::Format3(table)) => {
-                let value = table.coverages.iter().cloned().map(Glyph::from).collect();
-                values.insert(Self::expand(value, &table.records, directory));
+                if table.action_count > 0 {
+                    let value = table.coverages.iter().cloned().map(Glyph::from).collect();
+                    values.insert(Self::expand(value, &table.actions, directory));
+                }
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format1(table)) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).flat_map(
                     |(glyph_id, record)| {
-                        record.records.iter().map(move |record| {
-                            let mut value = Vec::with_capacity(
-                                record.backward_glyph_count as usize
-                                    + record.glyph_count as usize
-                                    + record.forward_glyph_count as usize,
-                            );
-                            value.extend(
-                                record
-                                    .backward_glyph_ids
-                                    .iter()
-                                    .rev()
-                                    .cloned()
-                                    .map(Into::into),
-                            );
-                            value.push(glyph_id.into());
-                            value.extend(record.glyph_ids.iter().cloned().map(Into::into));
-                            value.extend(record.forward_glyph_ids.iter().cloned().map(Into::into));
-                            Self::expand(value, &record.records, directory)
-                        })
+                        record
+                            .records
+                            .iter()
+                            .filter(|record| record.action_count > 0)
+                            .map(move |record| {
+                                let mut value = Vec::with_capacity(
+                                    record.backward_glyph_count as usize
+                                        + record.glyph_count as usize
+                                        + record.forward_glyph_count as usize,
+                                );
+                                value.extend(
+                                    record
+                                        .backward_glyph_ids
+                                        .iter()
+                                        .rev()
+                                        .cloned()
+                                        .map(Into::into),
+                                );
+                                value.push(glyph_id.into());
+                                value.extend(record.glyph_ids.iter().cloned().map(Into::into));
+                                value.extend(
+                                    record.forward_glyph_ids.iter().cloned().map(Into::into),
+                                );
+                                Self::expand(value, &record.actions, directory)
+                            })
                     },
                 ));
             }
@@ -220,39 +236,45 @@ impl Table for opentype::tables::glyph_substitution::Type {
                             .and_then(|record| record.as_ref().map(|record| (class_index, record)))
                     })
                     .flat_map(|(class_index, record)| {
-                        record.records.iter().map(move |record| {
-                            let mut value = Vec::with_capacity(
-                                record.backward_glyph_count as usize
-                                    + record.glyph_count as usize
-                                    + record.forward_glyph_count as usize,
-                            );
-                            for class_index in record.backward_indices.iter().rev() {
-                                value.push(backward_classes.get(class_index)?.clone());
-                            }
-                            value.push(classes.get(&class_index)?.clone());
-                            for class_index in &record.indices {
-                                value.push(classes.get(class_index)?.clone());
-                            }
-                            for class_index in &record.forward_indices {
-                                value.push(forward_classes.get(class_index)?.clone());
-                            }
-                            Some(Self::expand(value, &record.records, directory))
-                        })
+                        record
+                            .records
+                            .iter()
+                            .filter(|record| record.action_count > 0)
+                            .map(move |record| {
+                                let mut value = Vec::with_capacity(
+                                    record.backward_glyph_count as usize
+                                        + record.glyph_count as usize
+                                        + record.forward_glyph_count as usize,
+                                );
+                                for class_index in record.backward_indices.iter().rev() {
+                                    value.push(backward_classes.get(class_index)?.clone());
+                                }
+                                value.push(classes.get(&class_index)?.clone());
+                                for class_index in &record.indices {
+                                    value.push(classes.get(class_index)?.clone());
+                                }
+                                for class_index in &record.forward_indices {
+                                    value.push(forward_classes.get(class_index)?.clone());
+                                }
+                                Some(Self::expand(value, &record.actions, directory))
+                            })
                     })
                     .collect::<Option<Vec<_>>>()?,
                 );
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format3(table)) => {
-                let mut value = table
-                    .backward_coverages
-                    .iter()
-                    .cloned()
-                    .rev()
-                    .map(Glyph::from)
-                    .collect::<Vec<_>>();
-                value.extend(table.coverages.iter().cloned().map(Glyph::from));
-                value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                values.insert(Self::expand(value, &table.records, directory));
+                if table.action_count > 0 {
+                    let mut value = table
+                        .backward_coverages
+                        .iter()
+                        .cloned()
+                        .rev()
+                        .map(Glyph::from)
+                        .collect::<Vec<_>>();
+                    value.extend(table.coverages.iter().cloned().map(Glyph::from));
+                    value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
+                    values.insert(Self::expand(value, &table.actions, directory));
+                }
             }
             Type::ReverseChainedContextualSubstibution(table) => {
                 let mut value = table
