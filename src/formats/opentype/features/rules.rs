@@ -30,12 +30,12 @@ pub trait Table: Sized {
     }
 
     #[inline]
-    fn expand(value: Vec<Glyph>, _: &Directory<Self>) -> Vec<Glyph> {
+    fn ascend(value: Rule, _: &Directory<Self>) -> Rule {
         value
     }
 
     #[inline]
-    fn target(_: &[Action], _: &Directory<Self>) -> Vec<Glyph> {
+    fn descend(_: &[Action], _: &Directory<Self>) -> Vec<Glyph> {
         Default::default()
     }
 }
@@ -95,10 +95,10 @@ impl Table for opentype::tables::glyph_substitution::Type {
                 values.extend(uncover(&table.coverage).filter_map(|glyph_id| {
                     let other_id = glyph_id as isize + table.delta_glyph_id as isize;
                     GlyphID::try_from(other_id).ok().map(|other_id| {
-                        Rule::Simple((
-                            Self::expand(vec![glyph_id.into()], directory),
-                            Self::expand(vec![other_id.into()], directory),
-                        ))
+                        Self::ascend(
+                            Rule::Simple((vec![glyph_id.into()], vec![other_id.into()])),
+                            directory,
+                        )
                     })
                 }));
             }
@@ -107,29 +107,34 @@ impl Table for opentype::tables::glyph_substitution::Type {
                     uncover(&table.coverage)
                         .zip(table.glyph_ids.iter().cloned())
                         .map(|(glyph_id, other_id)| {
-                            Rule::Simple((
-                                Self::expand(vec![glyph_id.into()], directory),
-                                Self::expand(vec![other_id.into()], directory),
-                            ))
+                            Self::ascend(
+                                Rule::Simple((vec![glyph_id.into()], vec![other_id.into()])),
+                                directory,
+                            )
                         }),
                 );
             }
             Type::MultipleSubstitution(table) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).map(
                     |(glyph_id, record)| {
-                        Rule::Simple((
-                            Self::expand(vec![glyph_id.into()], directory),
-                            Self::expand(
+                        Self::ascend(
+                            Rule::Simple((
+                                vec![glyph_id.into()],
                                 record.glyph_ids.iter().cloned().map(Into::into).collect(),
-                                directory,
-                            ),
-                        ))
+                            )),
+                            directory,
+                        )
                     },
                 ));
             }
             Type::AlternateSubstitution(table) => {
                 values.extend(uncover(&table.coverage).zip(&table.records).map(
-                    |(glyph_id, record)| Rule::Alternate((glyph_id, record.glyph_ids.to_vec())),
+                    |(glyph_id, record)| {
+                        Self::ascend(
+                            Rule::Alternate((glyph_id, record.glyph_ids.to_vec())),
+                            directory,
+                        )
+                    },
                 ));
             }
             Type::LigatureSubstitution(table) => {
@@ -139,10 +144,10 @@ impl Table for opentype::tables::glyph_substitution::Type {
                             let mut value = Vec::with_capacity(record.glyph_count as usize);
                             value.push(glyph_id.into());
                             value.extend(record.glyph_ids.iter().cloned().map(Into::into));
-                            Rule::Simple((
-                                Self::expand(value, directory),
-                                Self::expand(vec![record.glyph_id.into()], directory),
-                            ))
+                            Self::ascend(
+                                Rule::Simple((value, vec![record.glyph_id.into()])),
+                                directory,
+                            )
                         })
                     },
                 ));
@@ -158,13 +163,13 @@ impl Table for opentype::tables::glyph_substitution::Type {
                                 let mut value = Vec::with_capacity(record.glyph_count as usize);
                                 value.push(glyph_id.into());
                                 value.extend(record.glyph_ids.iter().cloned().map(Into::into));
-                                Rule::Simple((
-                                    Self::expand(value, directory),
-                                    Self::expand(
-                                        Self::target(&record.actions, directory),
-                                        directory,
-                                    ),
-                                ))
+                                Self::ascend(
+                                    Rule::Simple((
+                                        value,
+                                        Self::descend(&record.actions, directory),
+                                    )),
+                                    directory,
+                                )
                             })
                     },
                 ));
@@ -194,13 +199,13 @@ impl Table for opentype::tables::glyph_substitution::Type {
                                 for class_index in &record.indices {
                                     value.push(classes.get(class_index)?.clone());
                                 }
-                                Some(Rule::Simple((
-                                    Self::expand(value, directory),
-                                    Self::expand(
-                                        Self::target(&record.actions, directory),
-                                        directory,
-                                    ),
-                                )))
+                                Some(Self::ascend(
+                                    Rule::Simple((
+                                        value,
+                                        Self::descend(&record.actions, directory),
+                                    )),
+                                    directory,
+                                ))
                             })
                     })
                     .collect::<Option<Vec<_>>>()?,
@@ -209,10 +214,10 @@ impl Table for opentype::tables::glyph_substitution::Type {
             Type::ContextualSubstitution(Context::Format3(table)) => {
                 if table.action_count > 0 {
                     let value = table.coverages.iter().cloned().map(Glyph::from).collect();
-                    values.insert(Rule::Simple((
-                        Self::expand(value, directory),
-                        Self::expand(Self::target(&table.actions, directory), directory),
-                    )));
+                    values.insert(Self::ascend(
+                        Rule::Simple((value, Self::descend(&table.actions, directory))),
+                        directory,
+                    ));
                 }
             }
             Type::ChainedContextualSubstitution(ChainedContext::Format1(table)) => {
@@ -241,13 +246,13 @@ impl Table for opentype::tables::glyph_substitution::Type {
                                 value.extend(
                                     record.forward_glyph_ids.iter().cloned().map(Into::into),
                                 );
-                                Rule::Simple((
-                                    Self::expand(value, directory),
-                                    Self::expand(
-                                        Self::target(&record.actions, directory),
-                                        directory,
-                                    ),
-                                ))
+                                Self::ascend(
+                                    Rule::Simple((
+                                        value,
+                                        Self::descend(&record.actions, directory),
+                                    )),
+                                    directory,
+                                )
                             })
                     },
                 ));
@@ -294,13 +299,13 @@ impl Table for opentype::tables::glyph_substitution::Type {
                                 for class_index in &record.forward_indices {
                                     value.push(forward_classes.get(class_index)?.clone());
                                 }
-                                Some(Rule::Simple((
-                                    Self::expand(value, directory),
-                                    Self::expand(
-                                        Self::target(&record.actions, directory),
-                                        directory,
-                                    ),
-                                )))
+                                Some(Self::ascend(
+                                    Rule::Simple((
+                                        value,
+                                        Self::descend(&record.actions, directory),
+                                    )),
+                                    directory,
+                                ))
                             })
                     })
                     .collect::<Option<Vec<_>>>()?,
@@ -317,10 +322,10 @@ impl Table for opentype::tables::glyph_substitution::Type {
                         .collect::<Vec<_>>();
                     value.extend(table.coverages.iter().cloned().map(Glyph::from));
                     value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                    values.insert(Rule::Simple((
-                        Self::expand(value, directory),
-                        Self::expand(Self::target(&table.actions, directory), directory),
-                    )));
+                    values.insert(Self::ascend(
+                        Rule::Simple((value, Self::descend(&table.actions, directory))),
+                        directory,
+                    ));
                 }
             }
             Type::ReverseChainedContextualSubstibution(table) => {
@@ -333,13 +338,13 @@ impl Table for opentype::tables::glyph_substitution::Type {
                     .collect::<Vec<_>>();
                 value.push(table.coverage.clone().into());
                 value.extend(table.forward_coverages.iter().cloned().map(Glyph::from));
-                values.insert(Rule::Simple((
-                    Self::expand(value, directory),
-                    Self::expand(
+                values.insert(Self::ascend(
+                    Rule::Simple((
+                        value,
                         table.glyph_ids.iter().cloned().map(Into::into).collect(),
-                        directory,
-                    ),
-                )));
+                    )),
+                    directory,
+                ));
             }
             _ => {
                 return None;
