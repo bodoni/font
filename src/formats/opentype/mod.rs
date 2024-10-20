@@ -6,6 +6,7 @@ pub mod features;
 pub mod names;
 pub mod palettes;
 pub mod tables;
+pub mod timestamps;
 
 pub(crate) mod cache;
 pub(crate) mod metrics;

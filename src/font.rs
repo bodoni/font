@@ -1,7 +1,6 @@
 use std::io::Result;
 
-use crate::metrics::Metrics;
-use crate::{Axes, Characters, Features, Glyph, Names, Palettes, Tables};
+use crate::{Axes, Characters, Features, Glyph, Metrics, Names, Palettes, Tables, Timestamps};
 
 /// A font.
 pub struct Font<T> {
@@ -63,6 +62,8 @@ implement! {
     fn palettes() -> Palettes;
     /// Return the tables.
     fn tables() -> Tables;
+    /// Return the timestamps.
+    fn timestamps() -> Timestamps;
     /// Return the glyph of a character.
     fn glyph(character: char) -> Option<Glyph>;
 }

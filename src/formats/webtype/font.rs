@@ -3,7 +3,9 @@ use std::io::{Cursor, Result};
 use std::rc::Rc;
 
 use crate::formats::opentype::cache::{Cache, Reference};
-use crate::formats::opentype::{axes, characters, features, metrics, names, palettes, tables};
+use crate::formats::opentype::{
+    axes, characters, features, metrics, names, palettes, tables, timestamps,
+};
 
 /// A font.
 pub struct Font<T> {
@@ -46,6 +48,11 @@ impl<T: crate::Read> crate::font::Case for Font<T> {
     #[inline]
     fn tables(&mut self) -> Result<crate::Tables> {
         tables::read(&mut self.cache.borrow_mut())
+    }
+
+    #[inline]
+    fn timestamps(&mut self) -> Result<crate::Timestamps> {
+        timestamps::read(&mut self.cache.borrow_mut())
     }
 
     #[inline]

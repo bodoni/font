@@ -38,6 +38,7 @@ mod file;
 mod font;
 mod metrics;
 mod offset;
+mod timestamps;
 
 pub use typeface::tape::{Read, Write};
 
@@ -52,6 +53,7 @@ pub use self::formats::opentype::tables::Tables;
 pub use self::glyph::Glyph;
 pub use self::metrics::Metrics;
 pub use self::offset::Offset;
+pub use self::timestamps::Timestamps;
 
 /// A number.
 pub type Number = f32;
