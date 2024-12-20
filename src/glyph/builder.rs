@@ -86,7 +86,7 @@ impl Builder {
         let b = match self.contour.segments.get_mut(0) {
             Some(&mut Segment::Quadratic(ref mut b, _)) => b,
             Some(&mut Segment::Cubic(ref mut b, _, _)) => b,
-            _ => unreachable!(),
+            _ => return,
         };
         *b = a;
     }
