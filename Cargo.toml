@@ -1,6 +1,6 @@
 [package]
 name = "font"
-version = "0.39.3"
+version = "0.40.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -18,5 +18,5 @@ webtype = ["dep:webtype"]
 
 [dependencies]
 opentype = { version = "0.38.1", features = ["default-language"] }
-typeface = "0.4.2"
-webtype = { version = "0.16", optional = true }
+typeface = "0.4.3"
+webtype = { version = "0.17", optional = true }
