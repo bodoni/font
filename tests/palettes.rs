@@ -1,7 +1,7 @@
 #[macro_use]
 mod support;
 
-use crate::support::{setup, Fixture};
+use crate::support::{Fixture, setup};
 
 #[test]
 fn noto_color_emoji() {

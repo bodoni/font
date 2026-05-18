@@ -86,11 +86,7 @@ impl<'l> Transform<'l> for &Glyph {
                     .filter_map(|glyph_id| glyph_id.transform(mapping, rules)),
             ),
         };
-        if !value.is_empty() {
-            Some(value)
-        } else {
-            None
-        }
+        if !value.is_empty() { Some(value) } else { None }
     }
 }
 

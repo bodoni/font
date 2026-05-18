@@ -46,8 +46,8 @@ pub fn path(fixture: Fixture) -> PathBuf {
 }
 
 pub fn trace(glyph: &Glyph) -> Vec<(f32, f32)> {
-    use font::glyph::Segment::*;
     use font::Offset;
+    use font::glyph::Segment::*;
 
     let mut points = vec![];
     let mut offset = Offset::default();

@@ -1,7 +1,7 @@
 use std::io::Result;
 
-use crate::formats::opentype::cache::Cache;
 use crate::Timestamps;
+use crate::formats::opentype::cache::Cache;
 
 pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Timestamps> {
     let font_header = cache.font_header()?.clone();

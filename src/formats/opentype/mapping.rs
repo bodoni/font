@@ -1,8 +1,8 @@
 use std::collections::{BTreeSet, HashMap};
 use std::io::Result;
 
-use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 use opentype::truetype::GlyphID;
+use opentype::truetype::tables::character_mapping::{CharacterMapping, Encoding};
 
 pub struct Forward(HashMap<u32, GlyphID>);
 

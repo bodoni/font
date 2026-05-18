@@ -4,10 +4,10 @@ use std::collections::BTreeMap;
 use std::io::Result;
 
 use opentype::truetype::tables::names::NameID;
-use opentype::truetype::{q32, Tag};
+use opentype::truetype::{Tag, q32};
 
-use crate::formats::opentype::cache::Cache;
 use crate::Number;
+use crate::formats::opentype::cache::Cache;
 
 /// Design axes.
 pub type Axes = BTreeMap<Type, Value>;
@@ -93,11 +93,7 @@ impl Value {
 
     /// Create an instance from a flag for italic.
     pub fn from_italic_flag(value: bool) -> Self {
-        if value {
-            1.0.into()
-        } else {
-            0.0.into()
-        }
+        if value { 1.0.into() } else { 0.0.into() }
     }
 }
 
@@ -121,7 +117,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Axes> {
     macro_rules! get(
         ($($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref table) => (
+                $(WindowsMetrics::$version(table) => (
                     table.weight_class,
                     table.width_class,
                     table.selection_flags,
@@ -138,7 +134,7 @@ pub(crate) fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<Axes> {
     macro_rules! get(
         ($($version:ident),+) => (
             match &*postscript {
-                $(PostScript::$version(ref table) => table.italic_angle,)*
+                $(PostScript::$version(table) => table.italic_angle,)*
             }
         );
     );

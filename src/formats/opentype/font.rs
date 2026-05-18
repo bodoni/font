@@ -1,8 +1,8 @@
 use std::io::Result;
 use std::ops::{Deref, DerefMut};
 
-use opentype::truetype::tables::FontHeader;
 use opentype::truetype::Tag;
+use opentype::truetype::tables::FontHeader;
 
 use crate::formats::opentype::cache::{Cache, Reference};
 use crate::formats::opentype::{

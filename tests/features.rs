@@ -4,11 +4,11 @@ mod support;
 use std::collections::BTreeSet;
 use std::ops::Deref;
 
+use font::Font;
 use font::features::{Component, Sample};
 use font::opentype::truetype::Tag;
-use font::Font;
 
-use crate::support::{setup, Fixture};
+use crate::support::{Fixture, setup};
 
 #[test]
 fn crimson_text() {

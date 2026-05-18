@@ -2,7 +2,7 @@
 mod support;
 
 mod adobe_blank {
-    use crate::support::{setup, Fixture};
+    use crate::support::{Fixture, setup};
 
     #[test]
     fn a() {
@@ -13,7 +13,7 @@ mod adobe_blank {
 }
 
 mod monte_carlo {
-    use crate::support::{setup, trace, Fixture};
+    use crate::support::{Fixture, setup, trace};
 
     #[test]
     fn i() {
@@ -67,7 +67,7 @@ mod monte_carlo {
 }
 
 mod numans {
-    use crate::support::{setup, trace, Fixture};
+    use crate::support::{Fixture, setup, trace};
 
     #[test]
     fn a() {
@@ -118,7 +118,7 @@ mod numans {
 }
 
 mod source_serif {
-    use crate::support::{setup, trace, Fixture};
+    use crate::support::{Fixture, setup, trace};
 
     #[test]
     fn from_a_to_z() {
@@ -159,7 +159,7 @@ mod source_serif {
 }
 
 mod open_sans {
-    use crate::support::{setup, trace, Fixture};
+    use crate::support::{Fixture, setup, trace};
 
     #[test]
     fn a_ring() {
@@ -283,7 +283,7 @@ mod open_sans {
 }
 
 mod vesper_libre {
-    use crate::support::{setup, trace, Fixture};
+    use crate::support::{Fixture, setup, trace};
 
     #[test]
     fn a() {
@@ -398,7 +398,7 @@ mod vesper_libre {
 }
 
 mod zen_loop {
-    use crate::support::{setup, trace, Fixture};
+    use crate::support::{Fixture, setup, trace};
 
     #[test]
     fn d() {

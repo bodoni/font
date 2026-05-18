@@ -3,7 +3,7 @@ mod support;
 
 use font::characters::Character;
 
-use crate::support::{setup, Fixture};
+use crate::support::{Fixture, setup};
 
 #[test]
 fn adobe_blank() {

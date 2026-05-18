@@ -9,7 +9,7 @@ use crate::support::Fixture;
 mod noto_color_emoji {
     use font::opentype::truetype::tables::names::Names;
 
-    use crate::support::{setup, Fixture};
+    use crate::support::{Fixture, setup};
 
     #[test]
     fn read() {
@@ -20,8 +20,8 @@ mod noto_color_emoji {
 
     #[test]
     fn write() {
-        use font::formats::opentype::read;
         use font::Case;
+        use font::formats::opentype::read;
 
         let cursor = super::write(Fixture::NotoColorEmoji);
         let mut font = ok!(ok!(read(cursor)).pop());
@@ -67,7 +67,7 @@ mod noto_color_emoji {
 mod source_serif {
     use font::opentype::truetype::tables::names::Names;
 
-    use crate::support::{setup, Fixture};
+    use crate::support::{Fixture, setup};
 
     #[test]
     fn read() {
@@ -78,8 +78,8 @@ mod source_serif {
 
     #[test]
     fn write() {
-        use font::formats::opentype::read;
         use font::Case;
+        use font::formats::opentype::read;
 
         let cursor = super::write(Fixture::SourceSerif);
         let mut font = ok!(ok!(read(cursor)).pop());
@@ -113,9 +113,9 @@ mod source_serif {
 }
 
 fn write(fixture: Fixture) -> Cursor<Vec<u8>> {
-    use font::formats::opentype::{read, write, Disposition};
-    use font::opentype::truetype::tables::names::Names;
     use font::Case;
+    use font::formats::opentype::{Disposition, read, write};
+    use font::opentype::truetype::tables::names::Names;
 
     let path = crate::support::path(fixture);
     let file = ok!(File::open(path));

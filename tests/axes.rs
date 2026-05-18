@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use font::axes::Type;
 use font::opentype::truetype::Tag;
 
-use crate::support::{setup, Fixture};
+use crate::support::{Fixture, setup};
 
 #[test]
 fn adobe_vf_prototype() {

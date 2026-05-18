@@ -37,7 +37,7 @@ pub(super) fn draw(
         ),
     };
     builder.set_horizontal_metrics(metrics.get(glyph_id));
-    if let Some(ref glyph) = glyph {
+    if let Some(glyph) = glyph {
         draw_glyph(glyph_data, metrics, &mut builder, glyph)?;
         builder.set_bounding_box((glyph.min_x, glyph.min_y, glyph.max_x, glyph.max_y));
     }
@@ -53,8 +53,8 @@ fn draw_glyph(
     use opentype::truetype::tables::glyph_data::Description::*;
 
     match &glyph.description {
-        Composite(ref description) => draw_composite(glyph_data, metrics, builder, description),
-        Simple(ref description) => draw_simple(builder, description),
+        Composite(description) => draw_composite(glyph_data, metrics, builder, description),
+        Simple(description) => draw_simple(builder, description),
     }
 }
 

@@ -16,7 +16,7 @@ mod mapping;
 mod postscript;
 mod truetype;
 
-pub use self::font::{write, Disposition, Font};
+pub use self::font::{Disposition, Font, write};
 
 use std::io::Result;
 use std::ops::DerefMut;

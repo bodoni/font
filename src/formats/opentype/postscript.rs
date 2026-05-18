@@ -35,7 +35,7 @@ pub(super) fn draw(
             character_string,
             &font_set.subroutines,
             match &font_set.records[id] {
-                Record::CharacterNameKeyed(ref record) => &record.subroutines,
+                Record::CharacterNameKeyed(record) => &record.subroutines,
                 _ => raise!("found a character-ID-keyed font, which is not supported yet"),
             },
         ),

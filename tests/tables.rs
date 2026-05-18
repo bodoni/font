@@ -3,7 +3,7 @@ mod support;
 
 use font::opentype::truetype::Tag;
 
-use crate::support::{setup, Fixture};
+use crate::support::{Fixture, setup};
 
 #[test]
 fn noto_naskh_arabic() {

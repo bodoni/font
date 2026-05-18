@@ -6,10 +6,10 @@ use std::fs::File;
 use std::io::{Cursor, Read};
 use std::path::PathBuf;
 
+use font::Case;
 use font::formats::opentype::Disposition;
 use font::opentype::truetype::tables::Names;
-use font::Case;
-use test::{black_box, Bencher};
+use test::{Bencher, black_box};
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 

@@ -1,10 +1,10 @@
 use std::io::Result;
 
-use opentype::truetype::tables::HorizontalMetrics;
 use opentype::truetype::GlyphID;
+use opentype::truetype::tables::HorizontalMetrics;
 
-use crate::formats::opentype::cache::{Cache, Reference};
 use crate::Number;
+use crate::formats::opentype::cache::{Cache, Reference};
 
 pub struct Metrics {
     horizontal_metrics: Reference<HorizontalMetrics>,
@@ -32,7 +32,7 @@ pub fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
     macro_rules! get(
         (@version0 $($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref table) => (
+                $(WindowsMetrics::$version(table) => (
                     table.windows_ascender.into(),
                     table.typographic_ascender.into(),
                     table.typographic_descender.into(),
@@ -43,7 +43,7 @@ pub fn read<T: crate::Read>(cache: &mut Cache<T>) -> Result<crate::Metrics> {
         );
         (@version2 $($version:ident),+) => (
             match &*windows_metrics {
-                $(WindowsMetrics::$version(ref table) => (
+                $(WindowsMetrics::$version(table) => (
                     table.cap_height.into(),
                     table.x_height.into(),
                 ),)*
