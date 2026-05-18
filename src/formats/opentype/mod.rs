@@ -18,17 +18,17 @@ mod truetype;
 
 pub use self::font::{write, Disposition, Font};
 
-use std::cell::RefCell;
 use std::io::Result;
 use std::ops::DerefMut;
-use std::rc::Rc;
+
+use crate::formats::opentype::cache::Reference;
 
 /// Read fonts.
 pub fn read<T>(tape: T) -> Result<Vec<Font<T>>>
 where
     T: crate::Read,
 {
-    let tape = Rc::new(RefCell::new(tape));
+    let tape = Reference::new(tape);
     let mut fonts = vec![];
     let file = opentype::File::read(tape.borrow_mut().deref_mut())?;
     for font in file.fonts.into_iter() {

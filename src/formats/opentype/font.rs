@@ -1,7 +1,5 @@
-use std::cell::RefCell;
 use std::io::Result;
 use std::ops::{Deref, DerefMut};
-use std::rc::Rc;
 
 use opentype::truetype::tables::FontHeader;
 use opentype::truetype::Tag;
@@ -98,7 +96,7 @@ pub fn read<T: crate::Read>(tape: Reference<T>, backend: opentype::Font) -> Resu
             .transpose()?
             .unwrap_or(0)
     };
-    let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
+    let cache = Reference::new(Cache::new(tape, backend));
     let mut fonts = vec![];
     if truetype {
         fonts.push(Font {

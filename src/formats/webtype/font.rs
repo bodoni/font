@@ -1,6 +1,4 @@
-use std::cell::RefCell;
 use std::io::{Cursor, Result};
-use std::rc::Rc;
 
 use crate::formats::opentype::cache::{Cache, Reference};
 use crate::formats::opentype::{
@@ -65,7 +63,7 @@ pub fn read<T>(tape: Reference<Cursor<Vec<u8>>>, backend: webtype::Font) -> Resu
 where
     T: crate::Read,
 {
-    let cache = Rc::new(RefCell::new(Cache::new(tape, backend)));
+    let cache = Reference::new(Cache::new(tape, backend));
     let tape = std::marker::PhantomData;
     Ok(vec![Font { cache, tape }])
 }

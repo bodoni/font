@@ -1,14 +1,47 @@
-use std::cell::RefCell;
 use std::io::Result;
 use std::ops::DerefMut;
-use std::rc::Rc;
+use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use opentype;
 
 use crate::formats::opentype::mapping;
 use crate::formats::opentype::metrics::Metrics;
 
-pub type Reference<T> = Rc<RefCell<T>>;
+pub struct Reference<T>(Arc<RwLock<T>>);
+
+impl<T> Reference<T> {
+    #[inline]
+    pub fn new(value: T) -> Self {
+        Self(Arc::new(RwLock::new(value)))
+    }
+
+    #[inline]
+    pub fn borrow(&self) -> RwLockReadGuard<'_, T> {
+        match self.0.read() {
+            Ok(value) => value,
+            // Poisoning only records that another holder panicked. The wrapped
+            // value remains memory-safe. Therefore, keep exposing the state.
+            Err(error) => error.into_inner(),
+        }
+    }
+
+    #[inline]
+    pub fn borrow_mut(&self) -> RwLockWriteGuard<'_, T> {
+        match self.0.write() {
+            Ok(value) => value,
+            // Poisoning only records that another holder panicked. The wrapped
+            // value remains memory-safe. Therefore, keep exposing the state.
+            Err(error) => error.into_inner(),
+        }
+    }
+}
+
+impl<T> Clone for Reference<T> {
+    #[inline]
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
 
 macro_rules! cache(
     ($(($field:ident -> $try_field:ident($($argument:tt)*), $type:ty, $name:literal,),)+) => (
@@ -37,9 +70,9 @@ macro_rules! cache(
             pub tape: Reference<T>,
             pub backend: opentype::Font,
 
-            forward_mapping: Option<Rc<mapping::Forward>>,
-            reverse_mapping: Option<Rc<mapping::Reverse>>,
-            metrics: Option<Rc<Metrics>>,
+            forward_mapping: Option<Arc<mapping::Forward>>,
+            reverse_mapping: Option<Arc<mapping::Reverse>>,
+            metrics: Option<Arc<Metrics>>,
 
             $(pub $field: Option<Reference<$type>>,)+
         }
@@ -59,7 +92,7 @@ macro_rules! cache(
                 self.$field = match self.backend.take::<_, $type>(
                     self.tape.borrow_mut().deref_mut(),
                 )? {
-                    Some(value) => Some(Rc::new(RefCell::new(value))),
+                    Some(value) => Some(Reference::new(value)),
                     _ => None,
                 };
             }
@@ -88,7 +121,7 @@ macro_rules! cache(
                     self.tape.borrow_mut().deref_mut(),
                     ($(&$argument.borrow()),+)
                 )? {
-                    Some(value) => Some(Rc::new(RefCell::new(value))),
+                    Some(value) => Some(Reference::new(value)),
                     _ => None,
                 };
             }
@@ -178,26 +211,26 @@ cache! {
 }
 
 impl<T: crate::Read> Cache<T> {
-    pub fn forward_mapping(&mut self) -> Result<&Rc<mapping::Forward>> {
+    pub fn forward_mapping(&mut self) -> Result<&Arc<mapping::Forward>> {
         if self.forward_mapping.is_none() {
             let value = mapping::Forward::new(&self.character_mapping()?.borrow())?;
-            self.forward_mapping = Some(Rc::new(value));
+            self.forward_mapping = Some(Arc::new(value));
         }
         Ok(self.forward_mapping.as_ref().unwrap())
     }
 
-    pub fn reverse_mapping(&mut self) -> Result<&Rc<mapping::Reverse>> {
+    pub fn reverse_mapping(&mut self) -> Result<&Arc<mapping::Reverse>> {
         if self.reverse_mapping.is_none() {
             let value = mapping::Reverse::new(&self.forward_mapping()?.clone());
-            self.reverse_mapping = Some(Rc::new(value));
+            self.reverse_mapping = Some(Arc::new(value));
         }
         Ok(self.reverse_mapping.as_ref().unwrap())
     }
 
-    pub fn metrics(&mut self) -> Result<&Rc<Metrics>> {
+    pub fn metrics(&mut self) -> Result<&Arc<Metrics>> {
         if self.metrics.is_none() {
             let value = Metrics::new(self.horizontal_metrics()?.clone());
-            self.metrics = Some(Rc::new(value));
+            self.metrics = Some(Arc::new(value));
         }
         Ok(self.metrics.as_ref().unwrap())
     }
