@@ -150,11 +150,12 @@ where
                 values.insert(Sample::Alternate(value).into());
             }
             (None, Some(Some(Sample::Composite(value)))) => {
-                if value.len() == 1 && value[0].len() == 1 {
-                    if let Some(Component::Scalar(next)) = value[0].first() {
-                        range = Some((*next, *next));
-                        continue;
-                    }
+                if value.len() == 1
+                    && value[0].len() == 1
+                    && let Some(Component::Scalar(next)) = value[0].first()
+                {
+                    range = Some((*next, *next));
+                    continue;
                 }
                 values.insert(Sample::Composite(value).into());
             }
@@ -164,16 +165,17 @@ where
                 range = None;
             }
             (Some((start, end)), Some(Some(Sample::Composite(value)))) => {
-                if value.len() == 1 && value[0].len() == 1 {
-                    if let Some(Component::Scalar(next)) = value[0].first() {
-                        if end as usize + 1 == *next as usize {
-                            range = Some((start, *next));
-                            continue;
-                        }
-                        sample(&mut values, (start, end));
-                        range = Some((*next, *next));
+                if value.len() == 1
+                    && value[0].len() == 1
+                    && let Some(Component::Scalar(next)) = value[0].first()
+                {
+                    if end as usize + 1 == *next as usize {
+                        range = Some((start, *next));
                         continue;
                     }
+                    sample(&mut values, (start, end));
+                    range = Some((*next, *next));
+                    continue;
                 }
                 sample(&mut values, (start, end));
                 values.insert(Sample::Composite(value).into());
